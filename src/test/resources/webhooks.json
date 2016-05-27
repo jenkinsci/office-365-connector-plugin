@@ -1,0 +1,20 @@
+[ {
+	"url" : "http://localhost:8000/test1",
+	"startNotification" : true,
+	"notifySuccess" : true,
+	"notifyAborted" : true,
+	"notifyUnstable" : true,
+	"notifyFailure" : true,
+	"notifyBackToNormal" : true
+  },
+  {
+	"url" : "http://localhost:8000/test2",
+	"startNotification" : true,
+	"notifySuccess" : true,
+	"notifyAborted" : true,
+	"notifyUnstable" : true,
+	"notifyFailure" : true,
+	"notifyBackToNormal" : true
+  }
+]
+  

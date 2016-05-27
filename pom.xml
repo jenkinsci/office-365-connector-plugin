@@ -1,0 +1,108 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jenkins-ci.plugins</groupId>
+        <artifactId>plugin</artifactId>
+        <version>1.509.3</version><!-- which version of Jenkins is this plugin built against? -->
+    </parent>
+
+    <groupId>jenkins.plugins.office365connector</groupId>
+    <artifactId>Office-365-Connector</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>hpi</packaging>
+
+    <properties>
+        <powermock.version>1.5.6</powermock.version>
+    </properties>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+    <url>https://wiki.jenkins-ci.org/display/JENKINS/Office+365+Connector</url>
+    <dependencies>
+    <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.2.4</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>4.0</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>1.9.5</version>
+    </dependency>
+    <dependency>
+        <groupId>org.powermock</groupId>
+        <artifactId>powermock-module-junit4</artifactId>
+        <version>${powermock.version}</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.powermock</groupId>
+        <artifactId>powermock-api-mockito</artifactId>
+        <version>${powermock.version}</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.simpleframework</groupId>
+        <artifactId>simple</artifactId>
+        <version>5.1.6</version>
+    </dependency>
+
+</dependencies>
+
+<developers>
+    <developer>
+            <id>srhebbar</id>
+            <name>Srivardhan Hebbar</name>
+            <email>srhebbar@microsoft.com</email>
+            <organization>Microsoft Corp.</organization>
+            <organizationUrl>http://microsoft.com</organizationUrl>
+    </developer>
+</developers>
+<scm>
+    <connection>scm:git:ssh://github.com/jenkinsci/office-365-connector.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/jenkinsci/office-365-connector.git</developerConnection>
+    <url>https://github.com/jenkinsci/office-365-connector.git</url>
+<tag>HEAD</tag>
+</scm>
+
+<build>
+<plugins>
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+            <excludes>
+                <exclude>InjectedTest.java</exclude>
+            </excludes>
+        </configuration>
+    </plugin>
+</plugins>
+</build>
+
+  <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
+    <repositories>
+        <repository>
+            <id>repo.jenkins-ci.org</id>
+            <url>http://repo.jenkins-ci.org/public/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>repo.jenkins-ci.org</id>
+            <url>http://repo.jenkins-ci.org/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+    <name>Office 365 Connector</name>
+</project>
