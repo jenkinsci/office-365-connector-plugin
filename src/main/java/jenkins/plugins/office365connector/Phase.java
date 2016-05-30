@@ -32,7 +32,6 @@ import jenkins.model.Jenkins;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import hudson.EnvVars;
 import hudson.tasks.test.AbstractTestResultAction;
 import java.text.SimpleDateFormat;
 import jenkins.plugins.office365connector.model.Card;
@@ -195,8 +194,10 @@ public enum Phase {
                     Run previousBuild = run.getPreviousBuild();
                     Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
                     AbstractBuild failingSinceRun = null;
-                    if(run.getPreviousNotFailedBuild() != null) {
-			failingSinceRun = (AbstractBuild) (run.getPreviousNotFailedBuild().getNextBuild());
+                    Run rt;
+                    rt = run.getPreviousNotFailedBuild();
+                    if(rt != null) {
+			failingSinceRun = (AbstractBuild) (rt.getNextBuild());
                     } else {
 			failingSinceRun = run.getProject().getFirstBuild();
                     }

@@ -92,24 +92,26 @@ public class HttpWorker implements Runnable {
 	}
 
 	private HttpClient getHttpClient() {
-		HttpClient client = new HttpClient();
-		if (Jenkins.getInstance() != null) {
-			ProxyConfiguration proxy = Jenkins.getInstance().proxy;
-			if (proxy != null) {
-				client.getHostConfiguration().setProxy(proxy.name, proxy.port);
-				String username = proxy.getUserName();
-				String password = proxy.getPassword();
-				// Consider it to be passed if username specified. Sufficient?
-				if (username != null && !"".equals(username.trim())) {
-					logger.println("Using proxy authentication (user=" + username + ")");
-					// http://hc.apache.org/httpclient-3.x/authentication.html#Proxy_Authentication
-					// and
-					// http://svn.apache.org/viewvc/httpcomponents/oac.hc3x/trunk/src/examples/BasicAuthenticationExample.java?view=markup
-					client.getState().setProxyCredentials(AuthScope.ANY,
-							new UsernamePasswordCredentials(username, password));
-				}
-			}
-		}
-		return client;
+            HttpClient client = new HttpClient();
+            Jenkins jen = Jenkins.getInstance();
+            if (jen != null) {
+                ProxyConfiguration proxy;
+                proxy = jen.proxy;
+                if (proxy != null) {
+                        client.getHostConfiguration().setProxy(proxy.name, proxy.port);
+                        String username = proxy.getUserName();
+                        String password = proxy.getPassword();
+                        // Consider it to be passed if username specified. Sufficient?
+                        if (username != null && !"".equals(username.trim())) {
+                                logger.println("Using proxy authentication (user=" + username + ")");
+                                // http://hc.apache.org/httpclient-3.x/authentication.html#Proxy_Authentication
+                                // and
+                                // http://svn.apache.org/viewvc/httpcomponents/oac.hc3x/trunk/src/examples/BasicAuthenticationExample.java?view=markup
+                                client.getState().setProxyCredentials(AuthScope.ANY,
+                                                new UsernamePasswordCredentials(username, password));
+                        }
+                }
+            }
+            return client;
 	}
 }
