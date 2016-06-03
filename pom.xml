@@ -3,17 +3,9 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>2.2</version><!-- which version of Jenkins is this plugin built against? -->
+        <version>2.3</version><!-- which version of Jenkins is this plugin built against? -->
     </parent>
 
-    <groupId>jenkins.plugins.office365connector</groupId>
-    <artifactId>Office-365-Connector</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>hpi</packaging>
-
-    <properties>
-        <powermock.version>1.5.6</powermock.version>
-    </properties>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -22,20 +14,27 @@
             <comments>A business-friendly OSS license</comments>
         </license>
     </licenses>
+
+    <groupId>jenkins.plugins.office365connector</groupId>
+    <artifactId>Office-365-Connector</artifactId>
+    <name>Office 365 Connector</name>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>hpi</packaging>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Office+365+Connector</url>
+
+    <properties>
+        <powermock.version>1.5.6</powermock.version>
+        <jenkins.version>1.651.2</jenkins.version>
+        <java.level>7</java.level>
+    </properties>
+    
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.2.4</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
+       <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <version>1.9.5</version>
@@ -65,8 +64,14 @@
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.main</groupId>
-            <artifactId>jenkins-core</artifactId>
-            <version>1.576</version>
+            <artifactId>jenkins-war</artifactId>
+            <type>war</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>junit</artifactId>
+            <version>1.5</version>
             <type>jar</type>
         </dependency>
     </dependencies>
@@ -88,20 +93,6 @@
     <tag>HEAD</tag>
     </scm>
 
-    <build>
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-                <excludes>
-                    <exclude>InjectedTest.java</exclude>
-                </excludes>
-            </configuration>
-        </plugin>
-    </plugins>
-    </build>
-
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
     <repositories>
         <repository>
@@ -116,5 +107,5 @@
             <url>http://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
-    <name>Office 365 Connector</name>
+    
 </project>
