@@ -78,11 +78,18 @@
 
     <developers>
         <developer>
-                <id>srhebbar</id>
-                <name>Srivardhan Hebbar</name>
-                <email>srhebbar@microsoft.com</email>
-                <organization>Microsoft Corp.</organization>
-                <organizationUrl>http://microsoft.com</organizationUrl>
+            <id>outconn</id>
+            <name>Out conn</name>
+            <email>outconn@microsoft.com</email>
+            <organization>Microsoft Corp.</organization>
+            <organizationUrl>http://microsoft.com</organizationUrl>
+        </developer>
+        <developer>
+            <id>srhebbar</id>
+            <name>Srivardhan Hebbar</name>
+            <email>srhebbar@microsoft.com</email>
+            <organization>Microsoft Corp.</organization>
+            <organizationUrl>http://microsoft.com</organizationUrl>
         </developer>
     </developers>
     
