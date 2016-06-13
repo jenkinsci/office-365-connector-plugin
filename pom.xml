@@ -97,7 +97,7 @@
         <connection>scm:git:ssh://github.com/jenkinsci/office-365-connector.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/jenkinsci/office-365-connector.git</developerConnection>
         <url>https://github.com/jenkinsci/office-365-connector.git</url>
-    <tag>Office-365-Connector-1.0.4</tag>
+    <tag>Office-365-Connector-1.0.5</tag>
     </scm>
 
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
