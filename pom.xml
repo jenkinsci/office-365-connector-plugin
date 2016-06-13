@@ -18,7 +18,7 @@
     <groupId>jenkins.plugins.office365connector</groupId>
     <artifactId>Office-365-Connector</artifactId>
     <name>Office 365 Connector</name>
-    <version>1.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Office+365+Connector</url>
 
