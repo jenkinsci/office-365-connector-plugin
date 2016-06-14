@@ -15,7 +15,7 @@
         </license>
     </licenses>
 
-    <artifactId>office-365-connector</artifactId>
+    <artifactId>Office-365-Connector</artifactId>
     <name>Office 365 Connector</name>
     <version>1.1.3-SNAPSHOT</version>
     <packaging>hpi</packaging>
