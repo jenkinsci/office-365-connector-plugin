@@ -96,7 +96,8 @@ public enum Phase {
 			Run previousBuild = build.getPreviousBuild();
 			Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
 			return ((result == Result.ABORTED && webhook.isNotifyAborted())
-					|| (result == Result.FAILURE && webhook.isNotifyFailure())
+					|| (result == Result.FAILURE && (webhook.isNotifyFailure()))
+                                        || (result == Result.FAILURE && previousResult == Result.FAILURE && (webhook.isNotifyRepeatedFailure()))
 					|| (result == Result.NOT_BUILT && webhook.isNotifyNotBuilt())
 					|| (result == Result.SUCCESS && previousResult == Result.FAILURE && webhook.isNotifyBackToNormal())
 					|| (result == Result.SUCCESS && webhook.isNotifySuccess()) || (result == Result.UNSTABLE && webhook
@@ -236,6 +237,9 @@ public enum Phase {
                     } else if (result == Result.SUCCESS) {
                         status = "Build Success";
                         summary += " Success.";
+                    } else if (result == Result.NOT_BUILT) {
+                        status = "Not Built";
+                        summary += " Not Built.";
                     }
                     
                     event.setValue(status);
