@@ -204,7 +204,7 @@ public enum Phase {
                     }
                     if (result == Result.SUCCESS && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)) {
 			status = "Back to Normal";
-                        summary += " Bank to Normal.";
+                        summary += " Back to Normal.";
                                         
                         Facts backToNormalTime = new Facts();
                         backToNormalTime.setName("Back To Normal Time");
@@ -213,7 +213,7 @@ public enum Phase {
                     } else if (result == Result.FAILURE && failingSinceRun != null) {
                         if (previousResult == Result.FAILURE) {
                             status = "Repeated Failure";
-                            summary += " Repeat Failure";
+                            summary += " Repeated Failure";
                             
                             Facts failingSinceBuild = new Facts();
                             failingSinceBuild.setName("Failing since build");
