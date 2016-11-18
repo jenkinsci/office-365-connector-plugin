@@ -124,16 +124,15 @@ public class Office365ConnectorBuildListener extends RunListener<Run> {
         if(listener == null) return null;
 
         Card card = new Card();
+        Sections section = new Sections();
+        section.setMarkdown(true);
 
         String rootUrl = null;
         Jenkins jenkins = Jenkins.getInstance();
         if (jenkins != null) {
             rootUrl = jenkins.getRootUrl();
         }
-
-        Sections section = new Sections();
-        section.setMarkdown(true);
-
+        
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 
         Facts event = new Facts();
