@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: jglick
+Build-Jdk: 1.8.0_45
+Extension-Name: workflow-step-api
+Implementation-Title: workflow-step-api
+Implementation-Version: 1.11
+Group-Id: org.jenkins-ci.plugins.workflow
+Short-Name: workflow-step-api
+Long-Name: Workflow: Step API
+Url: https://wiki.jenkins-ci.org/display/JENKINS/Workflow+Plugin
+Plugin-Version: 1.11
+Hudson-Version: 1.609.2
+Jenkins-Version: 1.609.1
+Plugin-Developers: 
+Support-Dynamic-Loading: true
+

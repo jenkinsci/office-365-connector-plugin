@@ -1,0 +1,12 @@
+<div>
+    <p>
+        By default when a newer build of an upstream project is building (or in queue),
+        an earlier build will not trigger builds of downstream modules.
+        This is under the assumption that those builds would soon be superseded and are not of interest.
+    </p>
+    <p>
+        You can however disable this logic on the upstream project, which will result in a fuller sequence of downstream builds.
+        This is not be confused with <b>Block build when upstream project is building</b> (marked on the other project),
+        which controls <em>scheduling</em> of the downstream project once it has been triggered.
+    </p>
+</div>

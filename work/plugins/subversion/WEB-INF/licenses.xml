@@ -1,0 +1,25 @@
+<l:dependencies xmlns:l='licenses' groupId='org.jenkins-ci.plugins' artifactId='subversion' version='1.54'>
+  <l:dependency name='Jenkins Subversion Plug-in' groupId='org.jenkins-ci.plugins' artifactId='subversion' version='1.54' url='http://wiki.jenkins-ci.org/display/JENKINS/Subversion+Plugin'>
+    <l:description />
+    <l:license name='MIT license' />
+  </l:dependency>
+  <l:dependency name='SqlJet Library' groupId='org.tmatesoft.sqljet' artifactId='sqljet' version='1.1.7' url='http://www.sqljet.com/'>
+    <l:description>Pure Java Sqlite Library</l:description>
+    <l:license name='GPL (with dual licensing option)' url='http://www.gnu.org/licenses/gpl.html' />
+  </l:dependency>
+  <l:dependency name='SVNKit' groupId='org.jenkins-ci.svnkit' artifactId='svnkit' version='1.7.10-jenkins-1' url='http://svnkit.com/'>
+    <l:description>A pure Java Subversion library, formerly known as JavaSVN</l:description>
+    <l:license url='http://svnkit.com/license.html' />
+  </l:dependency>
+  <l:dependency name='Sequence Library' groupId='de.regnis.q.sequence' artifactId='sequence-library' version='1.0.2' url='http://svn.svnkit.com/repos/3rdparty/de.regnigs.q.sequence'>
+    <l:description>Textual Diff and Merge Library</l:description>
+    <l:license name='Sequence Library License' url='http://www.svnkit.com/SEQUENCE-LICENSE.txt' />
+  </l:dependency>
+  <l:dependency name='Antlr 3.4 Runtime' groupId='org.antlr' artifactId='antlr-runtime' version='3.4' url='http://www.antlr.org'>
+    <l:description>A framework for constructing recognizers, compilers, and translators from grammatical descriptions containing Java, C#, C++, or Python actions.</l:description>
+  </l:dependency>
+  <l:dependency name='Ganymed SSH2 for Java' groupId='org.jenkins-ci' artifactId='trilead-ssh2' version='build217-jenkins-3' url='http://svn.svnkit.com/repos/3rdparty/com.trilead.ssh2/tags/1.0.0-build217/trilead-ssh2/'>
+    <l:description>Ganymed SSH2 for Java is a library which implements the SSH-2 protocol in pure Java</l:description>
+    <l:license name='BSD style license' url='http://www.ganymed.ethz.ch/ssh2/LICENSE.txt' />
+  </l:dependency>
+</l:dependencies>

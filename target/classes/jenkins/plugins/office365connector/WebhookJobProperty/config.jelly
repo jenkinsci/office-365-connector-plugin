@@ -1,0 +1,77 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<!--
+   	 This jelly script is used for per-project configuration.
+
+    See global.jelly for a general discussion about jelly script.
+-->
+
+<!--
+    Creates a text field that shows the value of the "name" property.
+    When submitted, it will be passed to the corresponding constructor parameter.
+-->
+  	<f:section title="Office 365 Connector">
+  		<f:entry title="Notification webhooks" field="webhooks">
+  			<f:repeatable name="webhooks" var="webhook"
+  				items="${instance.getWebhooks()}" add="${%Add Webhook}">
+  				<table class="center-align">
+                    <f:entry field="webhook">
+                        <table>
+                            <tr>
+                                <td>
+                                    <f:entry title="URL" field="url">
+                                        <f:textbox name="url" value="${webhook.getUrl()}" />
+                                    </f:entry>
+                                </td>
+                            </tr>
+                            <tr>
+                            	<td>
+                            		<f:entry title="Notify Build Start">
+      									<f:checkbox name="startNotification" value="true" checked="${webhook.isStartNotification()}"/>
+    								</f:entry>
+
+        							<f:entry title="Notify Aborted">
+            							<f:checkbox name="notifyAborted" value="true" checked="${webhook.isNotifyAborted()}"/>
+        							</f:entry>
+
+        							<f:entry title="Notify Failure">
+            							<f:checkbox name="notifyFailure" value="true" checked="${webhook.isNotifyFailure()}"/>
+        							</f:entry>
+
+        							<f:entry title="Notify Not Built">
+            							<f:checkbox name="notifyNotBuilt" value="true" checked="${webhook.isNotifyNotBuilt()}"/>
+        							</f:entry>
+
+        							<f:entry title="Notify Success">
+            							<f:checkbox name="notifySuccess" value="true" checked="${webhook.isNotifySuccess()}"/>
+        							</f:entry>
+
+        							<f:entry title="Notify Unstable">
+            							<f:checkbox name="notifyUnstable" value="true" checked="${webhook.isNotifyUnstable()}"/>
+        							</f:entry>
+
+        							<f:entry title="Notify Back To Normal">
+            							<f:checkbox name="notifyBackToNormal" value="true" checked="${webhook.isNotifyBackToNormal()}"/>
+        							</f:entry>
+                                                                
+                                                                <f:entry title="Notify Repeated Failure">
+            							<f:checkbox name="notifyRepeatedFailure" value="true" checked="${webhook.isNotifyRepeatedFailure()}"/>
+        							</f:entry>
+                            	</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <f:entry title="Timeout" description="Timeout (in ms)"
+                                        field="timeout">
+                                        <f:textbox name="timeout" value="${webhook.getTimeout()}" default="${descriptor.defaultTimeout}"/>
+                                    </f:entry>
+                                </td>
+                            </tr>
+                        </table>
+                    </f:entry>
+                    <f:repeatableDeleteButton value="${%Delete}" />
+                </table>
+            </f:repeatable>
+        </f:entry>
+    </f:section>
+</j:jelly>

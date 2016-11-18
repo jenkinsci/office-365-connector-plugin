@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: kohsuke
+Build-Jdk: 1.7.0_07
+Extension-Name: subversion
+Implementation-Title: subversion
+Implementation-Version: 1.54
+Group-Id: org.jenkins-ci.plugins
+Short-Name: subversion
+Long-Name: Jenkins Subversion Plug-in
+Url: http://wiki.jenkins-ci.org/display/JENKINS/Subversion+Plugin
+Plugin-Version: 1.54
+Hudson-Version: 1.466
+Jenkins-Version: 1.466
+Mask-Classes: com.trilead.ssh2.
+Plugin-Developers: Many:kohsuke abayer dodok1 dty huybrechts mindless 
+ pgweiss stephenconnolly rseguy kutzi etc:
+
