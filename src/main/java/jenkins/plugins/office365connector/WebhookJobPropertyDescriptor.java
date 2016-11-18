@@ -42,7 +42,7 @@ public final class WebhookJobPropertyDescriptor extends JobPropertyDescriptor {
         load();
     }
 
-    private List<Webhook> webhooks = new ArrayList<Webhook>();
+    private List<Webhook> webhooks = new ArrayList<>();
 
     public boolean isEnabled() {
         return !webhooks.isEmpty();
@@ -53,7 +53,7 @@ public final class WebhookJobPropertyDescriptor extends JobPropertyDescriptor {
     }
 
     public void setWebhooks(List<Webhook> webhooks) {
-        this.webhooks = new ArrayList<Webhook>( webhooks );
+        this.webhooks = new ArrayList<>( webhooks );
     }
 
     @Override
@@ -73,7 +73,7 @@ public final class WebhookJobPropertyDescriptor extends JobPropertyDescriptor {
     @Override
     public WebhookJobProperty newInstance(StaplerRequest req, JSONObject formData) throws FormException {
 
-        List<Webhook> webhooks = new ArrayList<Webhook>();
+        List<Webhook> webhooks = new ArrayList<>();
         if (formData != null && !formData.isNullObject()) {
             JSON webhooksData = (JSON) formData.get("webhooks");
             if (webhooksData != null && !webhooksData.isEmpty()) {

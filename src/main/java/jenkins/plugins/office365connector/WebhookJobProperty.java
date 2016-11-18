@@ -13,9 +13,7 @@
  */
 package jenkins.plugins.office365connector;
 
-import hudson.model.BuildListener;
 import hudson.model.JobProperty;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 
 import java.util.ArrayList;
@@ -35,7 +33,7 @@ public class WebhookJobProperty extends
 
     @DataBoundConstructor
     public WebhookJobProperty(List<Webhook> webhooks) {
-        this.webhooks = new ArrayList<Webhook>( webhooks );
+        this.webhooks = new ArrayList<>( webhooks );
     }
 
     public List<Webhook> getWebhooks() {
@@ -45,11 +43,5 @@ public class WebhookJobProperty extends
     @Override
     public WebhookJobPropertyDescriptor getDescriptor() {
         return (WebhookJobPropertyDescriptor) super.getDescriptor();
-    }
-    
-    @Override
-    public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
-        Phase.STARTED.handle(build, listener);
-        return super.prebuild(build, listener);
     }
 }

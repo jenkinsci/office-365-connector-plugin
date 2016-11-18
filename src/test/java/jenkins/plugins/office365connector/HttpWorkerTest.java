@@ -47,7 +47,6 @@ import org.simpleframework.transport.connect.SocketConnection;
  *
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Phase.class, HttpWorker.class})
 public class HttpWorkerTest {
 
 	WebhookJobProperty property;
