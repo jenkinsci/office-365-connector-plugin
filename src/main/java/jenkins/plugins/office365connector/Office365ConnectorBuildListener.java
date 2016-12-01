@@ -200,7 +200,7 @@ public class Office365ConnectorBuildListener extends RunListener<Run> {
             || (result == Result.FAILURE && (webhook.isNotifyFailure()))
             || (result == Result.FAILURE && previousResult == Result.FAILURE && (webhook.isNotifyRepeatedFailure()))
             || (result == Result.NOT_BUILT && webhook.isNotifyNotBuilt())
-            || (result == Result.SUCCESS && previousResult == Result.FAILURE && webhook.isNotifyBackToNormal())
+            || (result == Result.SUCCESS && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) && webhook.isNotifyBackToNormal())
             || (result == Result.SUCCESS && webhook.isNotifySuccess()) 
             || (result == Result.UNSTABLE && webhook.isNotifyUnstable()));
     }
