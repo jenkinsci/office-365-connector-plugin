@@ -3,6 +3,7 @@ package jenkins.plugins.office365connector;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
