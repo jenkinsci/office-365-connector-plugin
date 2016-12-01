@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: jenkins.plugins.office365connector.HttpWorkerTest
--------------------------------------------------------------------------------
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.992 sec - in jenkins.plugins.office365connector.HttpWorkerTest

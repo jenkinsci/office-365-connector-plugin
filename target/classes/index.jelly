@@ -1,6 +1,0 @@
-<?jelly escape-by-default='true'?>
-<div>
-    This plugin from
-    <a href="http://www.microsoft.com">Microsoft Corp.</a>
-    allows sending running Jobs status notifications.
-</div>
