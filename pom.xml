@@ -74,6 +74,12 @@
             <version>1.5</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
+            <version>1.11</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
     <developers>

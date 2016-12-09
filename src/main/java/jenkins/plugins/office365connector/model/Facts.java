@@ -26,6 +26,20 @@ public class Facts
 
     private String value;
 
+    public Facts(String name, String value) {
+        this.name = name;
+        this.value = value;
+    }
+    
+    public Facts(String name, int value) {
+        this.name = name;
+        this.value = Integer.toString(value);
+    }
+
+    public Facts(String name) {
+        this.name = name;
+    }
+
     public String getName ()
     {
         return name;

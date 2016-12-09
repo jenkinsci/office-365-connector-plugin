@@ -28,6 +28,12 @@ public class Card {
     private List<Sections> sections;
     
     private List<PotentialAction> potentialAction;
+
+    public Card(String summary, List<Sections> sectionList) {
+        this.summary = summary;
+        this.theme = "#3479BF";
+        this.sections = sectionList;
+    }
     
     public String getSummary()
     {

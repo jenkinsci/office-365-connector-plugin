@@ -84,81 +84,6 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
     
-    private static Card createJobStartedCard(Run run, TaskListener listener, boolean isFromPrebuild) {
-        if(run == null) return null;
-        if(listener == null) return null;
-  
-        Card card = new Card();
-        Sections section = new Sections();
-        section.setMarkdown(true);
-
-        String rootUrl = null;
-        Jenkins jenkins = Jenkins.getInstance();
-        if (jenkins != null) {
-            rootUrl = jenkins.getRootUrl();
-        }
-        
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-
-        Facts event = new Facts();
-        event.setName("Status");
-
-        String summary = run.getParent().getName() + ": Build #" + run.getNumber();
-
-        Facts startTime = new Facts();
-        startTime.setName("Start Time");
-        startTime.setValue(sdf.format(run.getStartTimeInMillis()));
-
-        List<Facts> factsList = new ArrayList<>();
-        factsList.add(event);
-        factsList.add(startTime);
-
-        summary += " Started.";
-        event.setValue("Build Started");
-
-        List<Cause> causes = run.getCauses();
-        Facts causeField = new Facts();
-        if (causes != null) {
-           StringBuilder causesStr = new StringBuilder();
-                for (Cause cause : causes) {
-                    causesStr.append(cause.getShortDescription()).append(". ");
-                }
-                causeField.setName("Remarks");
-                causeField.setValue(causesStr.toString());
-        }
-        factsList.add(causeField);
-        
-        addScmDetails(run, listener, factsList);
-        
-        card.setSummary(summary);
-        card.setTheme("#3479BF");
-
-        section.setFacts(factsList);
-        section.setActivityTitle("Update from build " + run.getParent().getName() + ".");
-        section.setActivitySubtitle("Latest status of build #" + run.getNumber());
-
-        List<Sections> sectionList = new ArrayList<>();
-        sectionList.add(section);
-        card.setSections(sectionList);
-
-        if(rootUrl != null) {
-            PotentialAction pa = new PotentialAction();
-            pa.setContext("http://schema.org");
-            pa.setType("ViewAction");
-            pa.setName("View Build");
-            List<String> url;
-            url = new ArrayList<>();
-
-            url.add(rootUrl + run.getUrl());
-            pa.setTarget(url);
-            List<PotentialAction> paList = new ArrayList<>();
-            paList.add(pa);
-            card.setPotentialAction(paList);
-        }
-
-        return card;
-    }
-    
     public static void sendBuildCompleteNotification(Run run, TaskListener listener)
     {
         WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
@@ -189,85 +114,85 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
     
-    private static boolean shouldSendNotification(Webhook webhook, Run run) {
-    Result result = run.getResult();
-    Run previousBuild = run.getPreviousBuild();
-    Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
-    return ((result == Result.ABORTED && webhook.isNotifyAborted())
-        || (result == Result.FAILURE && (webhook.isNotifyFailure()))
-        || (result == Result.FAILURE && previousResult == Result.FAILURE && (webhook.isNotifyRepeatedFailure()))
-        || (result == Result.NOT_BUILT && webhook.isNotifyNotBuilt())
-        || (result == Result.SUCCESS && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) && webhook.isNotifyBackToNormal())
-        || (result == Result.SUCCESS && webhook.isNotifySuccess()) 
-        || (result == Result.UNSTABLE && webhook.isNotifyUnstable()));
+    public static void sendBuildMessage(Run run, TaskListener listener, String message)
+    {
+        WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
+        if (property == null) {
+            return;
+        }
+
+        Card card = null;
+        for (Webhook webhook : property.getWebhooks()) {
+            card = createBuildMessageCard(run, listener, message);
+            listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
+            if (card != null ) {
+                try {
+                    HttpWorker worker = new HttpWorker(webhook.getUrl(), gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
+                    executorService.submit(worker);
+                } catch (Throwable error) {
+                    error.printStackTrace(listener.error(String.format("Failed to notify webhook '%s'", webhook)));
+                    listener.getLogger().println(String.format("Failed to notify webhook '%s' - %s: %s", webhook, error.getClass().getName(), error.getMessage()));
+                }
+            }
+        }
+    }
+    
+    private static Card createJobStartedCard(Run run, TaskListener listener, boolean isFromPrebuild) {
+        if(run == null) return null;
+        if(listener == null) return null;
+  
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+
+        List<Facts> factsList = new ArrayList<>();
+        factsList.add(new Facts("Status", "Build Started"));
+        factsList.add(new Facts("Start Time", sdf.format(run.getStartTimeInMillis())));
+
+        addCauses(run, factsList);
+
+        addScmDetails(run, listener, factsList);
+        
+        String activityTitle = "Update from build " + run.getParent().getName() + ".";
+        String activitySubtitle = "Latest status of build #" + run.getNumber();
+        Sections section = new Sections(activityTitle, activitySubtitle, factsList);
+
+        List<Sections> sectionList = new ArrayList<>();
+        sectionList.add(section);
+        
+        String summary = run.getParent().getName() + ": Build #" + run.getNumber() + " Started";
+        Card card = new Card(summary, sectionList);
+        addPotentialAction(run, card);
+
+        return card;
     }
     
     private static Card createJobCompletedCard(Run run, TaskListener listener) {
         if(run == null) return null;
         if(listener == null) return null;
         
-        Card card = new Card();
- 
-        String rootUrl = null;
-        Jenkins jenkins = Jenkins.getInstance();
-        if (jenkins != null) {
-            rootUrl = jenkins.getRootUrl();
-        }
-                
-        Sections section = new Sections();
-        section.setMarkdown(true);
-            
-        Facts event = new Facts();
-        event.setName("Status");
-            
+        List<Facts> factsList = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
         String summary = run.getParent().getName() + ": Build #" + run.getNumber();
         
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-        Facts startTime = new Facts();
-        startTime.setName("Start Time");
-        startTime.setValue(sdf.format(run.getStartTimeInMillis()));
-        List<Facts> factsList = new ArrayList<>();
+        Facts event = new Facts("Status");
         factsList.add(event);
-        factsList.add(startTime);
-            
+        factsList.add(new Facts("Start Time", sdf.format(run.getStartTimeInMillis())));
+             
         Result result = run.getResult();
         if (result != null) {
             long currentBuildCompletionTime = run.getStartTimeInMillis() + run.getDuration();
-            Facts buildCompletion = new Facts();
-            buildCompletion.setName("Completion Time");
-            buildCompletion.setValue(sdf.format(currentBuildCompletionTime));
-            factsList.add(buildCompletion);
+            factsList.add(new Facts("Completion Time", sdf.format(currentBuildCompletionTime)));
 
             AbstractTestResultAction<?> action = run.getAction(AbstractTestResultAction.class);
             if (action != null) {
-                Facts totalTests = new Facts();
-                totalTests.setName("Total Tests");
-
-                Facts totalPassed = new Facts();
-                totalPassed.setName("Total Passed Tests");
-
-                Facts totalFailed = new Facts();
-                totalFailed.setName("Total Failed Tests");
-
-                Facts totalSkipped = new Facts();
-                totalSkipped.setName("Total Skipped Tests");
-
-                totalTests.setValue(action.getTotalCount());
-                totalPassed.setValue(action.getTotalCount() - action.getFailCount() - action.getSkipCount());
-                totalFailed.setValue(action.getFailCount());
-                totalSkipped.setValue(action.getSkipCount());
-                factsList.add(totalTests);
-                factsList.add(totalPassed);
-                factsList.add(totalFailed);
-                factsList.add(totalSkipped);
+                factsList.add(new Facts("Total Tests", action.getTotalCount()));
+                factsList.add(new Facts("Total Passed Tests", action.getTotalCount() - action.getFailCount() - action.getSkipCount()));
+                factsList.add(new Facts("Total Failed Tests", action.getFailCount()));
+                factsList.add(new Facts("Total Skipped Tests", action.getSkipCount()));
             } else {
-                Facts tests = new Facts();
-                tests.setName("Tests");
-                tests.setValue("No tests found");
-                factsList.add(tests);
+                factsList.add(new Facts("Tests", "No tests found"));
             }
 
-            String status = result.toString();
+            String status = null;
             Run previousBuild = run.getPreviousBuild();
             Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
             AbstractBuild failingSinceRun = null;
@@ -285,90 +210,97 @@ public final class Office365ConnectorWebhookNotifier {
             
             if (result == Result.SUCCESS && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)) {
                 status = "Back to Normal";
-                summary += " Back to Normal.";
+                summary += " Back to Normal";
 
                 if (failingSinceRun != null) {
-                    Facts backToNormalTime = new Facts();
-                    backToNormalTime.setName("Back To Normal Time");
-                    backToNormalTime.setValue(sdf.format(currentBuildCompletionTime - failingSinceRun.getStartTimeInMillis()));
-                    factsList.add(backToNormalTime);
+                    factsList.add(new Facts("Back To Normal Time", sdf.format(currentBuildCompletionTime - failingSinceRun.getStartTimeInMillis())));
                 }
             } else if (result == Result.FAILURE && failingSinceRun != null) {
                 if (previousResult == Result.FAILURE) {
                     status = "Repeated Failure";
                     summary += " Repeated Failure";
 
-                    Facts failingSinceBuild = new Facts();
-                    failingSinceBuild.setName("Failing since build");
-                    failingSinceBuild.setValue(failingSinceRun.number);
-                    factsList.add(failingSinceBuild);
-
-                    Facts failingSinceTime = new Facts();
-                    failingSinceTime.setName("Failing since time");
-                    failingSinceTime.setValue(sdf.format(failingSinceRun.getStartTimeInMillis() + failingSinceRun.getDuration()));
-                    factsList.add(failingSinceTime);
+                    factsList.add(new Facts("Failing since build", failingSinceRun.number));
+                    factsList.add(new Facts("Failing since time", sdf.format(failingSinceRun.getStartTimeInMillis() + failingSinceRun.getDuration())));
                 } else {
                     status = "Build Failed";
-                    summary += " Failed.";
+                    summary += " Failed";
                 }
             } else if (result == Result.ABORTED) {
                 status = "Build Aborted";
-                summary += " Aborted.";
+                summary += " Aborted";
             } else if (result == Result.UNSTABLE) {
                 status = "Build Unstable";
-                summary += " Unstable.";
+                summary += " Unstable";
             } else if (result == Result.SUCCESS) {
                 status = "Build Success";
-                summary += " Success.";
+                summary += " Success";
             } else if (result == Result.NOT_BUILT) {
                 status = "Not Built";
-                summary += " Not Built.";
+                summary += " Not Built";
+            } else {
+                status = result.toString();
+                summary += " " + status;
             }
 
             event.setValue(status);
+        } else {
+            event.setValue(" Completed");
+            summary += " Completed";
         }
             
-        List<Cause> causes = run.getCauses();
-        Facts causeField = new Facts();
-        if (causes != null) {
-            StringBuilder causesStr = new StringBuilder();
-            for (Cause cause : causes) {
-                causesStr.append(cause.getShortDescription()).append(". ");
-            }
-            causeField.setName("Remarks");
-            causeField.setValue(causesStr.toString());
-        }
-        factsList.add(causeField);
+        addCauses(run, factsList);
         
         addScmDetails(run, listener, factsList);
         
-        card.setSummary(summary);
-        card.setTheme("#3479BF");
-
-        section.setFacts(factsList);
-        section.setActivityTitle("Update from build " + run.getParent().getName() + ".");
-        section.setActivitySubtitle("Latest status of build #" + run.getNumber());
+        String activityTitle = "Update from build " + run.getParent().getName() + ".";
+        String activitySubtitle = "Latest status of build #" + run.getNumber();
+        Sections section = new Sections(activityTitle, activitySubtitle, factsList);
 
         List<Sections> sectionList = new ArrayList<>();
         sectionList.add(section);
-        card.setSections(sectionList);
-
-        if(rootUrl != null) {
-            PotentialAction pa = new PotentialAction();
-            pa.setContext("http://schema.org");
-            pa.setType("ViewAction");
-            pa.setName("View Build");
-            List<String> url;
-            url = new ArrayList<>();
-
-            url.add(rootUrl + run.getUrl());
-            pa.setTarget(url);
-            List<PotentialAction> paList = new ArrayList<>();
-            paList.add(pa);
-            card.setPotentialAction(paList);
-        }
+        
+        Card card = new Card(summary, sectionList);
+        addPotentialAction(run, card);
 
         return card;
+    }
+
+    private static Card createBuildMessageCard(Run run, TaskListener listener, String message) {
+        if(run == null) return null;
+        if(listener == null) return null;
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+        
+        
+        List<Facts> factsList = new ArrayList<>();
+        factsList.add(new Facts("Status", "Running"));
+        factsList.add(new Facts("Start Time", sdf.format(run.getStartTimeInMillis())));
+            
+        String activityTitle = "Update from build " + run.getParent().getName() + "(" + run.getNumber() + ")";
+        Sections section = new Sections(activityTitle, message, factsList);
+        
+        List<Sections> sectionList = new ArrayList<>();
+        sectionList.add(section);
+        
+        String summary = run.getParent().getName() + ": Build #" + run.getNumber() + " Status";
+        Card card = new Card(summary, sectionList);
+        addPotentialAction(run, card);
+
+        return card;
+    }
+    
+    private static boolean shouldSendNotification(Webhook webhook, Run run) {
+    Result result = run.getResult();
+    Run previousBuild = run.getPreviousBuild();
+    Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
+    return ((result == Result.ABORTED && webhook.isNotifyAborted())
+        || (result == Result.FAILURE && (webhook.isNotifyFailure()))
+        || (result == Result.FAILURE && previousResult == Result.FAILURE && (webhook.isNotifyRepeatedFailure()))
+        || (result == Result.NOT_BUILT && webhook.isNotifyNotBuilt())
+        || (result == Result.SUCCESS && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) && webhook.isNotifyBackToNormal())
+        || (result == Result.SUCCESS && webhook.isNotifySuccess()) 
+        || (result == Result.UNSTABLE && webhook.isNotifyUnstable()));
     }
 
     private static void addScmDetails(Run run, TaskListener listener, List<Facts> factsList) {
@@ -388,19 +320,42 @@ public final class Office365ConnectorWebhookNotifier {
                     for (ChangeLogSet.Entry entry : entries) {
                         authors.add(entry.getAuthor().getDisplayName());
                     }
-                    Facts authorList = new Facts();
-                    authorList.setName("Authors");
-                    authorList.setValue(StringUtils.join(authors, ", "));
-                    factsList.add(authorList);
                     
-                    Facts noOffiles = new Facts();
-                    noOffiles.setName("Number Of Files Changed");
-                    noOffiles.setValue(files.size());
-                    factsList.add(noOffiles);
+                    factsList.add(new Facts("Authors", StringUtils.join(authors, ", ")));
+                    factsList.add(new Facts("Number Of Files Changed", files.size()));
                 }
             }
         } catch (Throwable e) {
             e.printStackTrace(listener.error(String.format("Unable to cast run to abstract build")));
+        }
+    }
+
+    private static void addPotentialAction(Run run, Card card) {
+        String rootUrl = null;
+        Jenkins jenkins = Jenkins.getInstance();
+        if (jenkins != null) {
+            rootUrl = jenkins.getRootUrl();
+        }
+        if(rootUrl != null) {
+            List<String> url;
+            url = new ArrayList<>();
+            url.add(rootUrl + run.getUrl());
+            
+            PotentialAction pa = new PotentialAction(url);
+            List<PotentialAction> paList = new ArrayList<>();
+            paList.add(pa);
+            card.setPotentialAction(paList);
+        }
+    }
+
+    private static void addCauses(Run run, List<Facts> factsList) {
+        List<Cause> causes = run.getCauses();
+        if (causes != null) {
+           StringBuilder causesStr = new StringBuilder();
+                for (Cause cause : causes) {
+                    causesStr.append(cause.getShortDescription()).append(". ");
+                }
+            factsList.add(new Facts("Remarks", causesStr.toString()));
         }
     }
 }

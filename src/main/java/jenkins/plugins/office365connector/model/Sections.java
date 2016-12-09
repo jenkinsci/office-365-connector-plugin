@@ -32,6 +32,13 @@ public class Sections
 
     private String activitySubtitle;
 
+    public Sections(String activityTitle, String activitySubtitle, List<Facts> factsList) {
+        this.activityTitle = activityTitle;
+        this.activitySubtitle = activitySubtitle;
+        this.markdown = true;
+        this.facts = factsList;
+    }
+
     public boolean getMarkdown ()
     {
         return markdown;

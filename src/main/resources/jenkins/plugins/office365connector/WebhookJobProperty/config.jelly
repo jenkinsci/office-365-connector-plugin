@@ -27,7 +27,7 @@
                             <tr>
                             	<td>
                             		<f:entry title="Notify Build Start">
-      									<f:checkbox name="startNotification" value="true" checked="${webhook.isStartNotification()}"/>
+      								<f:checkbox name="startNotification" value="true" checked="${webhook.isStartNotification()}"/>
     								</f:entry>
 
         							<f:entry title="Notify Aborted">

@@ -32,6 +32,13 @@ public class PotentialAction
 
     private List<String> target;
 
+    public PotentialAction(List<String> url) {
+        this.context = "http://schema.org";
+        this.type = "ViewAction";
+        this.name = "View Build";
+        this.target = url;
+    }
+
     public String getName ()
     {
         return name;
