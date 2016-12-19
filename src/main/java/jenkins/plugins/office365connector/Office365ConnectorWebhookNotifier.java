@@ -213,7 +213,23 @@ public final class Office365ConnectorWebhookNotifier {
                 summary += " Back to Normal";
 
                 if (failingSinceRun != null) {
-                    factsList.add(new Facts("Back To Normal Time", sdf.format(currentBuildCompletionTime - failingSinceRun.getStartTimeInMillis())));
+                    long diffInSeconds = (currentBuildCompletionTime / 1000) - (failingSinceRun.getStartTimeInMillis() / 1000);
+                    long diff[] = new long[] { 0, 0, 0, 0 };
+                    /* sec */diff[3] = (diffInSeconds >= 60 ? diffInSeconds % 60 : diffInSeconds);
+                    /* min */diff[2] = (diffInSeconds = (diffInSeconds / 60)) >= 60 ? diffInSeconds % 60 : diffInSeconds;
+                    /* hours */diff[1] = (diffInSeconds = (diffInSeconds / 60)) >= 24 ? diffInSeconds % 24 : diffInSeconds;
+                    /* days */diff[0] = (diffInSeconds = (diffInSeconds / 24));
+                    String backToNormalTimeValue = String.format(
+                                                    "%d day%s, %d hour%s, %d minute%s, %d second%s",
+                                                    diff[0],
+                                                    diff[0] > 1 ? "s" : "",
+                                                    diff[1],
+                                                    diff[1] > 1 ? "s" : "",
+                                                    diff[2],
+                                                    diff[2] > 1 ? "s" : "",
+                                                    diff[3],
+                                                    diff[3] > 1 ? "s" : "");
+                    factsList.add(new Facts("Back To Normal Time", backToNormalTimeValue));
                 }
             } else if (result == Result.FAILURE && failingSinceRun != null) {
                 if (previousResult == Result.FAILURE) {
