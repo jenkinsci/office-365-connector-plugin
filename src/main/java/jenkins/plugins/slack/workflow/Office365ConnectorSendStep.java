@@ -1,6 +1,7 @@
 package jenkins.plugins.slack.workflow;
 
 import hudson.Extension;
+import hudson.Util;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
@@ -13,6 +14,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
+import org.kohsuke.stapler.DataBoundSetter;
 
 /**
  * Workflow step to send a Slack channel notification.
@@ -20,10 +22,20 @@ import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 public class Office365ConnectorSendStep extends AbstractStepImpl {
 
     private final @Nonnull String message;
+    private String webhookUrl;
 
     @Nonnull
     public String getMessage() {
         return message;
+    }
+
+    public String getWebhookUrl() {
+        return webhookUrl;
+    }
+
+    @DataBoundSetter
+    public void setWebhookUrl(String url) {
+        this.webhookUrl = url;
     }
 
     @DataBoundConstructor
@@ -64,7 +76,7 @@ public class Office365ConnectorSendStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            Office365ConnectorWebhookNotifier.sendBuildMessage(run, listener, step.message);
+            Office365ConnectorWebhookNotifier.sendBuildMessage(run, listener, step.message, step.webhookUrl);
             return null;
         }
     }

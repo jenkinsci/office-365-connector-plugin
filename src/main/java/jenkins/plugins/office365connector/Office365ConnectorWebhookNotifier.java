@@ -114,26 +114,33 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
     
-    public static void sendBuildMessage(Run run, TaskListener listener, String message)
+    public static void sendBuildMessage(Run run, TaskListener listener, String message, String webhookUrl)
     {
-        WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
-        if (property == null) {
+        Card card = createBuildMessageCard(run, listener, message);
+        if (card == null) {
             return;
         }
-
-        Card card = null;
-        for (Webhook webhook : property.getWebhooks()) {
-            card = createBuildMessageCard(run, listener, message);
-            listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
-            if (card != null ) {
-                try {
+        
+        try {
+            if (webhookUrl != null) {
+                listener.getLogger().println(String.format("Notifying webhook '%s'", webhookUrl));
+                HttpWorker worker = new HttpWorker(webhookUrl, gson.toJson(card), 30000, 3, listener.getLogger());
+                executorService.submit(worker);
+            } else {
+                WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
+                if (property == null) {
+                    return;
+                }
+                for (Webhook webhook : property.getWebhooks()) {
+                    webhookUrl = webhook.getUrl();
+                    listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
                     HttpWorker worker = new HttpWorker(webhook.getUrl(), gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
                     executorService.submit(worker);
-                } catch (Throwable error) {
-                    error.printStackTrace(listener.error(String.format("Failed to notify webhook '%s'", webhook)));
-                    listener.getLogger().println(String.format("Failed to notify webhook '%s' - %s: %s", webhook, error.getClass().getName(), error.getMessage()));
                 }
             }
+        } catch (Throwable error) {
+            error.printStackTrace(listener.error(String.format("Failed to notify webhook '%s'", webhookUrl)));
+            listener.getLogger().println(String.format("Failed to notify webhook '%s' - %s: %s", webhookUrl, error.getClass().getName(), error.getMessage()));
         }
     }
     
