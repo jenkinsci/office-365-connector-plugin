@@ -15,6 +15,8 @@
  */
 package jenkins.plugins.office365connector;
 
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -23,8 +25,11 @@ import hudson.model.Cause;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.test.AbstractTestResultAction;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -38,6 +43,7 @@ import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Facts;
 import jenkins.plugins.office365connector.model.PotentialAction;
 import jenkins.plugins.office365connector.model.Sections;
+import jenkins.plugins.office365connector.workflow.StepParameters;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -61,15 +67,15 @@ public final class Office365ConnectorWebhookNotifier {
         for (Webhook webhook : property.getWebhooks()) {
             if (webhook.isStartNotification()) {
                 try {
-                    AbstractBuild build = (AbstractBuild) run;
-                    if(isFromPrebuild) {
-                        card = createJobStartedCard(run, listener, isFromPrebuild);
+                    if ((run instanceof AbstractBuild<?,?> && isFromPrebuild) ||
+                            (!(run instanceof AbstractBuild<?,?>) && !isFromPrebuild)) {
+                        card = createJobStartedCard(run, listener);
                     }
                 } catch (Throwable e) {
-                    if(!isFromPrebuild) {
-                        card = createJobStartedCard(run, listener, isFromPrebuild);
-                    }
+                    e.printStackTrace(listener.error(String.format("Unable to build the json object")));
+                    listener.getLogger().println(String.format("Unable to build the json object - %s: %s", e.getClass().getName(), e.getMessage()));
 		}
+                
                 listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
                 if (card != null ) {
                     try {
@@ -114,13 +120,14 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
     
-    public static void sendBuildMessage(Run run, TaskListener listener, String message, String webhookUrl)
+    public static void sendBuildMessage(Run run, TaskListener listener, StepParameters stepParameters)
     {
-        Card card = createBuildMessageCard(run, listener, message);
+        Card card = createBuildMessageCard(run, listener, stepParameters);
         if (card == null) {
             return;
         }
         
+        String webhookUrl = stepParameters.getWebhookUrl();
         try {
             if (webhookUrl != null) {
                 listener.getLogger().println(String.format("Notifying webhook '%s'", webhookUrl));
@@ -134,7 +141,7 @@ public final class Office365ConnectorWebhookNotifier {
                 for (Webhook webhook : property.getWebhooks()) {
                     webhookUrl = webhook.getUrl();
                     listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
-                    HttpWorker worker = new HttpWorker(webhook.getUrl(), gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
+                    HttpWorker worker = new HttpWorker(webhookUrl, gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
                     executorService.submit(worker);
                 }
             }
@@ -144,7 +151,7 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
     
-    private static Card createJobStartedCard(Run run, TaskListener listener, boolean isFromPrebuild) {
+    private static Card createJobStartedCard(Run run, TaskListener listener) {
         if(run == null) return null;
         if(listener == null) return null;
   
@@ -154,9 +161,7 @@ public final class Office365ConnectorWebhookNotifier {
         factsList.add(new Facts("Status", "Build Started"));
         factsList.add(new Facts("Start Time", sdf.format(run.getStartTimeInMillis())));
 
-        addCauses(run, factsList);
-
-        addScmDetails(run, listener, factsList);
+        addCauses(run, listener, factsList);
         
         String activityTitle = "Update from build " + run.getParent().getName() + ".";
         String activitySubtitle = "Latest status of build #" + run.getNumber();
@@ -272,9 +277,7 @@ public final class Office365ConnectorWebhookNotifier {
             summary += " Completed";
         }
             
-        addCauses(run, factsList);
-        
-        addScmDetails(run, listener, factsList);
+        addCauses(run, listener, factsList);
         
         String activityTitle = "Update from build " + run.getParent().getName() + ".";
         String activitySubtitle = "Latest status of build #" + run.getNumber();
@@ -289,7 +292,7 @@ public final class Office365ConnectorWebhookNotifier {
         return card;
     }
 
-    private static Card createBuildMessageCard(Run run, TaskListener listener, String message) {
+    private static Card createBuildMessageCard(Run run, TaskListener listener, StepParameters stepParameters) {
         if(run == null) return null;
         if(listener == null) return null;
 
@@ -297,11 +300,16 @@ public final class Office365ConnectorWebhookNotifier {
         
         
         List<Facts> factsList = new ArrayList<>();
-        factsList.add(new Facts("Status", "Running"));
+        if (stepParameters.getStatus() != null) {
+            factsList.add(new Facts("Status", stepParameters.getStatus()));
+        } else {
+            factsList.add(new Facts("Status", "Running"));
+        }
+        
         factsList.add(new Facts("Start Time", sdf.format(run.getStartTimeInMillis())));
             
         String activityTitle = "Update from build " + run.getParent().getName() + "(" + run.getNumber() + ")";
-        Sections section = new Sections(activityTitle, message, factsList);
+        Sections section = new Sections(activityTitle, stepParameters.getMessage(), factsList);
         
         List<Sections> sectionList = new ArrayList<>();
         sectionList.add(section);
@@ -328,8 +336,17 @@ public final class Office365ConnectorWebhookNotifier {
 
     private static void addScmDetails(Run run, TaskListener listener, List<Facts> factsList) {
         try {
-            AbstractBuild build = (AbstractBuild) run;
-            if (build.hasChangeSetComputed()) {
+            if (run instanceof AbstractBuild) {
+                AbstractBuild build = (AbstractBuild) run;
+                Set<User> users = build.getCulprits();
+                if (users != null ) {
+                    Set<String> culprits = new HashSet<>();
+                    for (User user : users) {
+                        culprits.add(user.getFullName());
+                    }
+                    factsList.add(new Facts("Culprits", StringUtils.join(culprits, ", ")));
+                }
+                
                 ChangeLogSet changeSet = build.getChangeSet();
                 List<ChangeLogSet.Entry> entries = new LinkedList<>();
                 Set<ChangeLogSet.AffectedFile> files = new HashSet<>();
@@ -341,15 +358,42 @@ public final class Office365ConnectorWebhookNotifier {
                 if (!entries.isEmpty()) {
                     Set<String> authors = new HashSet<>();
                     for (ChangeLogSet.Entry entry : entries) {
-                        authors.add(entry.getAuthor().getDisplayName());
+                        authors.add(entry.getAuthor().getFullName());
                     }
-                    
-                    factsList.add(new Facts("Authors", StringUtils.join(authors, ", ")));
+
+                    factsList.add(new Facts("Developers", StringUtils.join(authors, ", ")));
                     factsList.add(new Facts("Number Of Files Changed", files.size()));
+                } 
+            } else {
+                try {
+                    Method getChangeSets = run.getClass().getMethod("getChangeSets");
+                    if (List.class.isAssignableFrom(getChangeSets.getReturnType())) {
+                        @SuppressWarnings("unchecked")
+                        List<ChangeLogSet<ChangeLogSet.Entry>> sets = (List<ChangeLogSet<ChangeLogSet.Entry>>) getChangeSets.invoke(run);
+                        Set<String> authors = new HashSet<>();
+                        Set<ChangeLogSet.AffectedFile> files = new HashSet<>();
+                        if (Iterables.all(sets, Predicates.instanceOf(ChangeLogSet.class))) {
+                            for (ChangeLogSet<ChangeLogSet.Entry> set : sets) {
+                                for (ChangeLogSet.Entry entry : set) {
+                                    authors.add(entry.getAuthor().getFullName());
+                                    files.addAll(entry.getAffectedFiles());
+                                }
+                            }
+                        }
+                        Result runResult = run.getResult();
+                        if (runResult != null && runResult.isWorseThan(Result.SUCCESS)) {
+                            factsList.add(new Facts("Culprits", StringUtils.join(authors, ", ")));
+                        }
+                        
+                        factsList.add(new Facts("Developers", StringUtils.join(authors, ", ")));
+                        factsList.add(new Facts("Number of Files Changed", files.size()));
+                    }
+                } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                    e.printStackTrace(listener.error(String.format("Exception getting changesets for %s: %s", run, e)));
                 }
             }
         } catch (Throwable e) {
-            e.printStackTrace(listener.error(String.format("Unable to cast run to abstract build")));
+            e.printStackTrace(listener.error(String.format("Unable to cast run to abstract build. %s", e)));
         }
     }
 
@@ -371,7 +415,7 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    private static void addCauses(Run run, List<Facts> factsList) {
+    private static void addCauses(Run run, TaskListener listener, List<Facts> factsList) {
         List<Cause> causes = run.getCauses();
         if (causes != null) {
            StringBuilder causesStr = new StringBuilder();
@@ -379,6 +423,10 @@ public final class Office365ConnectorWebhookNotifier {
                     causesStr.append(cause.getShortDescription()).append(". ");
                 }
             factsList.add(new Facts("Remarks", causesStr.toString()));
+            
+            if (causesStr.toString().contains("SCM change")) {
+                addScmDetails(run, listener, factsList);
+            }
         }
     }
 }
