@@ -58,72 +58,97 @@ public final class Office365ConnectorWebhookNotifier {
     
     public static void sendBuildStaredNotification(Run run, TaskListener listener, boolean isFromPrebuild)
     {
+        Card card = null;
+        if ((run instanceof AbstractBuild<?,?> && isFromPrebuild) ||
+                (!(run instanceof AbstractBuild<?,?>) && !isFromPrebuild)) {
+            card = getCard(run, listener, 1);
+        }
+        
+        if (card == null) {
+            listener.getLogger().println(String.format("Build started card not generated."));
+            return;
+        }
+        
         WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
         if (property == null) {
+            listener.getLogger().println(String.format("No webhooks to notify"));
             return;
         }
 
-        Card card = null;
         for (Webhook webhook : property.getWebhooks()) {
             if (webhook.isStartNotification()) {
-                try {
-                    if ((run instanceof AbstractBuild<?,?> && isFromPrebuild) ||
-                            (!(run instanceof AbstractBuild<?,?>) && !isFromPrebuild)) {
-                        card = createJobStartedCard(run, listener);
-                    }
-                } catch (Throwable e) {
-                    e.printStackTrace(listener.error(String.format("Unable to build the json object")));
-                    listener.getLogger().println(String.format("Unable to build the json object - %s: %s", e.getClass().getName(), e.getMessage()));
-		}
-                
                 listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
-                if (card != null ) {
-                    try {
-                        HttpWorker worker = new HttpWorker(webhook.getUrl(), gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
-                        executorService.submit(worker);
-                    } catch (Throwable error) {
-                        error.printStackTrace(listener.error(String.format("Failed to notify webhook '%s'", webhook)));
-                        listener.getLogger().println(String.format("Failed to notify webhook '%s' - %s: %s", webhook, error.getClass().getName(), error.getMessage()));
-                    }
+                try {
+                    HttpWorker worker = new HttpWorker(webhook.getUrl(), gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
+                    executorService.submit(worker);
+                } catch (Throwable error) {
+                    error.printStackTrace(listener.error(String.format("Failed to notify webhook '%s'", webhook)));
+                    listener.getLogger().println(String.format("Failed to notify webhook '%s' - %s: %s", webhook, error.getClass().getName(), error.getMessage()));
                 }
+            } else {
+                listener.getLogger().println(String.format("No need to notify webhook '%s'", webhook));
             }
         }
     }
     
+    private static Card getCard(Run run, TaskListener listener, int cardType)
+    {
+        return getCard(run, listener, cardType, null);
+    }
+    
+    private static Card getCard(Run run, TaskListener listener, int cardType, StepParameters stepParameters)
+    {
+        if(listener == null) return null;
+        if(run == null) {
+            listener.getLogger().println("Run is null!");
+            return null;
+        }
+        
+        switch (cardType) {
+            case 1: return createJobStartedCard(run, listener);
+            case 2: return createJobCompletedCard(run, listener);
+            case 3: return createBuildMessageCard(run, listener, stepParameters);
+            default: listener.getLogger().println("Default case! Not supposed to come here!");
+        }
+        
+        return null;
+    }
+    
     public static void sendBuildCompleteNotification(Run run, TaskListener listener)
     {
-        WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
-        if (property == null) {
+        Card card = getCard(run, listener, 2);
+        if (card == null) {
+            listener.getLogger().println(String.format("Build completed card not generated."));
             return;
         }
-
-        Card card = null;
+        
+        WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
+        if (property == null) {
+            listener.getLogger().println(String.format("No webhooks to notify"));
+            return;
+        }
+        
         for (Webhook webhook : property.getWebhooks()) {
             if (shouldSendNotification(webhook, run)) {
-                try {
-                    card = createJobCompletedCard(run, listener);
-                } catch (Throwable e) {
-                    e.printStackTrace(listener.error(String.format("Unable to build the json object")));
-                    listener.getLogger().println(String.format("Unable to build the json object - %s: %s", e.getClass().getName(), e.getMessage()));
-		}
                 listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
-                if (card != null ) {
-                    try {
-                        HttpWorker worker = new HttpWorker(webhook.getUrl(), gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
-                        executorService.submit(worker);
-                    } catch (Throwable error) {
-                        error.printStackTrace(listener.error(String.format("Failed to notify webhook '%s'", webhook)));
-                        listener.getLogger().println(String.format("Failed to notify webhook '%s' - %s: %s", webhook, error.getClass().getName(), error.getMessage()));
-                    }
+                try {
+                    HttpWorker worker = new HttpWorker(webhook.getUrl(), gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
+                    executorService.submit(worker);
+                } catch (Throwable error) {
+                    error.printStackTrace(listener.error(String.format("Failed to notify webhook '%s'", webhook)));
+                    listener.getLogger().println(String.format("Failed to notify webhook '%s' - %s: %s", webhook, error.getClass().getName(), error.getMessage()));
                 }
+            } else {
+                listener.getLogger().println(String.format("No need to notify webhook '%s'", webhook));
             }
         }
     }
     
     public static void sendBuildMessage(Run run, TaskListener listener, StepParameters stepParameters)
     {
-        Card card = createBuildMessageCard(run, listener, stepParameters);
+        Card card = getCard(run, listener, 3, stepParameters);
         if (card == null) {
+            listener.getLogger().println(String.format("Build message card not generated."));
             return;
         }
         
@@ -152,9 +177,6 @@ public final class Office365ConnectorWebhookNotifier {
     }
     
     private static Card createJobStartedCard(Run run, TaskListener listener) {
-        if(run == null) return null;
-        if(listener == null) return null;
-  
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 
         List<Facts> factsList = new ArrayList<>();
@@ -178,8 +200,8 @@ public final class Office365ConnectorWebhookNotifier {
     }
     
     private static Card createJobCompletedCard(Run run, TaskListener listener) {
-        if(run == null) return null;
-        if(listener == null) return null;
+        listener.getLogger().println(String.format("%s: %d", Thread.currentThread().getStackTrace()[1].getMethodName(),
+                Thread.currentThread().getStackTrace()[1].getLineNumber()));
         
         List<Facts> factsList = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
@@ -293,12 +315,6 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     private static Card createBuildMessageCard(Run run, TaskListener listener, StepParameters stepParameters) {
-        if(run == null) return null;
-        if(listener == null) return null;
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-        
-        
         List<Facts> factsList = new ArrayList<>();
         if (stepParameters.getStatus() != null) {
             factsList.add(new Facts("Status", stepParameters.getStatus()));
@@ -306,8 +322,6 @@ public final class Office365ConnectorWebhookNotifier {
             factsList.add(new Facts("Status", "Running"));
         }
         
-        factsList.add(new Facts("Start Time", sdf.format(run.getStartTimeInMillis())));
-            
         String activityTitle = "Update from build " + run.getParent().getName() + "(" + run.getNumber() + ")";
         Sections section = new Sections(activityTitle, stepParameters.getMessage(), factsList);
         
