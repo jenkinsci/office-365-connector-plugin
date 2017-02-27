@@ -71,13 +71,13 @@ public final class Office365ConnectorWebhookNotifier {
         
         WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
         if (property == null) {
-            listener.getLogger().println(String.format("No webhooks to notify"));
+       //     listener.getLogger().println(String.format("No webhooks to notify"));
             return;
         }
 
         for (Webhook webhook : property.getWebhooks()) {
             if (webhook.isStartNotification()) {
-                listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
+       //         listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
                 try {
                     HttpWorker worker = new HttpWorker(webhook.getUrl(), gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
                     executorService.submit(worker);
@@ -86,7 +86,7 @@ public final class Office365ConnectorWebhookNotifier {
                     listener.getLogger().println(String.format("Failed to notify webhook '%s' - %s: %s", webhook, error.getClass().getName(), error.getMessage()));
                 }
             } else {
-                listener.getLogger().println(String.format("No need to notify webhook '%s'", webhook));
+            //    listener.getLogger().println(String.format("No need to notify webhook '%s'", webhook));
             }
         }
     }
@@ -124,13 +124,13 @@ public final class Office365ConnectorWebhookNotifier {
         
         WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
         if (property == null) {
-            listener.getLogger().println(String.format("No webhooks to notify"));
+ //           listener.getLogger().println(String.format("No webhooks to notify"));
             return;
         }
         
         for (Webhook webhook : property.getWebhooks()) {
             if (shouldSendNotification(webhook, run)) {
-                listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
+    //            listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
                 try {
                     HttpWorker worker = new HttpWorker(webhook.getUrl(), gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
                     executorService.submit(worker);
@@ -139,7 +139,7 @@ public final class Office365ConnectorWebhookNotifier {
                     listener.getLogger().println(String.format("Failed to notify webhook '%s' - %s: %s", webhook, error.getClass().getName(), error.getMessage()));
                 }
             } else {
-                listener.getLogger().println(String.format("No need to notify webhook '%s'", webhook));
+    //            listener.getLogger().println(String.format("No need to notify webhook '%s'", webhook));
             }
         }
     }
@@ -155,7 +155,7 @@ public final class Office365ConnectorWebhookNotifier {
         String webhookUrl = stepParameters.getWebhookUrl();
         try {
             if (webhookUrl != null) {
-                listener.getLogger().println(String.format("Notifying webhook '%s'", webhookUrl));
+ //               listener.getLogger().println(String.format("Notifying webhook '%s'", webhookUrl));
                 HttpWorker worker = new HttpWorker(webhookUrl, gson.toJson(card), 30000, 3, listener.getLogger());
                 executorService.submit(worker);
             } else {
@@ -165,7 +165,7 @@ public final class Office365ConnectorWebhookNotifier {
                 }
                 for (Webhook webhook : property.getWebhooks()) {
                     webhookUrl = webhook.getUrl();
-                    listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
+    //                listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
                     HttpWorker worker = new HttpWorker(webhookUrl, gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
                     executorService.submit(worker);
                 }
@@ -200,9 +200,6 @@ public final class Office365ConnectorWebhookNotifier {
     }
     
     private static Card createJobCompletedCard(Run run, TaskListener listener) {
-        listener.getLogger().println(String.format("%s: %d", Thread.currentThread().getStackTrace()[1].getMethodName(),
-                Thread.currentThread().getStackTrace()[1].getLineNumber()));
-        
         List<Facts> factsList = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
         String summary = run.getParent().getName() + ": Build #" + run.getNumber();
@@ -239,7 +236,7 @@ public final class Office365ConnectorWebhookNotifier {
                     failingSinceRun = (AbstractBuild) run.getParent().getFirstBuild();
                 }
             } catch (Throwable e) {
-                e.printStackTrace(listener.error(String.format("Unable to cast run to abstract build")));
+                //listener.getLogger().println(e.getMessage());
             }
             
             if (result == Result.SUCCESS && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)) {
@@ -390,7 +387,11 @@ public final class Office365ConnectorWebhookNotifier {
                             for (ChangeLogSet<ChangeLogSet.Entry> set : sets) {
                                 for (ChangeLogSet.Entry entry : set) {
                                     authors.add(entry.getAuthor().getFullName());
-                                    files.addAll(entry.getAffectedFiles());
+                                    try {
+                                        files.addAll(entry.getAffectedFiles());
+                                    } catch (Throwable e) {
+                                        listener.getLogger().println(e.getMessage());
+                                    }
                                 }
                             }
                         }
@@ -400,13 +401,16 @@ public final class Office365ConnectorWebhookNotifier {
                         }
                         
                         factsList.add(new Facts("Developers", StringUtils.join(authors, ", ")));
-                        factsList.add(new Facts("Number of Files Changed", files.size()));
+                        
+                        if (!files.isEmpty()) {
+                            factsList.add(new Facts("Number of Files Changed", files.size()));
+                        }
                     }
                 } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
                     e.printStackTrace(listener.error(String.format("Exception getting changesets for %s: %s", run, e)));
                 }
             }
-        } catch (Throwable e) {
+        } catch (SecurityException | IllegalArgumentException e) {
             e.printStackTrace(listener.error(String.format("Unable to cast run to abstract build. %s", e)));
         }
     }

@@ -67,7 +67,7 @@ public class HttpWorker implements Runnable {
 				e.printStackTrace(logger);
 				break;
 			}
-			logger.println(String.format("Posting data to webhook - %s. Already Tried %s times", url, tried));
+			//logger.println(String.format("Posting data to webhook - %s. Already Tried %s times", url, tried));
 			PostMethod post = new PostMethod(url);
 			try {
 		        post.setRequestEntity(requestEntity);
@@ -79,7 +79,7 @@ public class HttpWorker implements Runnable {
 		        	
 		        } else {
 		        	success = true;
-		        	logger.println(String.format("Posting data to webhook - %s completed ", url));
+		        	//logger.println(String.format("Posting data to webhook - %s completed ", url));
 		        }
 			} catch (Exception e) {
 				logger.println(String.format("Failed to post data to webhook - %s", url));
