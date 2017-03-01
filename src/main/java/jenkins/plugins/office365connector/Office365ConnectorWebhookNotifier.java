@@ -364,7 +364,12 @@ public final class Office365ConnectorWebhookNotifier {
                 for (Object o : changeSet.getItems()) {
                     ChangeLogSet.Entry entry = (ChangeLogSet.Entry) o;
                     entries.add(entry);
-                    files.addAll(entry.getAffectedFiles());
+                    try {
+                        files.addAll(entry.getAffectedFiles());
+                    } catch (Throwable e) {
+                        listener.getLogger().println(e.getMessage());
+                    }
+                    
                 }
                 if (!entries.isEmpty()) {
                     Set<String> authors = new HashSet<>();
@@ -373,7 +378,10 @@ public final class Office365ConnectorWebhookNotifier {
                     }
 
                     factsList.add(new Facts("Developers", StringUtils.join(authors, ", ")));
-                    factsList.add(new Facts("Number Of Files Changed", files.size()));
+                    
+                    if (!files.isEmpty()) {
+                        factsList.add(new Facts("Number Of Files Changed", files.size()));
+                    }
                 } 
             } else {
                 try {
