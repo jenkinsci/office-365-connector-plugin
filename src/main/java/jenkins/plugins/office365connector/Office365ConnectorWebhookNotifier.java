@@ -218,7 +218,11 @@ public final class Office365ConnectorWebhookNotifier {
         // Result is only set to a worse status in pipeline
         Result result = run.getResult() == null ? Result.SUCCESS : run.getResult();
         if (result != null) {
-            long currentBuildCompletionTime = run.getStartTimeInMillis() + run.getDuration();
+            long duration = run.getDuration() == 0L
+                    ? System.currentTimeMillis() - run.getStartTimeInMillis()
+                    : run.getDuration();
+            long currentBuildCompletionTime = run.getStartTimeInMillis() + duration;
+
             factsList.add(new Facts("Completion Time", sdf.format(currentBuildCompletionTime)));
 
             AbstractTestResultAction<?> action = run.getAction(AbstractTestResultAction.class);
