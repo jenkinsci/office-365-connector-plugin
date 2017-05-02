@@ -79,7 +79,7 @@ public final class Office365ConnectorWebhookNotifier {
             if (webhook.isStartNotification()) {
        //         listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
                 try {
-                    HttpWorker worker = new HttpWorker(webhook.getUrl(), gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
+                    HttpWorker worker = new HttpWorker(run.getEnvironment(listener).expand(webhook.getUrl()), gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
                     executorService.submit(worker);
                 } catch (Throwable error) {
                     error.printStackTrace(listener.error(String.format("Failed to notify webhook '%s'", webhook)));
@@ -132,7 +132,7 @@ public final class Office365ConnectorWebhookNotifier {
             if (shouldSendNotification(webhook, run)) {
     //            listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
                 try {
-                    HttpWorker worker = new HttpWorker(webhook.getUrl(), gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
+                    HttpWorker worker = new HttpWorker(run.getEnvironment(listener).expand(webhook.getUrl()), gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
                     executorService.submit(worker);
                 } catch (Throwable error) {
                     error.printStackTrace(listener.error(String.format("Failed to notify webhook '%s'", webhook)));
@@ -156,7 +156,7 @@ public final class Office365ConnectorWebhookNotifier {
         try {
             if (webhookUrl != null) {
  //               listener.getLogger().println(String.format("Notifying webhook '%s'", webhookUrl));
-                HttpWorker worker = new HttpWorker(webhookUrl, gson.toJson(card), 30000, 3, listener.getLogger());
+                HttpWorker worker = new HttpWorker(run.getEnvironment(listener).expand(webhookUrl), gson.toJson(card), 30000, 3, listener.getLogger());
                 executorService.submit(worker);
             } else {
                 WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
@@ -166,7 +166,7 @@ public final class Office365ConnectorWebhookNotifier {
                 for (Webhook webhook : property.getWebhooks()) {
                     webhookUrl = webhook.getUrl();
     //                listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
-                    HttpWorker worker = new HttpWorker(webhookUrl, gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
+                    HttpWorker worker = new HttpWorker(run.getEnvironment(listener).expand(webhookUrl), gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
                     executorService.submit(worker);
                 }
             }
