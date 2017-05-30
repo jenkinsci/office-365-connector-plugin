@@ -23,7 +23,7 @@ import java.util.List;
 public class Card {
     private String summary;
     
-    private String theme;
+    private String themeColor;
     
     private List<Sections> sections;
     
@@ -31,7 +31,7 @@ public class Card {
 
     public Card(String summary, List<Sections> sectionList) {
         this.summary = summary;
-        this.theme = "#3479BF";
+        this.themeColor = "3479BF";
         this.sections = sectionList;
     }
     
@@ -40,9 +40,9 @@ public class Card {
         return summary;
     }
     
-    public String getTheme()
+    public String getThemeColor()
     {
-        return theme;
+        return themeColor;
     }
     
     public List<PotentialAction> getPotentialAction()
@@ -60,9 +60,9 @@ public class Card {
         this.summary = summary;
     }
     
-    public void setTheme(String theme)
+    public void setThemeColor(String themeColor)
     {
-        this.theme = theme;
+        this.themeColor = themeColor;
     }
     
     public void setPotentialAction(List<PotentialAction> pa)
