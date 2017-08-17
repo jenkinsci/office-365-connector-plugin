@@ -458,9 +458,11 @@ public final class Office365ConnectorWebhookNotifier {
                 for (Cause cause : causes) {
                     causesStr.append(cause.getShortDescription()).append(". ");
                 }
-            factsList.add(new Facts("Remarks", causesStr.toString()));
-            
-            if (causesStr.toString().contains("SCM change")) {
+            String cause = causesStr.toString();
+            if (cause.contains("Branch indexing")) cause = cause.replace("Branch indexing", "SCM change");
+            factsList.add(new Facts("Remarks", cause));
+
+            if (cause.contains("SCM change")) {
                 addScmDetails(run, listener, factsList);
             }
         }
