@@ -21,22 +21,21 @@ import org.kohsuke.stapler.DataBoundSetter;
  */
 public class Office365ConnectorSendStep extends AbstractStepImpl {
 
-    private final @Nonnull String message;
-    private String webhookUrl;
+    private String message;
+    private final String webhookUrl;
     private String status;
 
-    @Nonnull
     public String getMessage() {
         return message;
     }
 
-    public String getWebhookUrl() {
-        return webhookUrl;
+    @DataBoundSetter
+    public void setMessage(String message) {
+        this.message = message;
     }
 
-    @DataBoundSetter
-    public void setWebhookUrl(String url) {
-        this.webhookUrl = url;
+    public String getWebhookUrl() {
+        return webhookUrl;
     }
 
     public String getStatus() {
@@ -49,8 +48,8 @@ public class Office365ConnectorSendStep extends AbstractStepImpl {
     }
     
     @DataBoundConstructor
-    public Office365ConnectorSendStep(@Nonnull String message) {
-        this.message = message;
+    public Office365ConnectorSendStep(String webhookUrl) {
+        this.webhookUrl = webhookUrl;
     }
 
     @Extension

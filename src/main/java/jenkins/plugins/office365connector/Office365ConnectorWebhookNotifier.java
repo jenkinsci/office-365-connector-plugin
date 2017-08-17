@@ -123,7 +123,14 @@ public final class Office365ConnectorWebhookNotifier {
     
     public static void sendBuildMessage(Run run, TaskListener listener, StepParameters stepParameters)
     {
-        Card card = getCard(run, listener, 3, stepParameters);
+        Card card;
+        if (StringUtils.isNotBlank(stepParameters.getMessage())) {
+            card = getCard(run, listener, 3, stepParameters);
+        } else if (StringUtils.equalsIgnoreCase(stepParameters.getStatus(), "started")) {
+            card = getCard(run, listener, 1);
+        } else {
+            card = getCard(run, listener, 2);
+        }
         if (card == null) {
             listener.getLogger().println(String.format("Build message card not generated."));
             return;
