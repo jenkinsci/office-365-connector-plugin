@@ -91,29 +91,6 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
     
-    private static Card getCard(Run run, TaskListener listener, int cardType)
-    {
-        return getCard(run, listener, cardType, null);
-    }
-    
-    private static Card getCard(Run run, TaskListener listener, int cardType, StepParameters stepParameters)
-    {
-        if(listener == null) return null;
-        if(run == null) {
-            listener.getLogger().println("Run is null!");
-            return null;
-        }
-        
-        switch (cardType) {
-            case 1: return createJobStartedCard(run, listener);
-            case 2: return createJobCompletedCard(run, listener);
-            case 3: return createBuildMessageCard(run, listener, stepParameters);
-            default: listener.getLogger().println("Default case! Not supposed to come here!");
-        }
-        
-        return null;
-    }
-    
     public static void sendBuildCompleteNotification(Run run, TaskListener listener)
     {
         Card card = getCard(run, listener, 2);
@@ -176,6 +153,29 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
     
+    private static Card getCard(Run run, TaskListener listener, int cardType)
+    {
+        return getCard(run, listener, cardType, null);
+    }
+    
+    private static Card getCard(Run run, TaskListener listener, int cardType, StepParameters stepParameters)
+    {
+        if(listener == null) return null;
+        if(run == null) {
+            listener.getLogger().println("Run is null!");
+            return null;
+        }
+        
+        switch (cardType) {
+            case 1: return createJobStartedCard(run, listener);
+            case 2: return createJobCompletedCard(run, listener);
+            case 3: return createBuildMessageCard(run, listener, stepParameters);
+            default: listener.getLogger().println("Default case! Not supposed to come here!");
+        }
+        
+        return null;
+    }
+    
     private static Card createJobStartedCard(Run run, TaskListener listener) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 
@@ -219,9 +219,7 @@ public final class Office365ConnectorWebhookNotifier {
                 factsList.add(new Facts("Total Passed Tests", action.getTotalCount() - action.getFailCount() - action.getSkipCount()));
                 factsList.add(new Facts("Total Failed Tests", action.getFailCount()));
                 factsList.add(new Facts("Total Skipped Tests", action.getSkipCount()));
-            } else {
-                factsList.add(new Facts("Tests", "No tests found"));
-            }
+            } 
 
             String status = null;
             Run previousBuild = run.getPreviousBuild();
@@ -337,7 +335,7 @@ public final class Office365ConnectorWebhookNotifier {
     Run previousBuild = run.getPreviousBuild();
     Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
     return ((result == Result.ABORTED && webhook.isNotifyAborted())
-        || (result == Result.FAILURE && (webhook.isNotifyFailure()))
+        || (result == Result.FAILURE && previousResult != Result.FAILURE && (webhook.isNotifyFailure()))
         || (result == Result.FAILURE && previousResult == Result.FAILURE && (webhook.isNotifyRepeatedFailure()))
         || (result == Result.NOT_BUILT && webhook.isNotifyNotBuilt())
         || (result == Result.SUCCESS && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) && webhook.isNotifyBackToNormal())
@@ -377,7 +375,9 @@ public final class Office365ConnectorWebhookNotifier {
                         authors.add(entry.getAuthor().getFullName());
                     }
 
-                    factsList.add(new Facts("Developers", StringUtils.join(authors, ", ")));
+                    if (!authors.isEmpty()) {
+                        factsList.add(new Facts("Developers", StringUtils.join(authors, ", ")));
+                    }
                     
                     if (!files.isEmpty()) {
                         factsList.add(new Facts("Number Of Files Changed", files.size()));
@@ -404,12 +404,15 @@ public final class Office365ConnectorWebhookNotifier {
                             }
                         }
                         Result runResult = run.getResult();
-                        if (runResult != null && runResult.isWorseThan(Result.SUCCESS)) {
-                            factsList.add(new Facts("Culprits", StringUtils.join(authors, ", ")));
+                        
+                        if (!authors.isEmpty()) {
+                            if (runResult != null && runResult.isWorseThan(Result.SUCCESS)) {
+                                factsList.add(new Facts("Culprits", StringUtils.join(authors, ", ")));
+                            }
+
+                            factsList.add(new Facts("Developers", StringUtils.join(authors, ", ")));
                         }
-                        
-                        factsList.add(new Facts("Developers", StringUtils.join(authors, ", ")));
-                        
+
                         if (!files.isEmpty()) {
                             factsList.add(new Facts("Number of Files Changed", files.size()));
                         }
