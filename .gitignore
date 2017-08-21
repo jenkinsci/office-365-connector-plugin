@@ -215,3 +215,15 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+#################
+## Maven
+#################
+
+work/
+
+#################
+## IntelliJ
+#################
+.idea
+*.iml
