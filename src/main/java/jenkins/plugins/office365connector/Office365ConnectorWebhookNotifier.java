@@ -320,6 +320,18 @@ public final class Office365ConnectorWebhookNotifier {
         sectionList.add(section);
         
         Card card = new Card(summary, sectionList);
+        if (result == Result.SUCCESS)
+        {
+            card.setThemeColor("96CEB4");
+        }
+        else if (result == Result.FAILURE)
+        {
+            card.setThemeColor("FF6F69");
+        }
+        else
+        {
+            card.setThemeColor("FFCC5C");
+        }
         addPotentialAction(run, card);
 
         return card;
