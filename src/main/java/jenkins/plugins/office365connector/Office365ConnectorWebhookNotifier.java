@@ -334,7 +334,7 @@ public final class Office365ConnectorWebhookNotifier {
             factsList.add(new Facts("Status", "Running"));
         }
         
-        String activityTitle = "Update from build " + jobName + "(" + run.getNumber() + ")"; 
+        String activityTitle = "Update from build " + jobName + " (" + run.getNumber() + ")"; 
         Sections section = new Sections(activityTitle, stepParameters.getMessage(), factsList);
         
         List<Sections> sectionList = new ArrayList<>();
