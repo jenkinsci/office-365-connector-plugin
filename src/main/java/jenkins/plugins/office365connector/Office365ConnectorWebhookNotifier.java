@@ -28,8 +28,10 @@ import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.test.AbstractTestResultAction;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -123,7 +125,14 @@ public final class Office365ConnectorWebhookNotifier {
     
     public static void sendBuildMessage(Run run, TaskListener listener, StepParameters stepParameters)
     {
-        Card card = getCard(run, listener, 3, stepParameters);
+        Card card;
+        if (StringUtils.isNotBlank(stepParameters.getMessage())) {
+            card = getCard(run, listener, 3, stepParameters);
+        } else if (StringUtils.equalsIgnoreCase(stepParameters.getStatus(), "started")) {
+            card = getCard(run, listener, 1);
+        } else {
+            card = getCard(run, listener, 2);
+        }
         if (card == null) {
             listener.getLogger().println(String.format("Build message card not generated."));
             return;
@@ -178,6 +187,7 @@ public final class Office365ConnectorWebhookNotifier {
     
     private static Card createJobStartedCard(Run run, TaskListener listener) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+        String jobName = decodeURIComponent(run.getParent().getName()); 
 
         List<Facts> factsList = new ArrayList<>();
         factsList.add(new Facts("Status", "Build Started"));
@@ -185,14 +195,14 @@ public final class Office365ConnectorWebhookNotifier {
 
         addCauses(run, listener, factsList);
         
-        String activityTitle = "Update from build " + run.getParent().getName() + ".";
+        String activityTitle = "Update from build " + jobName + ".";
         String activitySubtitle = "Latest status of build #" + run.getNumber();
         Sections section = new Sections(activityTitle, activitySubtitle, factsList);
 
         List<Sections> sectionList = new ArrayList<>();
         sectionList.add(section);
         
-        String summary = run.getParent().getName() + ": Build #" + run.getNumber() + " Started";
+        String summary = jobName + ": Build #" + run.getNumber() + " Started";
         Card card = new Card(summary, sectionList);
         addPotentialAction(run, card);
 
@@ -202,15 +212,21 @@ public final class Office365ConnectorWebhookNotifier {
     private static Card createJobCompletedCard(Run run, TaskListener listener) {
         List<Facts> factsList = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-        String summary = run.getParent().getName() + ": Build #" + run.getNumber();
+        String jobName = decodeURIComponent(run.getParent().getName()); 
+        String summary = jobName + ": Build #" + run.getNumber(); 
         
         Facts event = new Facts("Status");
         factsList.add(event);
         factsList.add(new Facts("Start Time", sdf.format(run.getStartTimeInMillis())));
-             
-        Result result = run.getResult();
+
+        // Result is only set to a worse status in pipeline
+        Result result = run.getResult() == null ? Result.SUCCESS : run.getResult();
         if (result != null) {
-            long currentBuildCompletionTime = run.getStartTimeInMillis() + run.getDuration();
+            long duration = run.getDuration() == 0L
+                    ? System.currentTimeMillis() - run.getStartTimeInMillis()
+                    : run.getDuration();
+            long currentBuildCompletionTime = run.getStartTimeInMillis() + duration;
+
             factsList.add(new Facts("Completion Time", sdf.format(currentBuildCompletionTime)));
 
             AbstractTestResultAction<?> action = run.getAction(AbstractTestResultAction.class);
@@ -236,7 +252,7 @@ public final class Office365ConnectorWebhookNotifier {
             } catch (Throwable e) {
                 //listener.getLogger().println(e.getMessage());
             }
-            
+
             if (result == Result.SUCCESS && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)) {
                 status = "Back to Normal";
                 summary += " Back to Normal";
@@ -296,7 +312,7 @@ public final class Office365ConnectorWebhookNotifier {
             
         addCauses(run, listener, factsList);
         
-        String activityTitle = "Update from build " + run.getParent().getName() + ".";
+        String activityTitle = "Update from build " + jobName + ".";
         String activitySubtitle = "Latest status of build #" + run.getNumber();
         Sections section = new Sections(activityTitle, activitySubtitle, factsList);
 
@@ -310,6 +326,7 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     private static Card createBuildMessageCard(Run run, TaskListener listener, StepParameters stepParameters) {
+        String jobName = decodeURIComponent(run.getParent().getName()); 
         List<Facts> factsList = new ArrayList<>();
         if (stepParameters.getStatus() != null) {
             factsList.add(new Facts("Status", stepParameters.getStatus()));
@@ -317,13 +334,13 @@ public final class Office365ConnectorWebhookNotifier {
             factsList.add(new Facts("Status", "Running"));
         }
         
-        String activityTitle = "Update from build " + run.getParent().getName() + "(" + run.getNumber() + ")";
+        String activityTitle = "Update from build " + jobName + " (#" + run.getNumber() + ")"; 
         Sections section = new Sections(activityTitle, stepParameters.getMessage(), factsList);
         
         List<Sections> sectionList = new ArrayList<>();
         sectionList.add(section);
         
-        String summary = run.getParent().getName() + ": Build #" + run.getNumber() + " Status";
+        String summary = jobName + ": Build #" + run.getNumber() + " Status"; 
         Card card = new Card(summary, sectionList);
         addPotentialAction(run, card);
 
@@ -451,11 +468,17 @@ public final class Office365ConnectorWebhookNotifier {
                 for (Cause cause : causes) {
                     causesStr.append(cause.getShortDescription()).append(". ");
                 }
-            factsList.add(new Facts("Remarks", causesStr.toString()));
-            
-            if (causesStr.toString().contains("SCM change")) {
-                addScmDetails(run, listener, factsList);
-            }
+            String cause = causesStr.toString();
+            factsList.add(new Facts("Remarks", cause));
+            addScmDetails(run, listener, factsList);
         }
     }
+
+    private static String decodeURIComponent(String string) { 
+        try { 
+            return URLDecoder.decode(string, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException("Unexpected encoding error, expected UTF-8 encoding.", e);
+        } 
+    } 
 }
