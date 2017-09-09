@@ -23,6 +23,8 @@ public class Webhook {
 
     public static final Integer DEFAULT_TIMEOUT = 30000;
 
+    private String name;
+
     private String url;
 
     private boolean startNotification;
@@ -44,9 +46,10 @@ public class Webhook {
     private int timeout;
 
     @DataBoundConstructor
-    public Webhook(String url, boolean startNotification, boolean notifySuccess, boolean notifyAborted,
+    public Webhook(String name, String url, boolean startNotification, boolean notifySuccess, boolean notifyAborted,
                     boolean notifyNotBuilt, boolean notifyUnstable, boolean notifyFailure, boolean notifyBackToNormal,
                     boolean notifyRepeatedFailure, int timeout) {
+            this.name = name;
             this.url = url;
             this.startNotification = startNotification;
             this.notifySuccess = notifySuccess;
@@ -59,6 +62,9 @@ public class Webhook {
             this.timeout = timeout;
     }
 
+    public String getName() {
+            return name;
+    }
 
     public String getUrl() {
             return url;
