@@ -187,7 +187,7 @@ public final class Office365ConnectorWebhookNotifier {
     
     private static Card createJobStartedCard(Run run, TaskListener listener) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-        String jobName = decodeURIComponent(run.getParent().getName()); 
+        String jobName = decodeURIComponent(run.getParent().getDisplayName());
 
         List<Facts> factsList = new ArrayList<>();
         factsList.add(new Facts("Status", "Build Started"));
@@ -212,7 +212,7 @@ public final class Office365ConnectorWebhookNotifier {
     private static Card createJobCompletedCard(Run run, TaskListener listener) {
         List<Facts> factsList = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-        String jobName = decodeURIComponent(run.getParent().getName()); 
+        String jobName = decodeURIComponent(run.getParent().getDisplayName());
         String summary = jobName + ": Build #" + run.getNumber(); 
         
         Facts event = new Facts("Status");
