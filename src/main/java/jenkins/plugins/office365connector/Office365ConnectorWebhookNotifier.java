@@ -62,7 +62,7 @@ public final class Office365ConnectorWebhookNotifier {
     {
         Card card = null;
         if ((run instanceof AbstractBuild<?,?> && isFromPrebuild) ||
-                (!(run instanceof AbstractBuild<?,?>) && !isFromPrebuild)) {
+                (run instanceof AbstractBuild<?,?> || isFromPrebuild)) {
             card = getCard(run, listener, 1);
         }
         
