@@ -354,6 +354,11 @@ public final class Office365ConnectorWebhookNotifier {
         
         String summary = jobName + ": Build #" + run.getNumber() + " Status"; 
         Card card = new Card(summary, sectionList);
+                       
+        if (stepParameters.getColor() != null) {
+        	card.setThemeColor(stepParameters.getColor());
+        }
+        
         addPotentialAction(run, card);
 
         return card;

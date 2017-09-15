@@ -23,6 +23,7 @@ public class StepParameters {
     String message;
     String webhookUrl;
     String status;
+    String color;
     
     public String getMessage()
     {
@@ -39,9 +40,15 @@ public class StepParameters {
         return status;
     }
     
-    StepParameters(String message, String url, String status) {
+    public String getColor()
+    {
+        return color;
+    }  
+    
+    StepParameters(String message, String url, String status, String color) {
         this.message = message;
         this.webhookUrl = url;
         this.status = status;
+        this.color = color;
     }
 }
