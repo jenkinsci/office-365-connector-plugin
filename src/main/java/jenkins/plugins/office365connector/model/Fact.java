@@ -17,46 +17,40 @@ package jenkins.plugins.office365connector.model;
 import java.util.List;
 
 /**
- *
  * @author srhebbar
  */
-public class Facts
-{
+public class Fact {
     private String name;
 
     private String value;
 
-    public Facts(String name, String value) {
+    public Fact(String name, String value) {
         this.name = name;
         this.value = value;
     }
-    
-    public Facts(String name, int value) {
+
+    public Fact(String name, int value) {
         this.name = name;
         this.value = Integer.toString(value);
     }
 
-    public Facts(String name) {
+    public Fact(String name) {
         this.name = name;
     }
 
-    public String getName ()
-    {
+    public String getName() {
         return name;
     }
 
-    public void setName (String name)
-    {
+    public void setName(String name) {
         this.name = name;
     }
 
-    public String getValue ()
-    {
+    public String getValue() {
         return value;
     }
 
-    public void setValue (String value)
-    {
+    public void setValue(String value) {
         this.value = value;
     }
 
