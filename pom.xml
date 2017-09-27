@@ -80,6 +80,11 @@
             <version>1.11</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>token-macro</artifactId>
+            <version>2.3</version>
+        </dependency>
     </dependencies>
 
     <developers>
@@ -96,6 +101,11 @@
             <email>srhebbar@microsoft.com</email>
             <organization>Microsoft Corp.</organization>
             <organizationUrl>http://microsoft.com</organizationUrl>
+        </developer>
+        <developer>
+            <id>damianszczepanik</id>
+            <name>Damian Szczepanik</name>
+            <email>damianszczepanik@github</email>
         </developer>
     </developers>
     

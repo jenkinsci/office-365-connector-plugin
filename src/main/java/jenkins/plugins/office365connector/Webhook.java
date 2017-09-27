@@ -15,7 +15,7 @@
 package jenkins.plugins.office365connector;
 
 import hudson.util.FormValidation;
-
+import java.util.List;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -45,10 +45,12 @@ public class Webhook {
 
     private int timeout;
 
+    private List<Macro> macros;
+
     @DataBoundConstructor
     public Webhook(String name, String url, boolean startNotification, boolean notifySuccess, boolean notifyAborted,
-                    boolean notifyNotBuilt, boolean notifyUnstable, boolean notifyFailure, boolean notifyBackToNormal,
-                    boolean notifyRepeatedFailure, int timeout) {
+                   boolean notifyNotBuilt, boolean notifyUnstable, boolean notifyFailure, boolean notifyBackToNormal,
+                   boolean notifyRepeatedFailure, int timeout, List<Macro> macros) {
             this.name = name;
             this.url = url;
             this.startNotification = startNotification;
@@ -60,6 +62,7 @@ public class Webhook {
             this.notifyAborted = notifyAborted;
             this.notifyRepeatedFailure = notifyRepeatedFailure;
             this.timeout = timeout;
+            this.macros = macros;
     }
 
     public String getName() {
@@ -104,6 +107,10 @@ public class Webhook {
 
     public int getTimeout() {
             return timeout;
+    }
+
+    public List<Macro> getMacros() {
+        return macros;
     }
 
     public FormValidation doCheckURL(@QueryParameter(value = "url", fixEmpty = true) String url) {
