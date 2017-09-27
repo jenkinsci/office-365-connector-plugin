@@ -24,7 +24,8 @@ public class Office365ConnectorSendStep extends AbstractStepImpl {
     private String message;
     private final String webhookUrl;
     private String status;
-
+    private String color;
+    
     public String getMessage() {
         return message;
     }
@@ -47,7 +48,16 @@ public class Office365ConnectorSendStep extends AbstractStepImpl {
         this.status = status;
     }
     
-    @DataBoundConstructor
+    public String getColor() {
+		return color;
+	}
+
+    @DataBoundSetter
+	public void setColor(String color) {
+		this.color = color;
+	}
+
+	@DataBoundConstructor
     public Office365ConnectorSendStep(String webhookUrl) {
         this.webhookUrl = webhookUrl;
     }
@@ -85,7 +95,7 @@ public class Office365ConnectorSendStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            StepParameters stepParameters = new StepParameters(step.message, step.webhookUrl, step.status);
+            StepParameters stepParameters = new StepParameters(step.message, step.webhookUrl, step.status, step.color);
             Office365ConnectorWebhookNotifier.sendBuildMessage(run, listener, stepParameters);
             return null;
         }
