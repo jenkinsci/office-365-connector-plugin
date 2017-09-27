@@ -3,6 +3,12 @@ Office 365 Connector plugin for Jenkins
 
 Started with a fork of the [Workplace plugin](https://github.com/Outconn2016/workplace-plugin)
 
+## Screenshots
+
+![Configuration](blob/master/.README/config.png)
+
+![Message](blob/master/.README/message.png)
+
 ## Jenkins Instructions
 
 0. Install this plugin on your Jenkins server
