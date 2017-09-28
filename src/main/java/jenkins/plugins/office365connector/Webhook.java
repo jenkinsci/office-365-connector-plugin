@@ -14,8 +14,11 @@
 
 package jenkins.plugins.office365connector;
 
-import hudson.util.FormValidation;
+import java.util.Collections;
 import java.util.List;
+
+import hudson.util.FormValidation;
+import org.apache.commons.collections.CollectionUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -45,7 +48,7 @@ public class Webhook {
 
     private int timeout;
 
-    private List<Macro> macros;
+    private List<Macro> macros = Collections.emptyList();
 
     @DataBoundConstructor
     public Webhook(String name, String url, boolean startNotification, boolean notifySuccess, boolean notifyAborted,
@@ -62,7 +65,9 @@ public class Webhook {
             this.notifyAborted = notifyAborted;
             this.notifyRepeatedFailure = notifyRepeatedFailure;
             this.timeout = timeout;
-            this.macros = macros;
+            if (CollectionUtils.isNotEmpty(macros)) {
+                this.macros = macros;
+            }
     }
 
     public String getName() {
