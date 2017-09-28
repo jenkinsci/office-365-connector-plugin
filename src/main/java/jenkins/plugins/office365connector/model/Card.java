@@ -17,61 +17,53 @@ package jenkins.plugins.office365connector.model;
 import java.util.List;
 
 /**
- *
  * @author srhebbar
  */
 public class Card {
+
     private String summary;
-    
+
     private String themeColor;
-    
-    private List<Sections> sections;
-    
+
+    private List<Section> sections;
+
     private List<PotentialAction> potentialAction;
 
-    public Card(String summary, List<Sections> sectionList) {
+    public Card(String summary, List<Section> sectionList) {
         this.summary = summary;
         this.themeColor = "3479BF";
         this.sections = sectionList;
     }
-    
-    public String getSummary()
-    {
+
+    public String getSummary() {
         return summary;
     }
-    
-    public String getThemeColor()
-    {
+
+    public String getThemeColor() {
         return themeColor;
     }
-    
-    public List<PotentialAction> getPotentialAction()
-    {
+
+    public List<PotentialAction> getPotentialAction() {
         return this.potentialAction;
     }
-    
-    public List<Sections> getSections()
-    {
+
+    public List<Section> getSections() {
         return this.sections;
     }
-    
-    public void setSummary(String summary)
-    {
+
+    public void setSummary(String summary) {
         this.summary = summary;
     }
-    
-    public void setThemeColor(String themeColor)
-    {
+
+    public void setThemeColor(String themeColor) {
         this.themeColor = themeColor;
     }
-    
-    public void setPotentialAction(List<PotentialAction> pa)
-    {
+
+    public void setPotentialAction(List<PotentialAction> pa) {
         this.potentialAction = pa;
     }
-    
-    public void setSections(List<Sections> sections)
-    {
+
+    public void setSections(List<Section> sections) {
         this.sections = sections;
     }
 }

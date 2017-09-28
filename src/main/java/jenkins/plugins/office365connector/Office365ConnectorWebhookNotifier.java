@@ -46,13 +46,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.model.Card;
-import jenkins.plugins.office365connector.model.Facts;
+import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.model.PotentialAction;
-import jenkins.plugins.office365connector.model.Sections;
+import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.StepParameters;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
+import org.apache.commons.lang.time.FastDateFormat;
 
 /**
  * @author srhebbar
@@ -60,6 +61,9 @@ import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 public final class Office365ConnectorWebhookNotifier {
 
     private static final ExecutorService executorService = Executors.newCachedThreadPool();
+
+    /** Thread safe formatter for date. */
+    private static final FastDateFormat DATE_FORMATTER = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss z");
 
     private static final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY).create();
 
@@ -169,7 +173,9 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     private static Card getCard(Run run, TaskListener listener, int cardType, StepParameters stepParameters) {
-        if (listener == null) return null;
+        if (listener == null) {
+            return null;
+        }
         if (run == null) {
             listener.getLogger().println("Run is null!");
             return null;
@@ -183,27 +189,24 @@ public final class Office365ConnectorWebhookNotifier {
             case 3:
                 return createBuildMessageCard(run, listener, stepParameters);
             default:
-                listener.getLogger().println("Default case! Not supposed to come here!");
+                throw new IllegalArgumentException("Unsupported card type: " + cardType);
         }
-
-        return null;
     }
 
     private static Card createJobStartedCard(Run run, TaskListener listener) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
         String jobName = decodeURIComponent(run.getParent().getDisplayName());
 
-        List<Facts> factsList = new ArrayList<>();
-        factsList.add(new Facts("Status", "Build Started"));
-        factsList.add(new Facts("Start Time", sdf.format(run.getStartTimeInMillis())));
+        List<Fact> factsList = new ArrayList<>();
+        factsList.add(new Fact("Status", "Build Started"));
+        factsList.add(buildStartTimeFact(run));
 
         addCauses(run, listener, factsList);
 
         String activityTitle = "Update from build " + jobName + ".";
         String activitySubtitle = "Latest status of build #" + run.getNumber();
-        Sections section = new Sections(activityTitle, activitySubtitle, factsList);
+        Section section = new Section(activityTitle, activitySubtitle, factsList);
 
-        List<Sections> sectionList = new ArrayList<>();
+        List<Section> sectionList = new ArrayList<>();
         sectionList.add(section);
 
         String summary = jobName + ": Build #" + run.getNumber() + " Started";
@@ -214,14 +217,13 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     private static Card createJobCompletedCard(Run run, TaskListener listener) {
-        List<Facts> factsList = new ArrayList<>();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+        List<Fact> factsList = new ArrayList<>();
         String jobName = decodeURIComponent(run.getParent().getDisplayName());
         String summary = jobName + ": Build #" + run.getNumber();
 
-        Facts event = new Facts("Status");
+        Fact event = new Fact("Status");
         factsList.add(event);
-        factsList.add(new Facts("Start Time", sdf.format(run.getStartTimeInMillis())));
+        factsList.add(buildStartTimeFact(run));
 
         // Result is only set to a worse status in pipeline
         Result result = run.getResult() == null ? Result.SUCCESS : run.getResult();
@@ -231,14 +233,14 @@ public final class Office365ConnectorWebhookNotifier {
                     : run.getDuration();
             long currentBuildCompletionTime = run.getStartTimeInMillis() + duration;
 
-            factsList.add(new Facts("Completion Time", sdf.format(currentBuildCompletionTime)));
+            factsList.add(new Fact("Completion Time", formatDate(currentBuildCompletionTime)));
 
             AbstractTestResultAction<?> action = run.getAction(AbstractTestResultAction.class);
             if (action != null) {
-                factsList.add(new Facts("Total Tests", action.getTotalCount()));
-                factsList.add(new Facts("Total Passed Tests", action.getTotalCount() - action.getFailCount() - action.getSkipCount()));
-                factsList.add(new Facts("Total Failed Tests", action.getFailCount()));
-                factsList.add(new Facts("Total Skipped Tests", action.getSkipCount()));
+                factsList.add(new Fact("Total Tests", action.getTotalCount()));
+                factsList.add(new Fact("Total Passed Tests", action.getTotalCount() - action.getFailCount() - action.getSkipCount()));
+                factsList.add(new Fact("Total Failed Tests", action.getFailCount()));
+                factsList.add(new Fact("Total Skipped Tests", action.getSkipCount()));
             }
 
             String status = null;
@@ -282,15 +284,16 @@ public final class Office365ConnectorWebhookNotifier {
                             diff[2] > 1 ? "s" : "",
                             diff[3],
                             diff[3] > 1 ? "s" : "");
-                    factsList.add(new Facts("Back To Normal Time", backToNormalTimeValue));
+                    factsList.add(new Fact("Back To Normal Time", backToNormalTimeValue));
                 }
             } else if (result == Result.FAILURE && failingSinceRun != null) {
                 if (previousResult == Result.FAILURE) {
                     status = "Repeated Failure";
                     summary += " Repeated Failure";
 
-                    factsList.add(new Facts("Failing since build", failingSinceRun.number));
-                    factsList.add(new Facts("Failing since time", sdf.format(failingSinceRun.getStartTimeInMillis() + failingSinceRun.getDuration())));
+                    factsList.add(new Fact("Failing since build", failingSinceRun.number));
+                    factsList.add(new Fact("Failing since time",
+                            formatDate(failingSinceRun.getStartTimeInMillis() + failingSinceRun.getDuration())));
                 } else {
                     status = "Build Failed";
                     summary += " Failed";
@@ -322,9 +325,9 @@ public final class Office365ConnectorWebhookNotifier {
 
         String activityTitle = "Update from build " + jobName + ".";
         String activitySubtitle = "Latest status of build #" + run.getNumber();
-        Sections section = new Sections(activityTitle, activitySubtitle, factsList);
+        Section section = new Section(activityTitle, activitySubtitle, factsList);
 
-        List<Sections> sectionList = new ArrayList<>();
+        List<Section> sectionList = new ArrayList<>();
         sectionList.add(section);
 
         Card card = new Card(summary, sectionList);
@@ -340,19 +343,27 @@ public final class Office365ConnectorWebhookNotifier {
         return card;
     }
 
+    private static Fact buildStartTimeFact(Run run) {
+        return new Fact("Start Time", formatDate(run.getStartTimeInMillis()));
+    }
+
+    private static String formatDate(long time) {
+        return DATE_FORMATTER.format(time);
+    }
+
     private static Card createBuildMessageCard(Run run, TaskListener listener, StepParameters stepParameters) {
         String jobName = decodeURIComponent(run.getParent().getName());
-        List<Facts> factsList = new ArrayList<>();
+        List<Fact> factsList = new ArrayList<>();
         if (stepParameters.getStatus() != null) {
-            factsList.add(new Facts("Status", stepParameters.getStatus()));
+            factsList.add(new Fact("Status", stepParameters.getStatus()));
         } else {
-            factsList.add(new Facts("Status", "Running"));
+            factsList.add(new Fact("Status", "Running"));
         }
 
         String activityTitle = "Update from build " + jobName + " (#" + run.getNumber() + ")";
-        Sections section = new Sections(activityTitle, stepParameters.getMessage(), factsList);
+        Section section = new Section(activityTitle, stepParameters.getMessage(), factsList);
 
-        List<Sections> sectionList = new ArrayList<>();
+        List<Section> sectionList = new ArrayList<>();
         sectionList.add(section);
 
         String summary = jobName + ": Build #" + run.getNumber() + " Status";
@@ -398,7 +409,7 @@ public final class Office365ConnectorWebhookNotifier {
                 || (result == Result.UNSTABLE && webhook.isNotifyUnstable()));
     }
 
-    private static void addScmDetails(Run run, TaskListener listener, List<Facts> factsList) {
+    private static void addScmDetails(Run run, TaskListener listener, List<Fact> factsList) {
         try {
             if (run instanceof AbstractBuild) {
                 AbstractBuild build = (AbstractBuild) run;
@@ -408,7 +419,7 @@ public final class Office365ConnectorWebhookNotifier {
                     for (User user : users) {
                         culprits.add(user.getFullName());
                     }
-                    factsList.add(new Facts("Culprits", StringUtils.join(culprits, ", ")));
+                    factsList.add(new Fact("Culprits", StringUtils.join(culprits, ", ")));
                 }
 
                 ChangeLogSet changeSet = build.getChangeSet();
@@ -431,11 +442,11 @@ public final class Office365ConnectorWebhookNotifier {
                     }
 
                     if (!authors.isEmpty()) {
-                        factsList.add(new Facts("Developers", StringUtils.join(authors, ", ")));
+                        factsList.add(new Fact("Developers", StringUtils.join(authors, ", ")));
                     }
 
                     if (!files.isEmpty()) {
-                        factsList.add(new Facts("Number Of Files Changed", files.size()));
+                        factsList.add(new Fact("Number Of Files Changed", files.size()));
                     }
                 }
             } else {
@@ -462,14 +473,14 @@ public final class Office365ConnectorWebhookNotifier {
 
                         if (!authors.isEmpty()) {
                             if (runResult != null && runResult.isWorseThan(Result.SUCCESS)) {
-                                factsList.add(new Facts("Culprits", StringUtils.join(authors, ", ")));
+                                factsList.add(new Fact("Culprits", StringUtils.join(authors, ", ")));
                             }
 
-                            factsList.add(new Facts("Developers", StringUtils.join(authors, ", ")));
+                            factsList.add(new Fact("Developers", StringUtils.join(authors, ", ")));
                         }
 
                         if (!files.isEmpty()) {
-                            factsList.add(new Facts("Number of Files Changed", files.size()));
+                            factsList.add(new Fact("Number of Files Changed", files.size()));
                         }
                     }
                 } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
@@ -499,7 +510,7 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    private static void addCauses(Run run, TaskListener listener, List<Facts> factsList) {
+    private static void addCauses(Run run, TaskListener listener, List<Fact> factsList) {
         List<Cause> causes = run.getCauses();
         if (causes != null) {
             StringBuilder causesStr = new StringBuilder();
@@ -507,7 +518,7 @@ public final class Office365ConnectorWebhookNotifier {
                 causesStr.append(cause.getShortDescription()).append(". ");
             }
             String cause = causesStr.toString();
-            factsList.add(new Facts("Remarks", cause));
+            factsList.add(new Fact("Remarks", cause));
             addScmDetails(run, listener, factsList);
         }
     }
