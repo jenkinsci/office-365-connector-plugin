@@ -47,7 +47,7 @@ public class WebhookJobProperty extends
     @Override
     public boolean prebuild(AbstractBuild<?, ?> run, BuildListener listener) {
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, listener);
-        notifier.sendBuildStaredNotification(true);
+        notifier.sendBuildStartedNotification(true);
         return super.prebuild(run, listener);
     }
 }
