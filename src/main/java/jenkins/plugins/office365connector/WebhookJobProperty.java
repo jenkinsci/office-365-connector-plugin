@@ -13,20 +13,17 @@
  */
 package jenkins.plugins.office365connector;
 
-import hudson.model.AbstractBuild;
-import hudson.model.JobProperty;
-import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
+import hudson.model.JobProperty;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
- * 
  * Job Property.
- *
  */
 public class WebhookJobProperty extends
         JobProperty<AbstractProject<?, ?>> {
@@ -35,21 +32,22 @@ public class WebhookJobProperty extends
 
     @DataBoundConstructor
     public WebhookJobProperty(List<Webhook> webhooks) {
-        this.webhooks = new ArrayList<>( webhooks );
+        this.webhooks = new ArrayList<>(webhooks);
     }
 
     public List<Webhook> getWebhooks() {
         return webhooks;
     }
-    
+
     @Override
     public WebhookJobPropertyDescriptor getDescriptor() {
         return (WebhookJobPropertyDescriptor) super.getDescriptor();
     }
-    
+
     @Override
-    public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
-        Office365ConnectorWebhookNotifier.sendBuildStaredNotification(build, listener, true);
-        return super.prebuild(build, listener);
+    public boolean prebuild(AbstractBuild<?, ?> run, BuildListener listener) {
+        Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, listener);
+        notifier.sendBuildStaredNotification(true);
+        return super.prebuild(run, listener);
     }
 }

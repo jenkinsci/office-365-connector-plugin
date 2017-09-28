@@ -5,9 +5,9 @@ Started with a fork of the [Workplace plugin](https://github.com/Outconn2016/wor
 
 ## Screenshots
 
-![Configuration](blob/master/.README/config.png)
+![Configuration](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/config.png)
 
-![Message](blob/master/.README/message.png)
+![Message](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/message.png)
 
 ## Jenkins Instructions
 
