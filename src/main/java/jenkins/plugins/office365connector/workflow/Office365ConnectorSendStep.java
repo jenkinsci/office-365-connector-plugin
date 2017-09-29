@@ -1,19 +1,15 @@
 package jenkins.plugins.office365connector.workflow;
 
 import hudson.Extension;
-import hudson.Util;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-
+import javax.inject.Inject;
+import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
-import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import org.kohsuke.stapler.DataBoundSetter;
 
 /**
@@ -25,7 +21,7 @@ public class Office365ConnectorSendStep extends AbstractStepImpl {
     private final String webhookUrl;
     private String status;
     private String color;
-    
+
     public String getMessage() {
         return message;
     }
@@ -47,17 +43,17 @@ public class Office365ConnectorSendStep extends AbstractStepImpl {
     public void setStatus(String status) {
         this.status = status;
     }
-    
+
     public String getColor() {
-		return color;
-	}
+        return color;
+    }
 
     @DataBoundSetter
-	public void setColor(String color) {
-		this.color = color;
-	}
+    public void setColor(String color) {
+        this.color = color;
+    }
 
-	@DataBoundConstructor
+    @DataBoundConstructor
     public Office365ConnectorSendStep(String webhookUrl) {
         this.webhookUrl = webhookUrl;
     }
@@ -89,14 +85,15 @@ public class Office365ConnectorSendStep extends AbstractStepImpl {
 
         @StepContextParameter
         transient TaskListener listener;
-        
+
         @StepContextParameter
         transient Run run;
 
         @Override
         protected Void run() throws Exception {
             StepParameters stepParameters = new StepParameters(step.message, step.webhookUrl, step.status, step.color);
-            Office365ConnectorWebhookNotifier.sendBuildMessage(run, listener, stepParameters);
+            Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, listener);
+            notifier.sendBuildMessage(stepParameters);
             return null;
         }
     }

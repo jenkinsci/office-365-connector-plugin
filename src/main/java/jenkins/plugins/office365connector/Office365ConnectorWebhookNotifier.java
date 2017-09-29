@@ -51,9 +51,9 @@ import jenkins.plugins.office365connector.model.PotentialAction;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.StepParameters;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.FastDateFormat;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
-import org.apache.commons.lang.time.FastDateFormat;
 
 /**
  * @author srhebbar
@@ -62,16 +62,26 @@ public final class Office365ConnectorWebhookNotifier {
 
     private static final ExecutorService executorService = Executors.newCachedThreadPool();
 
-    /** Thread safe formatter for date. */
+    /**
+     * Thread safe formatter for date.
+     */
     private static final FastDateFormat DATE_FORMATTER = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss z");
 
     private static final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY).create();
 
-    public static void sendBuildStaredNotification(Run run, TaskListener listener, boolean isFromPrebuild) {
+    private final Run run;
+    private final TaskListener listener;
+
+    public Office365ConnectorWebhookNotifier(Run run, TaskListener listener) {
+        this.run = run;
+        this.listener = listener;
+    }
+
+    public void sendBuildStaredNotification(boolean isFromPrebuild) {
         Card card = null;
         if ((run instanceof AbstractBuild<?, ?> && isFromPrebuild) ||
                 (run instanceof AbstractBuild<?, ?> || isFromPrebuild)) {
-            card = getCard(run, listener, 1);
+            card = getCard(1);
         }
 
         if (card == null) {
@@ -101,8 +111,8 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    public static void sendBuildCompleteNotification(Run run, TaskListener listener) {
-        Card card = getCard(run, listener, 2);
+    public void sendBuildCompleteNotification() {
+        Card card = getCard(2);
         if (card == null) {
             listener.getLogger().println(String.format("Build completed card not generated."));
             return;
@@ -115,7 +125,7 @@ public final class Office365ConnectorWebhookNotifier {
         }
 
         for (Webhook webhook : property.getWebhooks()) {
-            if (shouldSendNotification(webhook, listener, run)) {
+            if (shouldSendNotification(webhook)) {
                 //            listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
                 try {
                     HttpWorker worker = new HttpWorker(run.getEnvironment(listener).expand(webhook.getUrl()), gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
@@ -130,14 +140,14 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    public static void sendBuildMessage(Run run, TaskListener listener, StepParameters stepParameters) {
+    public void sendBuildMessage(StepParameters stepParameters) {
         Card card;
         if (StringUtils.isNotBlank(stepParameters.getMessage())) {
-            card = getCard(run, listener, 3, stepParameters);
+            card = getCard(3, stepParameters);
         } else if (StringUtils.equalsIgnoreCase(stepParameters.getStatus(), "started")) {
-            card = getCard(run, listener, 1);
+            card = getCard(1);
         } else {
-            card = getCard(run, listener, 2);
+            card = getCard(2);
         }
         if (card == null) {
             listener.getLogger().println(String.format("Build message card not generated."));
@@ -168,11 +178,11 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    private static Card getCard(Run run, TaskListener listener, int cardType) {
-        return getCard(run, listener, cardType, null);
+    private Card getCard(int cardType) {
+        return getCard(cardType, null);
     }
 
-    private static Card getCard(Run run, TaskListener listener, int cardType, StepParameters stepParameters) {
+    private Card getCard(int cardType, StepParameters stepParameters) {
         if (listener == null) {
             return null;
         }
@@ -183,24 +193,24 @@ public final class Office365ConnectorWebhookNotifier {
 
         switch (cardType) {
             case 1:
-                return createJobStartedCard(run, listener);
+                return createJobStartedCard();
             case 2:
-                return createJobCompletedCard(run, listener);
+                return createJobCompletedCard();
             case 3:
-                return createBuildMessageCard(run, listener, stepParameters);
+                return createBuildMessageCard(stepParameters);
             default:
                 throw new IllegalArgumentException("Unsupported card type: " + cardType);
         }
     }
 
-    private static Card createJobStartedCard(Run run, TaskListener listener) {
+    private Card createJobStartedCard() {
         String jobName = decodeURIComponent(run.getParent().getDisplayName());
 
         List<Fact> factsList = new ArrayList<>();
         factsList.add(new Fact("Status", "Build Started"));
-        factsList.add(buildStartTimeFact(run));
+        factsList.add(buildStartTimeFact());
 
-        addCauses(run, listener, factsList);
+        addCauses(factsList);
 
         String activityTitle = "Update from build " + jobName + ".";
         String activitySubtitle = "Latest status of build #" + run.getNumber();
@@ -211,19 +221,19 @@ public final class Office365ConnectorWebhookNotifier {
 
         String summary = jobName + ": Build #" + run.getNumber() + " Started";
         Card card = new Card(summary, sectionList);
-        addPotentialAction(run, card);
+        addPotentialAction(card);
 
         return card;
     }
 
-    private static Card createJobCompletedCard(Run run, TaskListener listener) {
+    private Card createJobCompletedCard() {
         List<Fact> factsList = new ArrayList<>();
         String jobName = decodeURIComponent(run.getParent().getDisplayName());
         String summary = jobName + ": Build #" + run.getNumber();
 
         Fact event = new Fact("Status");
         factsList.add(event);
-        factsList.add(buildStartTimeFact(run));
+        factsList.add(buildStartTimeFact());
 
         // Result is only set to a worse status in pipeline
         Result result = run.getResult() == null ? Result.SUCCESS : run.getResult();
@@ -321,7 +331,7 @@ public final class Office365ConnectorWebhookNotifier {
             summary += " Completed";
         }
 
-        addCauses(run, listener, factsList);
+        addCauses(factsList);
 
         String activityTitle = "Update from build " + jobName + ".";
         String activitySubtitle = "Latest status of build #" + run.getNumber();
@@ -338,12 +348,12 @@ public final class Office365ConnectorWebhookNotifier {
         } else {
             card.setThemeColor("FFCC5C");
         }
-        addPotentialAction(run, card);
+        addPotentialAction(card);
 
         return card;
     }
 
-    private static Fact buildStartTimeFact(Run run) {
+    private Fact buildStartTimeFact() {
         return new Fact("Start Time", formatDate(run.getStartTimeInMillis()));
     }
 
@@ -351,7 +361,7 @@ public final class Office365ConnectorWebhookNotifier {
         return DATE_FORMATTER.format(time);
     }
 
-    private static Card createBuildMessageCard(Run run, TaskListener listener, StepParameters stepParameters) {
+    private Card createBuildMessageCard(StepParameters stepParameters) {
         String jobName = decodeURIComponent(run.getParent().getName());
         List<Fact> factsList = new ArrayList<>();
         if (stepParameters.getStatus() != null) {
@@ -368,23 +378,23 @@ public final class Office365ConnectorWebhookNotifier {
 
         String summary = jobName + ": Build #" + run.getNumber() + " Status";
         Card card = new Card(summary, sectionList);
-                       
+
         if (stepParameters.getColor() != null) {
-        	card.setThemeColor(stepParameters.getColor());
+            card.setThemeColor(stepParameters.getColor());
         }
-        
-        addPotentialAction(run, card);
+
+        addPotentialAction(card);
 
         return card;
     }
 
-    private static boolean shouldSendNotification(Webhook webhook, TaskListener listener, Run run) {
-        if (hasBuildMatched(webhook, listener, run)) {
+    private boolean shouldSendNotification(Webhook webhook) {
+        if (hasBuildMatched(webhook)) {
             if (webhook.getMacros().isEmpty()) {
                 return true;
             } else {
                 for (Macro macro : webhook.getMacros()) {
-                    String evaluated = evaluateMacro(run, listener, macro.getTemplate());
+                    String evaluated = evaluateMacro(macro.getTemplate());
                     if (evaluated.equals(macro.getValue())) {
                         return true;
                     }
@@ -395,7 +405,7 @@ public final class Office365ConnectorWebhookNotifier {
         return false;
     }
 
-    private static boolean hasBuildMatched(Webhook webhook, TaskListener listener, Run run) {
+    private boolean hasBuildMatched(Webhook webhook) {
         Result result = run.getResult();
         Run previousBuild = run.getPreviousBuild();
         Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
@@ -409,7 +419,7 @@ public final class Office365ConnectorWebhookNotifier {
                 || (result == Result.UNSTABLE && webhook.isNotifyUnstable()));
     }
 
-    private static void addScmDetails(Run run, TaskListener listener, List<Fact> factsList) {
+    private void addScmDetails(List<Fact> factsList) {
         try {
             if (run instanceof AbstractBuild) {
                 AbstractBuild build = (AbstractBuild) run;
@@ -492,7 +502,7 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    private static void addPotentialAction(Run run, Card card) {
+    private void addPotentialAction(Card card) {
         String rootUrl = null;
         Jenkins jenkins = Jenkins.getInstance();
         if (jenkins != null) {
@@ -510,7 +520,7 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    private static void addCauses(Run run, TaskListener listener, List<Fact> factsList) {
+    private void addCauses(List<Fact> factsList) {
         List<Cause> causes = run.getCauses();
         if (causes != null) {
             StringBuilder causesStr = new StringBuilder();
@@ -519,7 +529,7 @@ public final class Office365ConnectorWebhookNotifier {
             }
             String cause = causesStr.toString();
             factsList.add(new Fact("Remarks", cause));
-            addScmDetails(run, listener, factsList);
+            addScmDetails(factsList);
         }
     }
 
@@ -531,10 +541,10 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    private static String evaluateMacro(Run<?, ?> build, TaskListener listener, String template) {
+    private String evaluateMacro(String template) {
         try {
-            File workspace = build.getRootDir();
-            return TokenMacro.expandAll(build, new FilePath(workspace), listener, template);
+            File workspace = run.getRootDir();
+            return TokenMacro.expandAll(run, new FilePath(workspace), listener, template);
         } catch (InterruptedException | IOException | MacroEvaluationException e) {
             throw new IllegalArgumentException(e);
         }
