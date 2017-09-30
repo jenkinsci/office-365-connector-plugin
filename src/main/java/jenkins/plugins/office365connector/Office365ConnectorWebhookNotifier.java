@@ -16,6 +16,18 @@
 package jenkins.plugins.office365connector;
 
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.gson.FieldNamingPolicy;
@@ -30,20 +42,6 @@ import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.test.AbstractTestResultAction;
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URLDecoder;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Fact;
@@ -156,21 +154,14 @@ public final class Office365ConnectorWebhookNotifier {
 
         String webhookUrl = stepParameters.getWebhookUrl();
         try {
-            if (webhookUrl != null) {
-                //               listener.getLogger().println(String.format("Notifying webhook '%s'", webhookUrl));
-                HttpWorker worker = new HttpWorker(run.getEnvironment(listener).expand(webhookUrl), gson.toJson(card), 30000, 3, listener.getLogger());
+            WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
+            if (property == null) {
+                return;
+            }
+            for (Webhook webhook : property.getWebhooks()) {
+                webhookUrl = webhook.getUrl();
+                HttpWorker worker = new HttpWorker(run.getEnvironment(listener).expand(webhookUrl), gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
                 executorService.submit(worker);
-            } else {
-                WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
-                if (property == null) {
-                    return;
-                }
-                for (Webhook webhook : property.getWebhooks()) {
-                    webhookUrl = webhook.getUrl();
-                    //                listener.getLogger().println(String.format("Notifying webhook '%s'", webhook));
-                    HttpWorker worker = new HttpWorker(run.getEnvironment(listener).expand(webhookUrl), gson.toJson(card), webhook.getTimeout(), 3, listener.getLogger());
-                    executorService.submit(worker);
-                }
             }
         } catch (Throwable error) {
             error.printStackTrace(listener.error(String.format("Failed to notify webhook '%s'", webhookUrl)));
@@ -204,7 +195,7 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     private Card createJobStartedCard() {
-        String jobName = decodeURIComponent(run.getParent().getDisplayName());
+        String jobName = run.getParent().getDisplayName();
 
         List<Fact> factsList = new ArrayList<>();
         factsList.add(new Fact("Status", "Build Started"));
@@ -228,7 +219,7 @@ public final class Office365ConnectorWebhookNotifier {
 
     private Card createJobCompletedCard() {
         List<Fact> factsList = new ArrayList<>();
-        String jobName = decodeURIComponent(run.getParent().getDisplayName());
+        String jobName = run.getParent().getDisplayName();
         String summary = jobName + ": Build #" + run.getNumber();
 
         Fact event = new Fact("Status");
@@ -362,7 +353,7 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     private Card createBuildMessageCard(StepParameters stepParameters) {
-        String jobName = decodeURIComponent(run.getParent().getName());
+        String jobName = run.getParent().getDisplayName();
         List<Fact> factsList = new ArrayList<>();
         if (stepParameters.getStatus() != null) {
             factsList.add(new Fact("Status", stepParameters.getStatus()));
@@ -530,14 +521,6 @@ public final class Office365ConnectorWebhookNotifier {
             String cause = causesStr.toString();
             factsList.add(new Fact("Remarks", cause));
             addScmDetails(factsList);
-        }
-    }
-
-    private static String decodeURIComponent(String string) {
-        try {
-            return URLDecoder.decode(string, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalStateException("Unexpected encoding error, expected UTF-8 encoding.", e);
         }
     }
 

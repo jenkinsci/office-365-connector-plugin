@@ -16,39 +16,36 @@
 package jenkins.plugins.office365connector.workflow;
 
 /**
- *
  * @author srhebbar
  */
 public class StepParameters {
-    String message;
-    String webhookUrl;
-    String status;
-    String color;
-    
-    public String getMessage()
-    {
-        return message;
-    }
-    
-    public String getWebhookUrl()
-    {
-        return webhookUrl;
-    }
-    
-    public String getStatus()
-    {
-        return status;
-    }
-    
-    public String getColor()
-    {
-        return color;
-    }  
-    
+
+    private final String message;
+    private final String webhookUrl;
+    private final String status;
+    private final String color;
+
     StepParameters(String message, String url, String status, String color) {
         this.message = message;
         this.webhookUrl = url;
         this.status = status;
         this.color = color;
     }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getWebhookUrl() {
+        return webhookUrl;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
 }

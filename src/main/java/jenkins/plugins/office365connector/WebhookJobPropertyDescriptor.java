@@ -13,6 +13,11 @@
  */
 package jenkins.plugins.office365connector;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
 import hudson.Extension;
 import hudson.model.Job;
 import hudson.model.JobPropertyDescriptor;
@@ -20,19 +25,12 @@ import hudson.util.FormValidation;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * 
- * Job Property Descriptor. 
- *
+ * Job Property Descriptor.
  */
 @Extension
 public final class WebhookJobPropertyDescriptor extends JobPropertyDescriptor {
@@ -53,7 +51,7 @@ public final class WebhookJobPropertyDescriptor extends JobPropertyDescriptor {
     }
 
     public void setWebhooks(List<Webhook> webhooks) {
-        this.webhooks = new ArrayList<>( webhooks );
+        this.webhooks = new ArrayList<>(webhooks);
     }
 
     @Override
@@ -66,7 +64,7 @@ public final class WebhookJobPropertyDescriptor extends JobPropertyDescriptor {
         return "Job Notification";
     }
 
-    public int getDefaultTimeout(){
+    public int getDefaultTimeout() {
         return Webhook.DEFAULT_TIMEOUT;
     }
 
@@ -90,15 +88,19 @@ public final class WebhookJobPropertyDescriptor extends JobPropertyDescriptor {
         return notificationProperty;
     }
 
-    public FormValidation doCheckUrl(@QueryParameter(value = "url", fixEmpty = true) String url) {
-    	try {
-			new URL(url);
-		} catch (MalformedURLException e) {
-			return FormValidation.error(e.getMessage());
-		}
-		return FormValidation.ok();
+    public FormValidation doCheckUrl(@QueryParameter String value) {
+        if (StringUtils.isBlank(value)) {
+            return FormValidation.error("URL must be provided");
+        }
+
+        try {
+            new URL(value);
+        } catch (MalformedURLException e) {
+            return FormValidation.error(e.getMessage());
+        }
+        return FormValidation.ok();
     }
-   
+
     @Override
     public boolean configure(StaplerRequest req, JSONObject formData) {
         save();
