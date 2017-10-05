@@ -13,13 +13,13 @@
  */
 package jenkins.plugins.office365connector;
 
-import hudson.ProxyConfiguration;
-
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
+import hudson.ProxyConfiguration;
 import jenkins.model.Jenkins;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -29,89 +29,85 @@ import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 
 /**
- * 
  * Makes http post requests in a separate thread.
- *
  */
 public class HttpWorker implements Runnable {
 
-	private PrintStream logger;
+    private final PrintStream logger;
 
-	private String url;
+    private final String url;
+    private final String data;
+    private final int timeout;
+    private final int retries;
 
-	private String data;
+    public HttpWorker(String url, String data, int timeout, int retries, PrintStream logger) {
+        this.url = url;
+        this.data = data;
+        this.timeout = timeout;
+        this.logger = logger;
+        this.retries = retries;
+    }
 
-	private int timeout;
-	
-	private int retries;
+    @Override
+    public void run() {
+        int tried = 0;
+        boolean success = false;
+        HttpClient client = getHttpClient();
+        client.getParams().setConnectionManagerTimeout(timeout);
+        do {
+            tried++;
+            RequestEntity requestEntity;
+            try {
+                requestEntity = new StringRequestEntity(data, "application/json", StandardCharsets.UTF_8.name());
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace(logger);
+                break;
+            }
+            //logger.println(String.format("Posting data to webhook - %s. Already Tried %s times", url, tried));
+            PostMethod post = new PostMethod(url);
+            try {
+                post.setRequestEntity(requestEntity);
+                int responseCode = client.executeMethod(post);
+                if (responseCode != HttpStatus.SC_OK) {
+                    String response = post.getResponseBodyAsString();
+                    logger.println(String.format("Posting data to - %s may have failed. Webhook responded with status code - %s", url, responseCode));
+                    logger.println(String.format("Message from webhook - %s", response));
 
-	public HttpWorker(String url, String data, int timeout, int retries, PrintStream logger) {
-		this.url = url;
-		this.data = data;
-		this.timeout = timeout;
-		this.logger = logger;
-		this.retries = retries;
-	}
+                } else {
+                    success = true;
+                    //logger.println(String.format("Posting data to webhook - %s completed ", url));
+                }
+            } catch (IOException e) {
+                logger.println(String.format("Failed to post data to webhook - %s", url));
+                e.printStackTrace(logger);
+            } finally {
+                post.releaseConnection();
+            }
+        } while (tried < retries && !success);
 
-	public void run() {
-		int tried = 0;
-		boolean success = false;
-		HttpClient client= getHttpClient();
-		client.getParams().setConnectionManagerTimeout(timeout);
-		do {
-			tried++;
-			RequestEntity requestEntity;
-			try {
-				requestEntity = new StringRequestEntity(data, "application/json", "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace(logger);
-				break;
-			}
-			//logger.println(String.format("Posting data to webhook - %s. Already Tried %s times", url, tried));
-			PostMethod post = new PostMethod(url);
-			try {
-		        post.setRequestEntity(requestEntity);
-		        int responseCode = client.executeMethod(post);
-		        if(responseCode != HttpStatus.SC_OK) {
-		        	String response = post.getResponseBodyAsString();
-		        	logger.println(String.format("Posting data to - %s may have failed. Webhook responded with status code - %s", url, responseCode));
-		        	logger.println(String.format("Message from webhook - %s", response));
-		        	
-		        } else {
-		        	success = true;
-		        	//logger.println(String.format("Posting data to webhook - %s completed ", url));
-		        }
-			} catch (Exception e) {
-				logger.println(String.format("Failed to post data to webhook - %s", url));
-				e.printStackTrace(logger);
-			} finally {
-				 post.releaseConnection();
-			}
-		} while(tried < retries && !success);
-		
-	}
+    }
 
-	private HttpClient getHttpClient() {
-            HttpClient client = new HttpClient();
-            Jenkins jen = Jenkins.getInstance();
-            if (jen != null) {
-                ProxyConfiguration proxy;
-                proxy = jen.proxy;
-                if (proxy != null) {
-                        client.getHostConfiguration().setProxy(proxy.name, proxy.port);
-                        String username = proxy.getUserName();
-                        String password = proxy.getPassword();
-                        // Consider it to be passed if username specified. Sufficient?
-                        if (username != null && !"".equals(username.trim())) {
-                                logger.println("Using proxy authentication (user=" + username + ")");
-                                // http://hc.apache.org/httpclient-3.x/authentication.html#Proxy_Authentication
-                                // and
-                                // http://svn.apache.org/viewvc/httpcomponents/oac.hc3x/trunk/src/examples/BasicAuthenticationExample.java?view=markup
-                                client.getState().setProxyCredentials(AuthScope.ANY,
-                                                new UsernamePasswordCredentials(username, password));
-                        }
+    private HttpClient getHttpClient() {
+        HttpClient client = new HttpClient();
+        Jenkins jen = Jenkins.getInstance();
+        if (jen != null) {
+            ProxyConfiguration proxy;
+            proxy = jen.proxy;
+            if (proxy != null) {
+                client.getHostConfiguration().setProxy(proxy.name, proxy.port);
+                String username = proxy.getUserName();
+                String password = proxy.getPassword();
+                // Consider it to be passed if username specified. Sufficient?
+                if (username != null && !"".equals(username.trim())) {
+                    logger.println("Using proxy authentication (user=" + username + ")");
+                    // http://hc.apache.org/httpclient-3.x/authentication.html#Proxy_Authentication
+                    // and
+                    // http://svn.apache.org/viewvc/httpcomponents/oac.hc3x/trunk/src/examples/BasicAuthenticationExample.java?view=markup
+                    client.getState().setProxyCredentials(AuthScope.ANY,
+                            new UsernamePasswordCredentials(username, password));
                 }
             }
-            return client;
-	}
+        }
+        return client;
+    }
 }
