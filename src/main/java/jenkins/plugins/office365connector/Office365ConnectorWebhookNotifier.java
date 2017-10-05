@@ -49,7 +49,6 @@ import jenkins.plugins.office365connector.model.PotentialAction;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.StepParameters;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.FastDateFormat;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
@@ -59,11 +58,6 @@ import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 public final class Office365ConnectorWebhookNotifier {
 
     private static final ExecutorService executorService = Executors.newCachedThreadPool();
-
-    /**
-     * Thread safe formatter for date.
-     */
-    private static final FastDateFormat DATE_FORMATTER = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss z");
 
     private static final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY).create();
 
@@ -234,7 +228,7 @@ public final class Office365ConnectorWebhookNotifier {
                     : run.getDuration();
             long currentBuildCompletionTime = run.getStartTimeInMillis() + duration;
 
-            factsList.add(new Fact("Completion Time", formatDate(currentBuildCompletionTime)));
+            factsList.add(new Fact("Completion Time", TimeUtils.dateToString(currentBuildCompletionTime)));
 
             AbstractTestResultAction<?> action = run.getAction(AbstractTestResultAction.class);
             if (action != null) {
@@ -265,27 +259,7 @@ public final class Office365ConnectorWebhookNotifier {
                 summary += " Back to Normal";
 
                 if (failingSinceRun != null) {
-                    long diffInSeconds = (currentBuildCompletionTime / 1000) - (failingSinceRun.getStartTimeInMillis() / 1000);
-                    long diff[] = new long[]{0, 0, 0, 0};
-                    /* sec */
-                    diff[3] = (diffInSeconds >= 60 ? diffInSeconds % 60 : diffInSeconds);
-                    /* min */
-                    diff[2] = (diffInSeconds = (diffInSeconds / 60)) >= 60 ? diffInSeconds % 60 : diffInSeconds;
-                    /* hours */
-                    diff[1] = (diffInSeconds = (diffInSeconds / 60)) >= 24 ? diffInSeconds % 24 : diffInSeconds;
-                    /* days */
-                    diff[0] = (diffInSeconds = (diffInSeconds / 24));
-                    String backToNormalTimeValue = String.format(
-                            "%d day%s, %d hour%s, %d minute%s, %d second%s",
-                            diff[0],
-                            diff[0] > 1 ? "s" : "",
-                            diff[1],
-                            diff[1] > 1 ? "s" : "",
-                            diff[2],
-                            diff[2] > 1 ? "s" : "",
-                            diff[3],
-                            diff[3] > 1 ? "s" : "");
-                    factsList.add(new Fact("Back To Normal Time", backToNormalTimeValue));
+                    factsList.add(new Fact("Back To Normal Time", TimeUtils.durationToString(currentBuildCompletionTime - failingSinceRun.getStartTimeInMillis())));
                 }
             } else if (result == Result.FAILURE && failingSinceRun != null) {
                 if (previousResult == Result.FAILURE) {
@@ -294,7 +268,7 @@ public final class Office365ConnectorWebhookNotifier {
 
                     factsList.add(new Fact("Failing since build", failingSinceRun.number));
                     factsList.add(new Fact("Failing since time",
-                            formatDate(failingSinceRun.getStartTimeInMillis() + failingSinceRun.getDuration())));
+                            TimeUtils.dateToString(failingSinceRun.getStartTimeInMillis() + failingSinceRun.getDuration())));
                 } else {
                     status = "Build Failed";
                     summary += " Failed";
@@ -345,11 +319,7 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     private Fact buildStartTimeFact() {
-        return new Fact("Start Time", formatDate(run.getStartTimeInMillis()));
-    }
-
-    private static String formatDate(long time) {
-        return DATE_FORMATTER.format(time);
+        return new Fact("Start Time", TimeUtils.dateToString(run.getStartTimeInMillis()));
     }
 
     private Card createBuildMessageCard(StepParameters stepParameters) {
