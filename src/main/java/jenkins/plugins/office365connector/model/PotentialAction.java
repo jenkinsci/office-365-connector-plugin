@@ -32,10 +32,10 @@ public class PotentialAction
 
     private List<String> target;
 
-    public PotentialAction(List<String> url) {
+    public PotentialAction(String name, List<String> url) {
         this.context = "http://schema.org";
         this.type = "ViewAction";
-        this.name = "View Build";
+        this.name = name;
         this.target = url;
     }
 

@@ -42,13 +42,13 @@ import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.test.AbstractTestResultAction;
-import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.model.PotentialAction;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.StepParameters;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
@@ -431,21 +431,15 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     private void addPotentialAction(Card card) {
-        String rootUrl = null;
-        Jenkins jenkins = Jenkins.getInstance();
-        if (jenkins != null) {
-            rootUrl = jenkins.getRootUrl();
-        }
-        if (rootUrl != null) {
             List<String> url;
             url = new ArrayList<>();
-            url.add(rootUrl + run.getUrl());
+            String urlString = DisplayURLProvider.get().getRunURL(run);
+            url.add(urlString);
 
-            PotentialAction pa = new PotentialAction(url);
+            PotentialAction viewBuildPotentialAction = new PotentialAction("View Build", url);
             List<PotentialAction> paList = new ArrayList<>();
-            paList.add(pa);
+            paList.add(viewBuildPotentialAction);
             card.setPotentialAction(paList);
-        }
     }
 
     private void addCauses(List<Fact> factsList) {
