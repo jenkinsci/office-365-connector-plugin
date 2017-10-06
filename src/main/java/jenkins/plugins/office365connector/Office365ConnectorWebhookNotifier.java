@@ -443,7 +443,7 @@ public final class Office365ConnectorWebhookNotifier {
     private void addPotentialAction(Card card, List<Fact> factsList) {
         String urlString = DisplayURLProvider.get().getRunURL(run);
         PotentialAction viewBuildPotentialAction = new PotentialAction("View Build", urlString);
-        List<PotentialAction> paList = Util.fixNull(card.getPotentialAction());
+        List<PotentialAction> paList = new ArrayList<>();
         paList.add(viewBuildPotentialAction);
         card.setPotentialAction(paList);
         pullRequestActionable(paList, factsList);
