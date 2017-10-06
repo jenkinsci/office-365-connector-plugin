@@ -73,7 +73,7 @@ public final class Office365ConnectorWebhookNotifier {
         Card card = null;
         if ((run instanceof AbstractBuild<?, ?> && isFromPrebuild) ||
                 (run instanceof AbstractBuild<?, ?> || isFromPrebuild)) {
-            card = getCard(1);
+            card = createJobStartedCard();
         }
 
         if (card == null) {
@@ -104,11 +104,7 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     public void sendBuildCompleteNotification() {
-        Card card = getCard(2);
-        if (card == null) {
-            listener.getLogger().println(String.format("Build completed card not generated."));
-            return;
-        }
+        Card card = createJobCompletedCard();
 
         WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
         if (property == null) {
@@ -135,15 +131,11 @@ public final class Office365ConnectorWebhookNotifier {
     public void sendBuildMessage(StepParameters stepParameters) {
         Card card;
         if (StringUtils.isNotBlank(stepParameters.getMessage())) {
-            card = getCard(3, stepParameters);
+            card = createBuildMessageCard(stepParameters);
         } else if (StringUtils.equalsIgnoreCase(stepParameters.getStatus(), "started")) {
-            card = getCard(1);
+            card = createJobStartedCard();
         } else {
-            card = getCard(2);
-        }
-        if (card == null) {
-            listener.getLogger().println(String.format("Build message card not generated."));
-            return;
+            card = createJobCompletedCard();
         }
 
         String webhookUrl = stepParameters.getWebhookUrl();
@@ -160,31 +152,6 @@ public final class Office365ConnectorWebhookNotifier {
         } catch (Throwable error) {
             error.printStackTrace(listener.error(String.format("Failed to notify webhook '%s'", webhookUrl)));
             listener.getLogger().println(String.format("Failed to notify webhook '%s' - %s: %s", webhookUrl, error.getClass().getName(), error.getMessage()));
-        }
-    }
-
-    private Card getCard(int cardType) {
-        return getCard(cardType, null);
-    }
-
-    private Card getCard(int cardType, StepParameters stepParameters) {
-        if (listener == null) {
-            return null;
-        }
-        if (run == null) {
-            listener.getLogger().println("Run is null!");
-            return null;
-        }
-
-        switch (cardType) {
-            case 1:
-                return createJobStartedCard();
-            case 2:
-                return createJobCompletedCard();
-            case 3:
-                return createBuildMessageCard(stepParameters);
-            default:
-                throw new IllegalArgumentException("Unsupported card type: " + cardType);
         }
     }
 
