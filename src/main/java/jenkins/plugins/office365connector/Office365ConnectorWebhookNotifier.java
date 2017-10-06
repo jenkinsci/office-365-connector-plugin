@@ -34,19 +34,29 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import hudson.FilePath;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
+import hudson.model.ItemGroup;
+import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.test.AbstractTestResultAction;
+import jenkins.branch.Branch;
+import jenkins.branch.BranchProjectFactory;
+import jenkins.branch.MultiBranchProject;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.model.PotentialAction;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.StepParameters;
+import jenkins.scm.api.SCMHead;
+import jenkins.scm.api.metadata.ContributorMetadataAction;
+import jenkins.scm.api.metadata.ObjectMetadataAction;
+import jenkins.scm.api.mixin.ChangeRequestSCMHead;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
@@ -173,7 +183,7 @@ public final class Office365ConnectorWebhookNotifier {
 
         String summary = jobName + ": Build #" + run.getNumber() + " Started";
         Card card = new Card(summary, sectionList);
-        addPotentialAction(card);
+        addPotentialAction(card, factsList);
 
         return card;
     }
@@ -280,7 +290,7 @@ public final class Office365ConnectorWebhookNotifier {
         } else {
             card.setThemeColor("FFCC5C");
         }
-        addPotentialAction(card);
+        addPotentialAction(card, factsList);
 
         return card;
     }
@@ -311,7 +321,7 @@ public final class Office365ConnectorWebhookNotifier {
             card.setThemeColor(stepParameters.getColor());
         }
 
-        addPotentialAction(card);
+        addPotentialAction(card, factsList);
 
         return card;
     }
@@ -430,16 +440,13 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    private void addPotentialAction(Card card) {
-            List<String> url;
-            url = new ArrayList<>();
-            String urlString = DisplayURLProvider.get().getRunURL(run);
-            url.add(urlString);
-
-            PotentialAction viewBuildPotentialAction = new PotentialAction("View Build", url);
-            List<PotentialAction> paList = new ArrayList<>();
-            paList.add(viewBuildPotentialAction);
-            card.setPotentialAction(paList);
+    private void addPotentialAction(Card card, List<Fact> factsList) {
+        String urlString = DisplayURLProvider.get().getRunURL(run);
+        PotentialAction viewBuildPotentialAction = new PotentialAction("View Build", urlString);
+        List<PotentialAction> paList = Util.fixNull(card.getPotentialAction());
+        paList.add(viewBuildPotentialAction);
+        card.setPotentialAction(paList);
+        pullRequestActionable(paList, factsList);
     }
 
     private void addCauses(List<Fact> factsList) {
@@ -461,6 +468,32 @@ public final class Office365ConnectorWebhookNotifier {
             return TokenMacro.expandAll(run, new FilePath(workspace), listener, template);
         } catch (InterruptedException | IOException | MacroEvaluationException e) {
             throw new IllegalArgumentException(e);
+        }
+    }
+
+    private void pullRequestActionable(List<PotentialAction> paList, List<Fact> factsList) {
+        Job job = run.getParent();
+        ItemGroup parent = job.getParent();
+        if (parent instanceof MultiBranchProject) {
+            BranchProjectFactory projectFactory = ((MultiBranchProject) parent).getProjectFactory();
+            if (projectFactory.isProject(job)) {
+                Branch branch = projectFactory.getBranch(job);
+                SCMHead head = branch.getHead();
+
+                if (head instanceof ChangeRequestSCMHead) {
+                    ObjectMetadataAction oma = branch.getAction(ObjectMetadataAction.class);
+                    if (oma != null) {
+                        String urlString = oma.getObjectUrl();
+                        PotentialAction viewPRPotentialAction = new PotentialAction("View PR", urlString);
+                        paList.add(viewPRPotentialAction);
+                        factsList.add(new Fact(head.getPronoun() + " Title", oma.getObjectDisplayName()));
+                    }
+                    ContributorMetadataAction cma = branch.getAction(ContributorMetadataAction.class);
+                    if (cma != null) {
+                        factsList.add(new Fact("Author", cma.getContributorDisplayName()));
+                    }
+                }
+            }
         }
     }
 }
