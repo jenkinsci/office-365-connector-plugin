@@ -2,9 +2,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import hudson.ProxyConfiguration;
 import jenkins.model.Jenkins;
@@ -33,19 +35,28 @@ import org.apache.commons.httpclient.methods.StringRequestEntity;
  */
 public class HttpWorker implements Runnable {
 
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
+
     private final PrintStream logger;
 
     private final String url;
     private final String data;
     private final int timeout;
-    private final int retries;
 
-    public HttpWorker(String url, String data, int timeout, int retries, PrintStream logger) {
+    private static final int RETRIES = 3;
+
+    public HttpWorker(String url, String data, int timeout, PrintStream logger) {
         this.url = url;
         this.data = data;
         this.timeout = timeout;
         this.logger = logger;
-        this.retries = retries;
+    }
+
+    /**
+     * Sends the notification to the hook.
+     */
+    public void submit() {
+        executorService.submit(this);
     }
 
     @Override
@@ -83,7 +94,7 @@ public class HttpWorker implements Runnable {
             } finally {
                 post.releaseConnection();
             }
-        } while (tried < retries && !success);
+        } while (tried < RETRIES && !success);
 
     }
 
