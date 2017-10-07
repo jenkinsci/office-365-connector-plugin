@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -33,7 +35,6 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import hudson.FilePath;
-import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.ItemGroup;
@@ -129,7 +130,19 @@ public final class Office365ConnectorWebhookNotifier {
 
         WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
         if (property == null) {
-            return;
+            String webhookUrl = stepParameters.getWebhookUrl();
+            if (StringUtils.isBlank(webhookUrl)) {
+                listener.getLogger().println("No URL provided");
+                return;
+            }
+            try {
+                new URL(webhookUrl);
+                Webhook webhook = new Webhook(webhookUrl);
+                executeWorker(webhook, card);
+            } catch (MalformedURLException e) {
+                listener.getLogger().println("Malformed URL provided");
+                return;
+            }
         }
 
         for (Webhook webhook : property.getWebhooks()) {

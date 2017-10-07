@@ -70,6 +70,10 @@ public class Webhook {
             }
     }
 
+    public Webhook(String url) {
+        this.url = url;
+    }
+
     public String getName() {
             return name;
     }
