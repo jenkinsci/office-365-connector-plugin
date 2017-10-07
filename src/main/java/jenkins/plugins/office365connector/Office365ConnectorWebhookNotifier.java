@@ -468,16 +468,21 @@ public final class Office365ConnectorWebhookNotifier {
                 SCMHead head = branch.getHead();
 
                 if (head instanceof ChangeRequestSCMHead) {
+                    String pronoun = head.getPronoun();
+                    String viewName = String.format("View %s", pronoun);
+                    String titleName = String.format("%s Title", pronoun);
+                    String authorName = String.format("%s Author", pronoun);
+
                     ObjectMetadataAction oma = branch.getAction(ObjectMetadataAction.class);
                     if (oma != null) {
                         String urlString = oma.getObjectUrl();
-                        PotentialAction viewPRPotentialAction = new PotentialAction("View PR", urlString);
+                        PotentialAction viewPRPotentialAction = new PotentialAction(viewName, urlString);
                         paList.add(viewPRPotentialAction);
-                        factsList.add(new Fact(head.getPronoun() + " Title", oma.getObjectDisplayName()));
+                        factsList.add(new Fact(titleName, oma.getObjectDisplayName()));
                     }
                     ContributorMetadataAction cma = branch.getAction(ContributorMetadataAction.class);
                     if (cma != null) {
-                        factsList.add(new Fact("Author", cma.getContributorDisplayName()));
+                        factsList.add(new Fact(authorName, cma.getContributorDisplayName()));
                     }
                 }
             }
