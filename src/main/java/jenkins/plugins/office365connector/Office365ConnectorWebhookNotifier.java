@@ -160,7 +160,7 @@ public final class Office365ConnectorWebhookNotifier {
 
         addCauses(factsList);
 
-        String activityTitle = "Update from build " + jobName + ".";
+        String activityTitle = "Update from " + jobName + ".";
         String activitySubtitle = "Latest status of build #" + run.getNumber();
         Section section = new Section(activityTitle, activitySubtitle, factsList);
 
@@ -260,7 +260,7 @@ public final class Office365ConnectorWebhookNotifier {
 
         addCauses(factsList);
 
-        String activityTitle = "Update from build " + jobName + ".";
+        String activityTitle = "Update from " + jobName + ".";
         String activitySubtitle = "Latest status of build #" + run.getNumber();
         Section section = new Section(activityTitle, activitySubtitle, factsList);
 
@@ -293,7 +293,7 @@ public final class Office365ConnectorWebhookNotifier {
             factsList.add(new Fact("Status", "Running"));
         }
 
-        String activityTitle = "Update from build " + jobName + " (#" + run.getNumber() + ")";
+        String activityTitle = "Message from " + jobName + ", Build #" + run.getNumber() + "";
         Section section = new Section(activityTitle, stepParameters.getMessage(), factsList);
 
         List<Section> sectionList = new ArrayList<>();
