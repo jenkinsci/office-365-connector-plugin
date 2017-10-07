@@ -143,6 +143,7 @@ public final class Office365ConnectorWebhookNotifier {
                 listener.getLogger().println("Malformed URL provided");
                 return;
             }
+            return;
         }
 
         for (Webhook webhook : property.getWebhooks()) {
