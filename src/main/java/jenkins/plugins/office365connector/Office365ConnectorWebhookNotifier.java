@@ -482,7 +482,8 @@ public final class Office365ConnectorWebhookNotifier {
                     }
                     ContributorMetadataAction cma = branch.getAction(ContributorMetadataAction.class);
                     if (cma != null) {
-                        factsList.add(new Fact(authorName, cma.getContributorDisplayName()));
+                        String author = String.format("%s (%s)", cma.getContributor(), cma.getContributorDisplayName());
+                        factsList.add(new Fact(authorName, author));
                     }
                 }
             }
