@@ -204,16 +204,12 @@ public final class Office365ConnectorWebhookNotifier {
             String status = null;
             Run previousBuild = run.getPreviousBuild();
             Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
-            AbstractBuild failingSinceRun = null;
             Run rt = run.getPreviousNotFailedBuild();
-            try {
-                if (rt != null) {
-                    failingSinceRun = (AbstractBuild) rt.getNextBuild();
-                } else {
-                    failingSinceRun = (AbstractBuild) run.getParent().getFirstBuild();
-                }
-            } catch (ClassCastException e) {
-                listener.getLogger().println(e.getMessage());
+            Run failingSinceRun;
+            if (rt != null) {
+                failingSinceRun = rt.getNextBuild();
+            } else {
+                failingSinceRun = run.getParent().getFirstBuild();
             }
 
             if (result == Result.SUCCESS && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)) {
