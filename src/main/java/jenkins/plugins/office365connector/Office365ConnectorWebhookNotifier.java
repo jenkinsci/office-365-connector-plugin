@@ -464,7 +464,7 @@ public final class Office365ConnectorWebhookNotifier {
                 SCMHead head = branch.getHead();
 
                 if (head instanceof ChangeRequestSCMHead) {
-                    String pronoun = head.getPronoun();
+                    String pronoun = StringUtils.defaultIfBlank(head.getPronoun(), "Change Request");
                     String viewName = String.format("View %s", pronoun);
                     String titleName = String.format("%s Title", pronoun);
                     String authorName = String.format("%s Author", pronoun);
@@ -478,8 +478,14 @@ public final class Office365ConnectorWebhookNotifier {
                     }
                     ContributorMetadataAction cma = branch.getAction(ContributorMetadataAction.class);
                     if (cma != null) {
-                        String author = String.format("%s (%s)", cma.getContributor(), cma.getContributorDisplayName());
-                        factsList.add(new Fact(authorName, author));
+                        String contributor = cma.getContributor();
+                        String contributorDisplayName = cma.getContributorDisplayName();
+                        String author = StringUtils.defaultIfBlank(cma.getContributor(), cma.getContributorDisplayName());
+                        if (StringUtils.isNotBlank(contributor) && StringUtils.isNotBlank(contributorDisplayName))
+                            author = String.format("%s (%s)", cma.getContributor(), cma.getContributorDisplayName());
+
+                        if (StringUtils.isNotBlank(author))
+                            factsList.add(new Fact(authorName, author));
                     }
                 }
             }
