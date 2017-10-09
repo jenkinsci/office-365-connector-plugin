@@ -35,7 +35,7 @@ public class Office365ConnectorBuildListener extends RunListener<Run> {
     @Override
     public void onStarted(Run run, final TaskListener listener) {
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, listener);
-        notifier.sendBuildStaredNotification(false);
+        notifier.sendBuildStartedNotification(false);
     }
 
     /**

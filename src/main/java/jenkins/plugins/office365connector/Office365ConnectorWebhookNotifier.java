@@ -23,6 +23,8 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -77,10 +79,11 @@ public final class Office365ConnectorWebhookNotifier {
         this.listener = listener;
     }
 
-    public void sendBuildStaredNotification(boolean isFromPrebuild) {
+    public void sendBuildStartedNotification(boolean isFromPreBuild) {
         Card card = null;
-        if ((run instanceof AbstractBuild<?, ?> && isFromPrebuild) ||
-                (run instanceof AbstractBuild<?, ?> || isFromPrebuild)) {
+
+        boolean isBuild = run instanceof AbstractBuild<?, ?>;
+        if ((isBuild && isFromPreBuild) || (!isBuild && !isFromPreBuild)) {
             card = createJobStartedCard();
         }
 
@@ -96,8 +99,10 @@ public final class Office365ConnectorWebhookNotifier {
         }
 
         for (Webhook webhook : property.getWebhooks()) {
-            if (webhook.isStartNotification()) {
-                executeWorker(webhook, card);
+            if (isAtLeastOneRuleMatched(webhook)) {
+                if (webhook.isStartNotification()) {
+                    executeWorker(webhook, card);
+                }
             }
         }
     }
@@ -112,7 +117,7 @@ public final class Office365ConnectorWebhookNotifier {
         }
 
         for (Webhook webhook : property.getWebhooks()) {
-            if (shouldSendNotification(webhook)) {
+            if (isStatusMatched(webhook) && isAtLeastOneRuleMatched(webhook)) {
                 executeWorker(webhook, card);
             }
         }
@@ -318,24 +323,33 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    private boolean shouldSendNotification(Webhook webhook) {
-        if (hasBuildMatched(webhook)) {
-            if (webhook.getMacros().isEmpty()) {
-                return true;
-            } else {
-                for (Macro macro : webhook.getMacros()) {
-                    String evaluated = evaluateMacro(macro.getTemplate());
-                    if (evaluated.equals(macro.getValue())) {
-                        return true;
-                    }
+    /**
+     * Iterates over each macro for passed webhook and checks if at least one template matches to expected value.
+     *
+     * @param webhook webhook that should be examined
+     * @return <code>true</code> if at least one macro has matched, <code>false</code> otherwise
+     */
+    private boolean isAtLeastOneRuleMatched(Webhook webhook) {
+        if (webhook.getMacros().isEmpty()) {
+            return true;
+        } else {
+            for (Macro macro : webhook.getMacros()) {
+                String evaluated = evaluateMacro(macro.getTemplate());
+                if (evaluated.equals(macro.getValue())) {
+                    return true;
                 }
-                return false;
             }
+            return false;
         }
-        return false;
     }
 
-    private boolean hasBuildMatched(Webhook webhook) {
+    /**
+     * Checks if notification should be passed by comparing current status and webhook configuration
+     *
+     * @param webhook webhook that will be verified
+     * @return <code>true</code> if current status matches to webhook configuration
+     */
+    private boolean isStatusMatched(Webhook webhook) {
         Result result = run.getResult();
         Run previousBuild = run.getPreviousBuild();
         Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
@@ -368,7 +382,7 @@ public final class Office365ConnectorWebhookNotifier {
                 for (Object o : changeSet.getItems()) {
                     ChangeLogSet.Entry entry = (ChangeLogSet.Entry) o;
                     entries.add(entry);
-                    files.addAll(entry.getAffectedFiles());
+                    files.addAll(getAffectedFiles(entry));
                 }
                 if (!entries.isEmpty()) {
                     Set<String> authors = new HashSet<>();
@@ -396,7 +410,7 @@ public final class Office365ConnectorWebhookNotifier {
                             for (ChangeLogSet<ChangeLogSet.Entry> set : sets) {
                                 for (ChangeLogSet.Entry entry : set) {
                                     authors.add(entry.getAuthor().getFullName());
-                                    files.addAll(entry.getAffectedFiles());
+                                    files.addAll(getAffectedFiles(entry));
                                 }
                             }
                         }
@@ -420,6 +434,15 @@ public final class Office365ConnectorWebhookNotifier {
             }
         } catch (SecurityException | IllegalArgumentException e) {
             e.printStackTrace(listener.error(String.format("Unable to cast run to abstract build. %s", e)));
+        }
+    }
+
+    private Collection<? extends ChangeLogSet.AffectedFile> getAffectedFiles(ChangeLogSet.Entry entry) {
+        try {
+            return entry.getAffectedFiles();
+        } catch (UnsupportedOperationException e) {
+            listener.getLogger().println(e.getMessage());
+            return Collections.emptyList();
         }
     }
 
