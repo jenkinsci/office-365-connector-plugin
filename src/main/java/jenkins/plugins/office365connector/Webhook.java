@@ -17,8 +17,8 @@ package jenkins.plugins.office365connector;
 import java.util.Collections;
 import java.util.List;
 
+import hudson.Util;
 import hudson.util.FormValidation;
-import org.apache.commons.collections.CollectionUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -27,23 +27,15 @@ public class Webhook {
     public static final Integer DEFAULT_TIMEOUT = 30000;
 
     private String name;
-
     private String url;
 
     private boolean startNotification;
-
     private boolean notifySuccess;
-
     private boolean notifyAborted;
-
     private boolean notifyNotBuilt;
-
     private boolean notifyUnstable;
-
     private boolean notifyFailure;
-
     private boolean notifyBackToNormal;
-
     private boolean notifyRepeatedFailure;
 
     private int timeout;
@@ -54,20 +46,18 @@ public class Webhook {
     public Webhook(String name, String url, boolean startNotification, boolean notifySuccess, boolean notifyAborted,
                    boolean notifyNotBuilt, boolean notifyUnstable, boolean notifyFailure, boolean notifyBackToNormal,
                    boolean notifyRepeatedFailure, int timeout, List<Macro> macros) {
-            this.name = name;
-            this.url = url;
-            this.startNotification = startNotification;
-            this.notifySuccess = notifySuccess;
-            this.notifyBackToNormal = notifyBackToNormal;
-            this.notifyFailure = notifyFailure;
-            this.notifyUnstable = notifyUnstable;
-            this.notifyNotBuilt = notifyNotBuilt;
-            this.notifyAborted = notifyAborted;
-            this.notifyRepeatedFailure = notifyRepeatedFailure;
-            this.timeout = timeout;
-            if (CollectionUtils.isNotEmpty(macros)) {
-                this.macros = macros;
-            }
+        this.name = name;
+        this.url = url;
+        this.startNotification = startNotification;
+        this.notifySuccess = notifySuccess;
+        this.notifyBackToNormal = notifyBackToNormal;
+        this.notifyFailure = notifyFailure;
+        this.notifyUnstable = notifyUnstable;
+        this.notifyNotBuilt = notifyNotBuilt;
+        this.notifyAborted = notifyAborted;
+        this.notifyRepeatedFailure = notifyRepeatedFailure;
+        this.timeout = timeout;
+        this.macros = Util.fixNull(macros);
     }
 
     public Webhook(String url) {
@@ -75,47 +65,47 @@ public class Webhook {
     }
 
     public String getName() {
-            return name;
+        return name;
     }
 
     public String getUrl() {
-            return url;
+        return url;
     }
 
     public boolean isNotifySuccess() {
-            return notifySuccess;
+        return notifySuccess;
     }
 
     public boolean isStartNotification() {
-            return startNotification;
+        return startNotification;
     }
 
     public boolean isNotifyAborted() {
-            return notifyAborted;
+        return notifyAborted;
     }
 
     public boolean isNotifyNotBuilt() {
-            return notifyNotBuilt;
+        return notifyNotBuilt;
     }
 
     public boolean isNotifyUnstable() {
-            return notifyUnstable;
+        return notifyUnstable;
     }
 
     public boolean isNotifyFailure() {
-            return notifyFailure;
+        return notifyFailure;
     }
 
     public boolean isNotifyBackToNormal() {
-            return notifyBackToNormal;
+        return notifyBackToNormal;
     }
 
     public boolean isNotifyRepeatedFailure() {
-            return notifyRepeatedFailure;
+        return notifyRepeatedFailure;
     }
 
     public int getTimeout() {
-            return timeout;
+        return timeout;
     }
 
     public List<Macro> getMacros() {
