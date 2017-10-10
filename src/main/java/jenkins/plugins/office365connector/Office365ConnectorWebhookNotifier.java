@@ -16,7 +16,6 @@
 package jenkins.plugins.office365connector;
 
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -34,7 +33,6 @@ import com.google.common.collect.Iterables;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Job;
 import hudson.model.Result;
@@ -55,8 +53,6 @@ import jenkins.scm.api.mixin.ChangeRequestSCMHead;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
-import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
-import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
 /**
  * @author srhebbar
@@ -67,12 +63,14 @@ public final class Office365ConnectorWebhookNotifier {
 
     private final FactsBuilder factsBuilder = new FactsBuilder();
 
+    private final DecisionMaker decisionMaker;
     private final Run run;
     private final TaskListener listener;
 
     public Office365ConnectorWebhookNotifier(Run run, TaskListener listener) {
         this.run = run;
         this.listener = listener;
+        this.decisionMaker = new DecisionMaker(run, listener);
     }
 
     public void sendBuildStartedNotification(boolean isFromPreBuild) {
@@ -95,7 +93,7 @@ public final class Office365ConnectorWebhookNotifier {
         }
 
         for (Webhook webhook : property.getWebhooks()) {
-            if (isAtLeastOneRuleMatched(webhook)) {
+            if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                 if (webhook.isStartNotification()) {
                     executeWorker(webhook, card);
                 }
@@ -113,7 +111,7 @@ public final class Office365ConnectorWebhookNotifier {
         }
 
         for (Webhook webhook : property.getWebhooks()) {
-            if (isStatusMatched(webhook) && isAtLeastOneRuleMatched(webhook)) {
+            if (decisionMaker.isStatusMatched(webhook) && decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                 executeWorker(webhook, card);
             }
         }
@@ -296,46 +294,6 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    /**
-     * Iterates over each macro for passed webhook and checks if at least one template matches to expected value.
-     *
-     * @param webhook webhook that should be examined
-     * @return <code>true</code> if at least one macro has matched, <code>false</code> otherwise
-     */
-    private boolean isAtLeastOneRuleMatched(Webhook webhook) {
-        if (CollectionUtils.isEmpty(webhook.getMacros())) {
-            return true;
-        } else {
-            for (Macro macro : webhook.getMacros()) {
-                String evaluated = evaluateMacro(macro.getTemplate());
-                if (evaluated.equals(macro.getValue())) {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-
-    /**
-     * Checks if notification should be passed by comparing current status and webhook configuration
-     *
-     * @param webhook webhook that will be verified
-     * @return <code>true</code> if current status matches to webhook configuration
-     */
-    private boolean isStatusMatched(Webhook webhook) {
-        Result result = run.getResult();
-        Run previousBuild = run.getPreviousBuild();
-        Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
-
-        return ((result == Result.ABORTED && webhook.isNotifyAborted())
-                || (result == Result.FAILURE && previousResult != Result.FAILURE && (webhook.isNotifyFailure()))
-                || (result == Result.FAILURE && previousResult == Result.FAILURE && (webhook.isNotifyRepeatedFailure()))
-                || (result == Result.NOT_BUILT && webhook.isNotifyNotBuilt())
-                || (result == Result.SUCCESS && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) && webhook.isNotifyBackToNormal())
-                || (result == Result.SUCCESS && webhook.isNotifySuccess())
-                || (result == Result.UNSTABLE && webhook.isNotifyUnstable()));
-    }
-
     private void addScmDetails() {
         try {
             if (run instanceof AbstractBuild) {
@@ -411,15 +369,6 @@ public final class Office365ConnectorWebhookNotifier {
         paList.add(viewBuildPotentialAction);
         card.setPotentialAction(paList);
         pullRequestActionable(paList);
-    }
-
-    private String evaluateMacro(String template) {
-        try {
-            File workspace = run.getRootDir();
-            return TokenMacro.expandAll(run, new FilePath(workspace), listener, template);
-        } catch (InterruptedException | IOException | MacroEvaluationException e) {
-            throw new IllegalArgumentException(e);
-        }
     }
 
     private void pullRequestActionable(List<PotentialAction> paList) {
