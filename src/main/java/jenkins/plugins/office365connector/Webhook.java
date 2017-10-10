@@ -60,6 +60,10 @@ public class Webhook {
         this.macros = Util.fixNull(macros);
     }
 
+    public Webhook(String url) {
+        this.url = url;
+    }
+
     public String getName() {
         return name;
     }

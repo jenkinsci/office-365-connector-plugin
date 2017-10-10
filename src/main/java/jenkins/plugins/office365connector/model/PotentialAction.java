@@ -14,9 +14,10 @@
 
 package jenkins.plugins.office365connector.model;
 
-import com.google.gson.annotations.SerializedName;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+
+import com.google.gson.annotations.SerializedName;
 
 /**
  *
@@ -32,10 +33,14 @@ public class PotentialAction
 
     private List<String> target;
 
-    public PotentialAction(List<String> url) {
+    public PotentialAction(String name, String url) {
+        this(name, Collections.singletonList(url));
+    }
+
+    public PotentialAction(String name, List<String> url) {
         this.context = "http://schema.org";
         this.type = "ViewAction";
-        this.name = "View Build";
+        this.name = name;
         this.target = url;
     }
 
@@ -82,7 +87,7 @@ public class PotentialAction
     @Override
     public String toString()
     {
-        String temp = "{\"@context\": \"http://schema.org\"," +"\"@type\": \"ViewAction\",\"name\": \""+name+"\", \"target\": [\"" + target + "\"]}";
+        String temp = "{\"@context\": \""+context+"\"," +"\"@type\": \""+type+"\",\"name\": \""+name+"\", \"target\": [\"" + target + "\"]}";
         return temp;
     }
 }

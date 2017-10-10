@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,19 +39,28 @@ import com.google.gson.GsonBuilder;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
+import hudson.model.ItemGroup;
+import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.test.AbstractTestResultAction;
-import jenkins.model.Jenkins;
+import jenkins.branch.Branch;
+import jenkins.branch.BranchProjectFactory;
+import jenkins.branch.MultiBranchProject;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.model.PotentialAction;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.StepParameters;
+import jenkins.scm.api.SCMHead;
+import jenkins.scm.api.metadata.ContributorMetadataAction;
+import jenkins.scm.api.metadata.ObjectMetadataAction;
+import jenkins.scm.api.mixin.ChangeRequestSCMHead;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
@@ -124,6 +135,19 @@ public final class Office365ConnectorWebhookNotifier {
 
         WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
         if (property == null) {
+            String webhookUrl = stepParameters.getWebhookUrl();
+            if (StringUtils.isBlank(webhookUrl)) {
+                listener.getLogger().println("No URL provided");
+                return;
+            }
+            try {
+                new URL(webhookUrl);
+                Webhook webhook = new Webhook(webhookUrl);
+                executeWorker(webhook, card);
+            } catch (MalformedURLException e) {
+                listener.getLogger().println("Malformed URL provided");
+                return;
+            }
             return;
         }
 
@@ -141,7 +165,7 @@ public final class Office365ConnectorWebhookNotifier {
 
         addCauses(factsList);
 
-        String activityTitle = "Update from build " + jobName + ".";
+        String activityTitle = "Update from " + jobName + ".";
         String activitySubtitle = "Latest status of build #" + run.getNumber();
         Section section = new Section(activityTitle, activitySubtitle, factsList);
 
@@ -150,7 +174,7 @@ public final class Office365ConnectorWebhookNotifier {
 
         String summary = jobName + ": Build #" + run.getNumber() + " Started";
         Card card = new Card(summary, sectionList);
-        addPotentialAction(card);
+        addPotentialAction(card, factsList);
 
         return card;
     }
@@ -185,16 +209,12 @@ public final class Office365ConnectorWebhookNotifier {
             String status = null;
             Run previousBuild = run.getPreviousBuild();
             Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
-            AbstractBuild failingSinceRun = null;
             Run rt = run.getPreviousNotFailedBuild();
-            try {
-                if (rt != null) {
-                    failingSinceRun = (AbstractBuild) rt.getNextBuild();
-                } else {
-                    failingSinceRun = (AbstractBuild) run.getParent().getFirstBuild();
-                }
-            } catch (ClassCastException e) {
-                listener.getLogger().println(e.getMessage());
+            Run failingSinceRun;
+            if (rt != null) {
+                failingSinceRun = rt.getNextBuild();
+            } else {
+                failingSinceRun = run.getParent().getFirstBuild();
             }
 
             if (result == Result.SUCCESS && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)) {
@@ -241,7 +261,7 @@ public final class Office365ConnectorWebhookNotifier {
 
         addCauses(factsList);
 
-        String activityTitle = "Update from build " + jobName + ".";
+        String activityTitle = "Update from " + jobName + ".";
         String activitySubtitle = "Latest status of build #" + run.getNumber();
         Section section = new Section(activityTitle, activitySubtitle, factsList);
 
@@ -256,7 +276,7 @@ public final class Office365ConnectorWebhookNotifier {
         } else {
             card.setThemeColor("FFCC5C");
         }
-        addPotentialAction(card);
+        addPotentialAction(card, factsList);
 
         return card;
     }
@@ -274,7 +294,7 @@ public final class Office365ConnectorWebhookNotifier {
             factsList.add(new Fact("Status", "Running"));
         }
 
-        String activityTitle = "Update from build " + jobName + " (#" + run.getNumber() + ")";
+        String activityTitle = "Message from " + jobName + ", Build #" + run.getNumber() + "";
         Section section = new Section(activityTitle, stepParameters.getMessage(), factsList);
 
         List<Section> sectionList = new ArrayList<>();
@@ -287,7 +307,7 @@ public final class Office365ConnectorWebhookNotifier {
             card.setThemeColor(stepParameters.getColor());
         }
 
-        addPotentialAction(card);
+        addPotentialAction(card, factsList);
 
         return card;
     }
@@ -426,22 +446,13 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    private void addPotentialAction(Card card) {
-        String rootUrl = null;
-        Jenkins jenkins = Jenkins.getInstance();
-        if (jenkins != null) {
-            rootUrl = jenkins.getRootUrl();
-        }
-        if (rootUrl != null) {
-            List<String> url;
-            url = new ArrayList<>();
-            url.add(rootUrl + run.getUrl());
-
-            PotentialAction pa = new PotentialAction(url);
-            List<PotentialAction> paList = new ArrayList<>();
-            paList.add(pa);
-            card.setPotentialAction(paList);
-        }
+    private void addPotentialAction(Card card, List<Fact> factsList) {
+        String urlString = DisplayURLProvider.get().getRunURL(run);
+        PotentialAction viewBuildPotentialAction = new PotentialAction("View Build", urlString);
+        List<PotentialAction> paList = new ArrayList<>();
+        paList.add(viewBuildPotentialAction);
+        card.setPotentialAction(paList);
+        pullRequestActionable(paList, factsList);
     }
 
     private void addCauses(List<Fact> factsList) {
@@ -463,6 +474,44 @@ public final class Office365ConnectorWebhookNotifier {
             return TokenMacro.expandAll(run, new FilePath(workspace), listener, template);
         } catch (InterruptedException | IOException | MacroEvaluationException e) {
             throw new IllegalArgumentException(e);
+        }
+    }
+
+    private void pullRequestActionable(List<PotentialAction> paList, List<Fact> factsList) {
+        Job job = run.getParent();
+        ItemGroup parent = job.getParent();
+        if (parent instanceof MultiBranchProject) {
+            BranchProjectFactory projectFactory = ((MultiBranchProject) parent).getProjectFactory();
+            if (projectFactory.isProject(job)) {
+                Branch branch = projectFactory.getBranch(job);
+                SCMHead head = branch.getHead();
+
+                if (head instanceof ChangeRequestSCMHead) {
+                    String pronoun = StringUtils.defaultIfBlank(head.getPronoun(), "Change Request");
+                    String viewName = String.format("View %s", pronoun);
+                    String titleName = String.format("%s Title", pronoun);
+                    String authorName = String.format("%s Author", pronoun);
+
+                    ObjectMetadataAction oma = branch.getAction(ObjectMetadataAction.class);
+                    if (oma != null) {
+                        String urlString = oma.getObjectUrl();
+                        PotentialAction viewPRPotentialAction = new PotentialAction(viewName, urlString);
+                        paList.add(viewPRPotentialAction);
+                        factsList.add(new Fact(titleName, oma.getObjectDisplayName()));
+                    }
+                    ContributorMetadataAction cma = branch.getAction(ContributorMetadataAction.class);
+                    if (cma != null) {
+                        String contributor = cma.getContributor();
+                        String contributorDisplayName = cma.getContributorDisplayName();
+                        String author = StringUtils.defaultIfBlank(cma.getContributor(), cma.getContributorDisplayName());
+                        if (StringUtils.isNotBlank(contributor) && StringUtils.isNotBlank(contributorDisplayName))
+                            author = String.format("%s (%s)", cma.getContributor(), cma.getContributorDisplayName());
+
+                        if (StringUtils.isNotBlank(author))
+                            factsList.add(new Fact(authorName, author));
+                    }
+                }
+            }
         }
     }
 }
