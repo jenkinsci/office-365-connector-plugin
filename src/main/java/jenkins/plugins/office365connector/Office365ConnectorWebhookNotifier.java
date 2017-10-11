@@ -39,7 +39,6 @@ import com.google.gson.GsonBuilder;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
-import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -47,9 +46,6 @@ import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.test.AbstractTestResultAction;
-import jenkins.branch.Branch;
-import jenkins.branch.BranchProjectFactory;
-import jenkins.branch.MultiBranchProject;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.model.PotentialAction;
@@ -448,7 +444,9 @@ public final class Office365ConnectorWebhookNotifier {
 
     private void addPotentialAction(Card card, List<Fact> factsList) {
         String urlString = DisplayURLProvider.get().getRunURL(run);
-        PotentialAction viewBuildPotentialAction = new PotentialAction("View Build", urlString);
+        String build = Messages.Office365ConnectorWebhookNotifier_BuildPronoun();
+        String viewHeader = Messages.Office365ConnectorWebhookNotifier_ViewHeader(build);
+        PotentialAction viewBuildPotentialAction = new PotentialAction(viewHeader, urlString);
         List<PotentialAction> paList = new ArrayList<>();
         paList.add(viewBuildPotentialAction);
         card.setPotentialAction(paList);
@@ -479,38 +477,33 @@ public final class Office365ConnectorWebhookNotifier {
 
     private void pullRequestActionable(List<PotentialAction> paList, List<Fact> factsList) {
         Job job = run.getParent();
-        ItemGroup parent = job.getParent();
-        if (parent instanceof MultiBranchProject) {
-            BranchProjectFactory projectFactory = ((MultiBranchProject) parent).getProjectFactory();
-            if (projectFactory.isProject(job)) {
-                Branch branch = projectFactory.getBranch(job);
-                SCMHead head = branch.getHead();
+        SCMHead head = SCMHead.HeadByItem.findHead(job);
+        if (head instanceof ChangeRequestSCMHead) {
+            String pronoun = StringUtils.defaultIfBlank(
+                    head.getPronoun(),
+                    Messages.Office365ConnectorWebhookNotifier_ChangeRequestPronoun()
+            );
+            String viewHeader = Messages.Office365ConnectorWebhookNotifier_ViewHeader(pronoun);
+            String titleHeader = Messages.Office365ConnectorWebhookNotifier_TitleHeader(pronoun);
+            String authorHeader = Messages.Office365ConnectorWebhookNotifier_AuthorHeader(pronoun);
 
-                if (head instanceof ChangeRequestSCMHead) {
-                    String pronoun = StringUtils.defaultIfBlank(head.getPronoun(), "Change Request");
-                    String viewName = String.format("View %s", pronoun);
-                    String titleName = String.format("%s Title", pronoun);
-                    String authorName = String.format("%s Author", pronoun);
+            ObjectMetadataAction oma = job.getAction(ObjectMetadataAction.class);
+            if (oma != null) {
+                String urlString = oma.getObjectUrl();
+                PotentialAction viewPRPotentialAction = new PotentialAction(viewHeader, urlString);
+                paList.add(viewPRPotentialAction);
+                factsList.add(new Fact(titleHeader, oma.getObjectDisplayName()));
+            }
+            ContributorMetadataAction cma = job.getAction(ContributorMetadataAction.class);
+            if (cma != null) {
+                String contributor = cma.getContributor();
+                String contributorDisplayName = cma.getContributorDisplayName();
+                String author = StringUtils.defaultIfBlank(cma.getContributor(), cma.getContributorDisplayName());
+                if (StringUtils.isNotBlank(contributor) && StringUtils.isNotBlank(contributorDisplayName))
+                    author = String.format("%s (%s)", cma.getContributor(), cma.getContributorDisplayName());
 
-                    ObjectMetadataAction oma = branch.getAction(ObjectMetadataAction.class);
-                    if (oma != null) {
-                        String urlString = oma.getObjectUrl();
-                        PotentialAction viewPRPotentialAction = new PotentialAction(viewName, urlString);
-                        paList.add(viewPRPotentialAction);
-                        factsList.add(new Fact(titleName, oma.getObjectDisplayName()));
-                    }
-                    ContributorMetadataAction cma = branch.getAction(ContributorMetadataAction.class);
-                    if (cma != null) {
-                        String contributor = cma.getContributor();
-                        String contributorDisplayName = cma.getContributorDisplayName();
-                        String author = StringUtils.defaultIfBlank(cma.getContributor(), cma.getContributorDisplayName());
-                        if (StringUtils.isNotBlank(contributor) && StringUtils.isNotBlank(contributorDisplayName))
-                            author = String.format("%s (%s)", cma.getContributor(), cma.getContributorDisplayName());
-
-                        if (StringUtils.isNotBlank(author))
-                            factsList.add(new Fact(authorName, author));
-                    }
-                }
+                if (StringUtils.isNotBlank(author))
+                    factsList.add(new Fact(authorHeader, author));
             }
         }
     }
