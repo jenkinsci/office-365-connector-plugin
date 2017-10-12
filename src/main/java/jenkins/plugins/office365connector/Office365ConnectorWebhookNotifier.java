@@ -38,14 +38,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
-import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
-import hudson.tasks.test.AbstractTestResultAction;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.model.Macro;
@@ -68,6 +66,8 @@ import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 public final class Office365ConnectorWebhookNotifier {
 
     private static final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY).create();
+
+    private final FactsBuilder factsBuilder = new FactsBuilder();
 
     private final Run run;
     private final TaskListener listener;
@@ -155,56 +155,43 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     private Card createJobStartedCard() {
+
+        factsBuilder.addStatusStarted();
+        factsBuilder.addStartTime(run);
+        factsBuilder.addRemarks(run.getCauses());
+        addScmDetails();
+
         String jobName = run.getParent().getDisplayName();
-
-        List<Fact> factsList = new ArrayList<>();
-        factsList.add(new Fact("Status", "Build Started"));
-        factsList.add(buildStartTimeFact());
-
-        addCauses(factsList);
-
         String activityTitle = "Update from " + jobName + ".";
         String activitySubtitle = "Latest status of build #" + run.getNumber();
-        Section section = new Section(activityTitle, activitySubtitle, factsList);
+        Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
 
         List<Section> sectionList = new ArrayList<>();
         sectionList.add(section);
 
         String summary = jobName + ": Build #" + run.getNumber() + " Started";
         Card card = new Card(summary, sectionList);
-        addPotentialAction(card, factsList);
+        addPotentialAction(card);
 
         return card;
     }
 
     private Card createJobCompletedCard() {
-        List<Fact> factsList = new ArrayList<>();
         String jobName = run.getParent().getDisplayName();
         String summary = jobName + ": Build #" + run.getNumber();
 
-        Fact event = new Fact("Status");
-        factsList.add(event);
-        factsList.add(buildStartTimeFact());
+        Fact statusFact = FactsBuilder.buildStatus();
+        factsBuilder.addFact(statusFact);
+        factsBuilder.addStartTime(run);
 
         // Result is only set to a worse status in pipeline
         Result result = run.getResult() == null ? Result.SUCCESS : run.getResult();
         if (result != null) {
-            long duration = run.getDuration() == 0L
-                    ? System.currentTimeMillis() - run.getStartTimeInMillis()
-                    : run.getDuration();
-            long currentBuildCompletionTime = run.getStartTimeInMillis() + duration;
 
-            factsList.add(new Fact("Completion Time", TimeUtils.dateToString(currentBuildCompletionTime)));
+            factsBuilder.addCompletionTime(run);
+            factsBuilder.addTests(run);
 
-            AbstractTestResultAction<?> action = run.getAction(AbstractTestResultAction.class);
-            if (action != null) {
-                factsList.add(new Fact("Total Tests", action.getTotalCount()));
-                factsList.add(new Fact("Total Passed Tests", action.getTotalCount() - action.getFailCount() - action.getSkipCount()));
-                factsList.add(new Fact("Total Failed Tests", action.getFailCount()));
-                factsList.add(new Fact("Total Skipped Tests", action.getSkipCount()));
-            }
-
-            String status = null;
+            String status;
             Run previousBuild = run.getPreviousBuild();
             Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
             Run rt = run.getPreviousNotFailedBuild();
@@ -220,16 +207,19 @@ public final class Office365ConnectorWebhookNotifier {
                 summary += " Back to Normal";
 
                 if (failingSinceRun != null) {
-                    factsList.add(new Fact("Back To Normal Time", TimeUtils.durationToString(currentBuildCompletionTime - failingSinceRun.getStartTimeInMillis())));
+                    long duration = run.getDuration() == 0L
+                            ? System.currentTimeMillis() - run.getStartTimeInMillis()
+                            : run.getDuration();
+                    long currentBuildCompletionTime = run.getStartTimeInMillis() + duration;
+                    factsBuilder.addBackToNormalTime(currentBuildCompletionTime - failingSinceRun.getStartTimeInMillis());
                 }
             } else if (result == Result.FAILURE && failingSinceRun != null) {
                 if (previousResult == Result.FAILURE) {
                     status = "Repeated Failure";
                     summary += " Repeated Failure";
 
-                    factsList.add(new Fact("Failing since build", failingSinceRun.number));
-                    factsList.add(new Fact("Failing since time",
-                            TimeUtils.dateToString(failingSinceRun.getStartTimeInMillis() + failingSinceRun.getDuration())));
+                    factsBuilder.addFailingSinceBuild(failingSinceRun.number);
+                    factsBuilder.addFailingSinceTime(failingSinceRun.getStartTimeInMillis() + failingSinceRun.getDuration());
                 } else {
                     status = "Build Failed";
                     summary += " Failed";
@@ -251,17 +241,18 @@ public final class Office365ConnectorWebhookNotifier {
                 summary += " " + status;
             }
 
-            event.setValue(status);
+            statusFact.setValue(status);
         } else {
-            event.setValue(" Completed");
+            statusFact.setValue(" Completed");
             summary += " Completed";
         }
 
-        addCauses(factsList);
+        factsBuilder.addRemarks(run.getCauses());
+        addScmDetails();
 
         String activityTitle = "Update from " + jobName + ".";
         String activitySubtitle = "Latest status of build #" + run.getNumber();
-        Section section = new Section(activityTitle, activitySubtitle, factsList);
+        Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
 
         List<Section> sectionList = new ArrayList<>();
         sectionList.add(section);
@@ -274,26 +265,23 @@ public final class Office365ConnectorWebhookNotifier {
         } else {
             card.setThemeColor("FFCC5C");
         }
-        addPotentialAction(card, factsList);
+        addPotentialAction(card);
 
         return card;
     }
 
-    private Fact buildStartTimeFact() {
-        return new Fact("Start Time", TimeUtils.dateToString(run.getStartTimeInMillis()));
-    }
-
     private Card createBuildMessageCard(StepParameters stepParameters) {
         String jobName = run.getParent().getDisplayName();
-        List<Fact> factsList = new ArrayList<>();
         if (stepParameters.getStatus() != null) {
-            factsList.add(new Fact("Status", stepParameters.getStatus()));
+            Fact fact = FactsBuilder.buildStatus();
+            fact.setValue(stepParameters.getStatus());
+            factsBuilder.addFact(fact);
         } else {
-            factsList.add(new Fact("Status", "Running"));
+            factsBuilder.addStatusRunning();
         }
 
         String activityTitle = "Message from " + jobName + ", Build #" + run.getNumber() + "";
-        Section section = new Section(activityTitle, stepParameters.getMessage(), factsList);
+        Section section = new Section(activityTitle, stepParameters.getMessage(), factsBuilder.collect());
 
         List<Section> sectionList = new ArrayList<>();
         sectionList.add(section);
@@ -305,7 +293,7 @@ public final class Office365ConnectorWebhookNotifier {
             card.setThemeColor(stepParameters.getColor());
         }
 
-        addPotentialAction(card, factsList);
+        addPotentialAction(card);
 
         return card;
     }
@@ -361,18 +349,11 @@ public final class Office365ConnectorWebhookNotifier {
                 || (result == Result.UNSTABLE && webhook.isNotifyUnstable()));
     }
 
-    private void addScmDetails(List<Fact> factsList) {
+    private void addScmDetails() {
         try {
             if (run instanceof AbstractBuild) {
                 AbstractBuild build = (AbstractBuild) run;
-                Set<User> users = build.getCulprits();
-                if (users != null) {
-                    Set<String> culprits = new HashSet<>();
-                    for (User user : users) {
-                        culprits.add(user.getFullName());
-                    }
-                    factsList.add(new Fact("Culprits", StringUtils.join(culprits, ", ")));
-                }
+                factsBuilder.addCulprits(run.getResult(), build.getCulprits());
 
                 ChangeLogSet changeSet = build.getChangeSet();
                 List<ChangeLogSet.Entry> entries = new LinkedList<>();
@@ -383,49 +364,39 @@ public final class Office365ConnectorWebhookNotifier {
                     files.addAll(getAffectedFiles(entry));
                 }
                 if (!entries.isEmpty()) {
-                    Set<String> authors = new HashSet<>();
+                    Set<User> authors = new HashSet<>();
                     for (ChangeLogSet.Entry entry : entries) {
-                        authors.add(entry.getAuthor().getFullName());
+                        authors.add(entry.getAuthor());
                     }
 
-                    if (!authors.isEmpty()) {
-                        factsList.add(new Fact("Developers", StringUtils.join(authors, ", ")));
-                    }
-
-                    if (!files.isEmpty()) {
-                        factsList.add(new Fact("Number Of Files Changed", files.size()));
-                    }
+                    factsBuilder.addDevelopers(authors);
+                    factsBuilder.addNumberOfFilesChanged(files);
                 }
             } else {
                 try {
+                    // newer Jenkins uses jenkins.scm.RunWithSCM interface so such casting is not needed
+                    Method getCulprits = run.getClass().getMethod("getCulprits");
+                    @SuppressWarnings("unchecked")
+                    Set<User> users = (Set<User>) getCulprits.invoke(run);
+                    factsBuilder.addCulprits(run.getResult(), users);
+
                     Method getChangeSets = run.getClass().getMethod("getChangeSets");
-                    if (List.class.isAssignableFrom(getChangeSets.getReturnType())) {
-                        @SuppressWarnings("unchecked")
-                        List<ChangeLogSet<ChangeLogSet.Entry>> sets = (List<ChangeLogSet<ChangeLogSet.Entry>>) getChangeSets.invoke(run);
-                        Set<String> authors = new HashSet<>();
-                        Set<ChangeLogSet.AffectedFile> files = new HashSet<>();
-                        if (Iterables.all(sets, Predicates.instanceOf(ChangeLogSet.class))) {
-                            for (ChangeLogSet<ChangeLogSet.Entry> set : sets) {
-                                for (ChangeLogSet.Entry entry : set) {
-                                    authors.add(entry.getAuthor().getFullName());
-                                    files.addAll(getAffectedFiles(entry));
-                                }
+                    @SuppressWarnings("unchecked")
+                    List<ChangeLogSet<ChangeLogSet.Entry>> sets = (List<ChangeLogSet<ChangeLogSet.Entry>>) getChangeSets.invoke(run);
+                    Set<User> authors = new HashSet<>();
+                    Set<ChangeLogSet.AffectedFile> files = new HashSet<>();
+                    if (Iterables.all(sets, Predicates.instanceOf(ChangeLogSet.class))) {
+                        for (ChangeLogSet<ChangeLogSet.Entry> set : sets) {
+                            for (ChangeLogSet.Entry entry : set) {
+                                authors.add(entry.getAuthor());
+                                files.addAll(getAffectedFiles(entry));
                             }
-                        }
-                        Result runResult = run.getResult();
-
-                        if (!authors.isEmpty()) {
-                            if (runResult != null && runResult.isWorseThan(Result.SUCCESS)) {
-                                factsList.add(new Fact("Culprits", StringUtils.join(authors, ", ")));
-                            }
-
-                            factsList.add(new Fact("Developers", StringUtils.join(authors, ", ")));
-                        }
-
-                        if (!files.isEmpty()) {
-                            factsList.add(new Fact("Number of Files Changed", files.size()));
                         }
                     }
+
+                    factsBuilder.addDevelopers(authors);
+                    factsBuilder.addNumberOfFilesChanged(files);
+
                 } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
                     e.printStackTrace(listener.error(String.format("Exception getting changesets for %s: %s", run, e)));
                 }
@@ -444,7 +415,7 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    private void addPotentialAction(Card card, List<Fact> factsList) {
+    private void addPotentialAction(Card card) {
         String urlString = DisplayURLProvider.get().getRunURL(run);
         String build = Messages.Office365ConnectorWebhookNotifier_BuildPronoun();
         String viewHeader = Messages.Office365ConnectorWebhookNotifier_ViewHeader(build);
@@ -452,20 +423,7 @@ public final class Office365ConnectorWebhookNotifier {
         List<PotentialAction> paList = new ArrayList<>();
         paList.add(viewBuildPotentialAction);
         card.setPotentialAction(paList);
-        pullRequestActionable(paList, factsList);
-    }
-
-    private void addCauses(List<Fact> factsList) {
-        List<Cause> causes = run.getCauses();
-        if (causes != null) {
-            StringBuilder causesStr = new StringBuilder();
-            for (Cause cause : causes) {
-                causesStr.append(cause.getShortDescription()).append(". ");
-            }
-            String cause = causesStr.toString();
-            factsList.add(new Fact("Remarks", cause));
-            addScmDetails(factsList);
-        }
+        pullRequestActionable(paList);
     }
 
     private String evaluateMacro(String template) {
@@ -477,7 +435,7 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    private void pullRequestActionable(List<PotentialAction> paList, List<Fact> factsList) {
+    private void pullRequestActionable(List<PotentialAction> paList) {
         Job job = run.getParent();
         SCMHead head = SCMHead.HeadByItem.findHead(job);
         if (head instanceof ChangeRequestSCMHead) {
@@ -494,18 +452,17 @@ public final class Office365ConnectorWebhookNotifier {
                 String urlString = oma.getObjectUrl();
                 PotentialAction viewPRPotentialAction = new PotentialAction(viewHeader, urlString);
                 paList.add(viewPRPotentialAction);
-                factsList.add(new Fact(titleHeader, oma.getObjectDisplayName()));
+                factsBuilder.addFact(titleHeader, oma.getObjectDisplayName());
             }
             ContributorMetadataAction cma = job.getAction(ContributorMetadataAction.class);
             if (cma != null) {
                 String contributor = cma.getContributor();
                 String contributorDisplayName = cma.getContributorDisplayName();
                 String author = StringUtils.defaultIfBlank(cma.getContributor(), cma.getContributorDisplayName());
-                if (StringUtils.isNotBlank(contributor) && StringUtils.isNotBlank(contributorDisplayName))
+                if (StringUtils.isNotBlank(contributor) && StringUtils.isNotBlank(contributorDisplayName)) {
                     author = String.format("%s (%s)", cma.getContributor(), cma.getContributorDisplayName());
-
-                if (StringUtils.isNotBlank(author))
-                    factsList.add(new Fact(authorHeader, author));
+                }
+                factsBuilder.addFact(authorHeader, author);
             }
         }
     }
