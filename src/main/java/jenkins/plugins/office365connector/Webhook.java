@@ -19,6 +19,7 @@ import java.util.List;
 
 import hudson.Util;
 import hudson.util.FormValidation;
+import jenkins.plugins.office365connector.model.Macro;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
