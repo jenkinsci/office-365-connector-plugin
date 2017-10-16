@@ -59,6 +59,7 @@ import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.metadata.ContributorMetadataAction;
 import jenkins.scm.api.metadata.ObjectMetadataAction;
 import jenkins.scm.api.mixin.ChangeRequestSCMHead;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
@@ -330,7 +331,7 @@ public final class Office365ConnectorWebhookNotifier {
      * @return <code>true</code> if at least one macro has matched, <code>false</code> otherwise
      */
     private boolean isAtLeastOneRuleMatched(Webhook webhook) {
-        if (webhook.getMacros().isEmpty()) {
+        if (CollectionUtils.isEmpty(webhook.getMacros())) {
             return true;
         } else {
             for (Macro macro : webhook.getMacros()) {
