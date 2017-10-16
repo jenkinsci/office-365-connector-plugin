@@ -76,18 +76,5 @@ public class Section {
     public void setActivitySubtitle(String activitySubtitle) {
         this.activitySubtitle = activitySubtitle;
     }
-/*
-    @Override
-    public String toString()
-    {
-        String temp;
-        temp = "{\"markdown\": "+markdown+",\"facts\": [";
-        for (Fact fact: this.facts) {
-            temp += fact.toString();
-        }
-        temp += "],"+", \"activityTitle\": \""+activityTitle+"\"}";
-        
-        return temp;
-    }*/
 
 }

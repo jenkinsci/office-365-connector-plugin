@@ -51,4 +51,3 @@ public class Office365ConnectorBuildListener extends RunListener<Run> {
         notifier.sendBuildCompleteNotification();
     }
 }
-

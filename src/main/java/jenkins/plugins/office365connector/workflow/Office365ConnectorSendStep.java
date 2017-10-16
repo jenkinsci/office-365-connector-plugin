@@ -1,26 +1,43 @@
 package jenkins.plugins.office365connector.workflow;
 
+import java.util.Set;
+import javax.annotation.Nonnull;
+
+import com.google.common.collect.ImmutableSet;
 import hudson.Extension;
+import hudson.Util;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import javax.inject.Inject;
+import hudson.util.FormValidation;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import jenkins.plugins.office365connector.util.FormUtils;
+import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
 
 /**
  * Workflow step to send a notification to Jenkins office 365 connector.
  */
-public class Office365ConnectorSendStep extends AbstractStepImpl {
+public class Office365ConnectorSendStep extends Step {
 
-    private String message;
     private final String webhookUrl;
+    private String message;
     private String status;
     private String color;
+
+    @DataBoundConstructor
+    public Office365ConnectorSendStep(String webhookUrl) {
+        this.webhookUrl = Util.fixEmptyAndTrim(webhookUrl);
+    }
+
+    public String getWebhookUrl() {
+        return webhookUrl;
+    }
 
     public String getMessage() {
         return message;
@@ -28,11 +45,7 @@ public class Office365ConnectorSendStep extends AbstractStepImpl {
 
     @DataBoundSetter
     public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getWebhookUrl() {
-        return webhookUrl;
+        this.message = Util.fixEmptyAndTrim(message);
     }
 
     public String getStatus() {
@@ -41,7 +54,7 @@ public class Office365ConnectorSendStep extends AbstractStepImpl {
 
     @DataBoundSetter
     public void setStatus(String status) {
-        this.status = status;
+        this.status = Util.fixEmptyAndTrim(status);
     }
 
     public String getColor() {
@@ -50,19 +63,20 @@ public class Office365ConnectorSendStep extends AbstractStepImpl {
 
     @DataBoundSetter
     public void setColor(String color) {
-        this.color = color;
+        this.color = Util.fixEmptyAndTrim(color);
     }
 
-    @DataBoundConstructor
-    public Office365ConnectorSendStep(String webhookUrl) {
-        this.webhookUrl = webhookUrl;
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new Execution(this, context);
     }
 
     @Extension
-    public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+    public static class DescriptorImpl extends StepDescriptor {
 
-        public DescriptorImpl() {
-            super(Office365ConnectorSendStepExecution.class);
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return ImmutableSet.of(Run.class, TaskListener.class);
         }
 
         @Override
@@ -71,28 +85,35 @@ public class Office365ConnectorSendStep extends AbstractStepImpl {
         }
 
         @Override
+        @Nonnull
         public String getDisplayName() {
             return "office365ConnectorSend";
         }
+
+        public FormValidation doCheckWebhookUrl(@QueryParameter String value) {
+            return FormUtils.formValidateUrl(value);
+        }
+
     }
 
-    public static class Office365ConnectorSendStepExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {
+    public static class Execution extends SynchronousNonBlockingStepExecution<Void> {
 
         private static final long serialVersionUID = 1L;
 
-        @Inject
-        transient Office365ConnectorSendStep step;
+        private transient final Office365ConnectorSendStep step;
 
-        @StepContextParameter
-        transient TaskListener listener;
-
-        @StepContextParameter
-        transient Run run;
+        public Execution(Office365ConnectorSendStep step, StepContext context) {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected Void run() throws Exception {
             StepParameters stepParameters = new StepParameters(step.message, step.webhookUrl, step.status, step.color);
-            Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, listener);
+            Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(
+                    getContext().get(Run.class),
+                    getContext().get(TaskListener.class)
+            );
             notifier.sendBuildMessage(stepParameters);
             return null;
         }
