@@ -11,29 +11,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jenkins.plugins.office365connector;
+package jenkins.plugins.office365connector.model;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
+/**
+ * Defines template and expected value for the macro.
+ *
+ * @author Damian Szczepanik (damianszczepanik@github)
+ */
 public class Macro {
 
-    /** Template that will be evaluated. */
-    private String template;
+    /**
+     * Template that will be evaluated.
+     */
+    private final String template;
 
-    /** Expected value of the evaluated {@link #template}. */
-    private String value;
+    /**
+     * Expected value of the evaluated {@link #template}.
+     */
+    private final String value;
 
     @DataBoundConstructor
     public Macro(String template, String value) {
-            this.template = template;
-            this.value = value;
+        this.template = template;
+        this.value = value;
     }
 
     public String getTemplate() {
-            return template;
+        return template;
     }
 
     public String getValue() {
-            return value;
+        return value;
     }
 }

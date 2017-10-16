@@ -52,6 +52,7 @@ import jenkins.branch.BranchProjectFactory;
 import jenkins.branch.MultiBranchProject;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Fact;
+import jenkins.plugins.office365connector.model.Macro;
 import jenkins.plugins.office365connector.model.PotentialAction;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.StepParameters;

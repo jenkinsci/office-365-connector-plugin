@@ -20,8 +20,8 @@ import java.util.List;
  * @author srhebbar
  */
 public class Fact {
-    private String name;
 
+    private String name;
     private String value;
 
     public Fact(String name, String value) {
