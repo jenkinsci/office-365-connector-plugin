@@ -22,7 +22,7 @@
             </f:entry>
 
             <f:entry title="Notify Failure" field="notifyFailure">
-                <f:checkbox />
+                <f:checkbox default="true" />
             </f:entry>
 
             <f:entry title="Notify Not Built" field="notifyNotBuilt">
@@ -30,15 +30,15 @@
             </f:entry>
 
             <f:entry title="Notify Success" field="notifySuccess">
-                <f:checkbox />
+                <f:checkbox default="true" />
             </f:entry>
 
             <f:entry title="Notify Unstable" field="notifyUnstable">
-                <f:checkbox />
+                <f:checkbox default="true" />
             </f:entry>
 
             <f:entry title="Notify Back To Normal" field="notifyBackToNormal">
-                <f:checkbox />
+                <f:checkbox default="true" />
             </f:entry>
 
             <f:entry title="Notify Repeated Failure" field="notifyRepeatedFailure">
