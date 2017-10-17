@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
+import hudson.Util;
 
 /**
  *
@@ -41,7 +42,7 @@ public class PotentialAction
         this.context = "http://schema.org";
         this.type = "ViewAction";
         this.name = name;
-        this.target = url;
+        this.target = Util.fixNull(url);
     }
 
     public String getName ()
@@ -83,11 +84,5 @@ public class PotentialAction
     {
         this.type = type;
     }
-    
-    @Override
-    public String toString()
-    {
-        String temp = "{\"@context\": \""+context+"\"," +"\"@type\": \""+type+"\",\"name\": \""+name+"\", \"target\": [\"" + target + "\"]}";
-        return temp;
-    }
+
 }

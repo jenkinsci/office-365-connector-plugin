@@ -20,8 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -133,19 +131,8 @@ public final class Office365ConnectorWebhookNotifier {
 
         WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
         if (property == null) {
-            String webhookUrl = stepParameters.getWebhookUrl();
-            if (StringUtils.isBlank(webhookUrl)) {
-                listener.getLogger().println("No URL provided");
-                return;
-            }
-            try {
-                new URL(webhookUrl);
-                Webhook webhook = new Webhook(webhookUrl);
-                executeWorker(webhook, card);
-            } catch (MalformedURLException e) {
-                listener.getLogger().println("Malformed URL provided");
-                return;
-            }
+            Webhook webhook = new Webhook(stepParameters.getWebhookUrl());
+            executeWorker(webhook, card);
             return;
         }
 

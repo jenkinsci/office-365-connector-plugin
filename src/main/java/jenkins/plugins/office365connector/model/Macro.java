@@ -13,6 +13,12 @@
  */
 package jenkins.plugins.office365connector.model;
 
+import javax.annotation.Nonnull;
+
+import hudson.Extension;
+import hudson.Util;
+import hudson.model.AbstractDescribableImpl;
+import hudson.model.Descriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
@@ -20,7 +26,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
  *
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class Macro {
+public class Macro extends AbstractDescribableImpl<Macro> {
 
     /**
      * Template that will be evaluated.
@@ -34,8 +40,8 @@ public class Macro {
 
     @DataBoundConstructor
     public Macro(String template, String value) {
-        this.template = template;
-        this.value = value;
+        this.template = Util.fixEmptyAndTrim(template);
+        this.value = Util.fixEmptyAndTrim(value);
     }
 
     public String getTemplate() {
@@ -44,5 +50,16 @@ public class Macro {
 
     public String getValue() {
         return value;
+    }
+
+    @Extension
+    public static class DescriptorImpl extends Descriptor<Macro> {
+
+        @Nonnull
+        @Override
+        public String getDisplayName() {
+            return "Macro";
+        }
+
     }
 }
