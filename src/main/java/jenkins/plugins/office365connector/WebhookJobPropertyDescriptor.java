@@ -22,12 +22,14 @@ import hudson.model.JobPropertyDescriptor;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * Job Property Descriptor.
  */
 @Extension
+@Symbol("office365ConnectorWebhooks")
 public final class WebhookJobPropertyDescriptor extends JobPropertyDescriptor {
 
     public WebhookJobPropertyDescriptor() {
