@@ -11,6 +11,7 @@ import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.util.FormUtils;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -72,6 +73,7 @@ public class Office365ConnectorSendStep extends Step {
     }
 
     @Extension
+    @Symbol("office365ConnectorSend")
     public static class DescriptorImpl extends StepDescriptor {
 
         @Override
