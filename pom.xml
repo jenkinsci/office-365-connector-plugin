@@ -24,22 +24,31 @@
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Office+365+Connector+Plugin</url>
 
     <properties>
-        <powermock.version>1.6.1</powermock.version>
+        <powermock.version>1.6.6</powermock.version>
         <jenkins.version>1.651.2</jenkins.version>
+        <workflow.version>2.13</workflow.version>
         <java.level>7</java.level>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.2.4</version>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.10.8</version>
+            <artifactId>mockito-core</artifactId>
+            <version>1.10.19</version>
             <scope>test</scope>
+            <!-- powermock wants objenesis 2.4 and mockito wants objenesis 2.1 -->
+            <!-- exclude from mockito so that powermock version is used -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.objenesis</groupId>
+                    <artifactId>objenesis</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
@@ -65,18 +74,24 @@
             <version>5.1.6</version>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.jmockit</groupId>
             <artifactId>jmockit</artifactId>
             <version>1.33</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
+            <version>${workflow.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
 
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.2.4</version>
+        </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>junit</artifactId>
@@ -86,7 +101,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
-            <version>2.7</version>
+            <version>${workflow.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
