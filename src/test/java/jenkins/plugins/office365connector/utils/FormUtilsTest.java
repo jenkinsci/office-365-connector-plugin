@@ -1,10 +1,9 @@
-package jenkins.plugins.office365connector;
+package jenkins.plugins.office365connector.utils;
 
 import java.util.Arrays;
 import java.util.Collection;
 
 import hudson.util.FormValidation;
-import jenkins.plugins.office365connector.util.FormUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -14,7 +13,7 @@ import org.junit.runners.Parameterized.Parameters;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Parameterized.class)
-public class ValidateUrlTest {
+public class FormUtilsTest {
 
     private static final FormValidation.Kind OK = FormValidation.Kind.OK;
     private static final FormValidation.Kind ERROR = FormValidation.Kind.ERROR;

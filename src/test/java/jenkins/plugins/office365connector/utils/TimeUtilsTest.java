@@ -1,4 +1,4 @@
-package jenkins.plugins.office365connector;
+package jenkins.plugins.office365connector.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.junit.AfterClass;
+import jenkins.plugins.office365connector.utils.TimeUtils;
 import org.junit.Test;
 
 /**

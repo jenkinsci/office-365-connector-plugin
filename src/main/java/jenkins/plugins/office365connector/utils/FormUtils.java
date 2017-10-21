@@ -1,4 +1,4 @@
-package jenkins.plugins.office365connector.util;
+package jenkins.plugins.office365connector.utils;
 
 import hudson.util.FormValidation;
 import org.apache.commons.lang.StringUtils;

@@ -24,6 +24,7 @@ import hudson.model.Run;
 import hudson.model.User;
 import hudson.tasks.test.AbstractTestResultAction;
 import jenkins.plugins.office365connector.model.Fact;
+import jenkins.plugins.office365connector.utils.TimeUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
