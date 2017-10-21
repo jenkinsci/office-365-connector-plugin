@@ -6,22 +6,29 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
+import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import jenkins.plugins.office365connector.helpers.ChangeLogSetBuilder;
+import hudson.scm.ChangeLogSet;
+import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.HttpWorkerAnswer;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
+import jenkins.plugins.office365connector.utils.TimeUtilsTest;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,25 +43,33 @@ import org.powermock.modules.junit4.PowerMockRunner;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({DisplayURLProvider.class, Office365ConnectorWebhookNotifier.class, Run.class})
-public class Office365ConnectorWebhookNotifierTestInt {
+public class Office365ConnectorWebhookNotifierIntegrationTest {
+
+    private static final String REQUESTS_DIRECTORY = "requests" + File.separatorChar;
 
     public static final String JOB_NAME = "myFirstJob";
+
+    private static final String CAUSE_DESCRIPTION = "Started by John";
     private static final int BUILD_NUMBER = 167;
     private static final long START_TIME = 1508617305000L;
 
     private AbstractBuild run;
     private HttpWorkerAnswer workerAnswer;
 
+    static {
+        TimeUtilsTest.setupTimeZoneAndLocale();
+    }
+
     @Before
     public void setUp() {
         mockListener();
 
         run = mockRun();
-        when(run.getChangeSet()).thenReturn(new ChangeLogSetBuilder(run));
 
         mockDisplayURLProvider();
         mockEnvironment();
         mockHttpWorker();
+        mockGetChangeSets();
     }
 
     private AbstractBuild mockRun() {
@@ -69,6 +84,11 @@ public class Office365ConnectorWebhookNotifierTestInt {
         // getProperty
         WebhookJobProperty property = new WebhookJobProperty(WebhookBuilder.sampleWebhookWithAllStatuses());
         when(job.getProperty(WebhookJobProperty.class)).thenReturn(property);
+
+        // remarks
+        Cause cause = mock(Cause.class);
+        when(cause.getShortDescription()).thenReturn(CAUSE_DESCRIPTION);
+        when(run.getCauses()).thenReturn(Arrays.asList(cause));
 
         return run;
     }
@@ -115,6 +135,11 @@ public class Office365ConnectorWebhookNotifierTestInt {
         }
     }
 
+    private void mockGetChangeSets() {
+        List<ChangeLogSet> files = new AffectedFileBuilder().sampleFiles(run);
+        when(run.getChangeSets()).thenReturn(files);
+    }
+
 
     @Test
     public void validateRequest_OnStart() {
@@ -126,12 +151,17 @@ public class Office365ConnectorWebhookNotifierTestInt {
         notifier.sendBuildStartedNotification(true);
 
         // then
-        assertThat(workerAnswer.getData()).isEqualTo(pathToSampleFile("requests/started.json"));
+        assertHasSameContent(workerAnswer.getData(), getContentFile("started.json"));
     }
 
-    protected static String pathToSampleFile(String fileName) {
+    // compares files without worrying about EOL
+    private void assertHasSameContent(String value, String expected) {
+        assertThat(StringUtils.normalizeSpace(value)).isEqualTo(StringUtils.normalizeSpace(expected));
+    }
+
+    protected static String getContentFile(String fileName) {
         try {
-            URL url = Office365ConnectorWebhookNotifierTestInt.class.getClassLoader().getResource(fileName);
+            URL url = Office365ConnectorWebhookNotifierIntegrationTest.class.getClassLoader().getResource(REQUESTS_DIRECTORY + fileName);
             return IOUtils.toString(url.toURI(), StandardCharsets.UTF_8);
         } catch (IOException | URISyntaxException e) {
             throw new IllegalArgumentException(e);
