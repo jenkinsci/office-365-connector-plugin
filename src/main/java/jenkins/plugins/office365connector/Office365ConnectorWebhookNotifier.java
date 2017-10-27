@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.RejectedExecutionException;
@@ -301,22 +300,17 @@ public final class Office365ConnectorWebhookNotifier {
                 factsBuilder.addCulprits(run.getResult(), build.getCulprits());
 
                 ChangeLogSet changeSet = build.getChangeSet();
-                List<ChangeLogSet.Entry> entries = new LinkedList<>();
                 Set<ChangeLogSet.AffectedFile> files = new HashSet<>();
+                Set<User> authors = new HashSet<>();
+
                 for (Object o : changeSet.getItems()) {
                     ChangeLogSet.Entry entry = (ChangeLogSet.Entry) o;
-                    entries.add(entry);
+                    authors.add(entry.getAuthor());
                     files.addAll(getAffectedFiles(entry));
                 }
-                if (!entries.isEmpty()) {
-                    Set<User> authors = new HashSet<>();
-                    for (ChangeLogSet.Entry entry : entries) {
-                        authors.add(entry.getAuthor());
-                    }
 
-                    factsBuilder.addDevelopers(authors);
-                    factsBuilder.addNumberOfFilesChanged(files);
-                }
+                factsBuilder.addDevelopers(authors);
+                factsBuilder.addNumberOfFilesChanged(files.size());
             } else {
                 try {
                     // newer Jenkins uses jenkins.scm.RunWithSCM interface so such casting is not needed
@@ -340,7 +334,7 @@ public final class Office365ConnectorWebhookNotifier {
                     }
 
                     factsBuilder.addDevelopers(authors);
-                    factsBuilder.addNumberOfFilesChanged(files);
+                    factsBuilder.addNumberOfFilesChanged(files.size());
 
                 } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
                     e.printStackTrace(listener.error(String.format("Exception getting changesets for %s: %s", run, e)));

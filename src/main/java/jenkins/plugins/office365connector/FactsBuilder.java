@@ -22,7 +22,6 @@ import hudson.model.Cause;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.User;
-import hudson.scm.ChangeLogSet;
 import hudson.tasks.test.AbstractTestResultAction;
 import jenkins.plugins.office365connector.model.Fact;
 import org.apache.commons.collections.CollectionUtils;
@@ -127,13 +126,13 @@ public class FactsBuilder {
             return;
         }
         facts.add(new Fact(NAME_DEVELOPERS, StringUtils.join(authors, ", ")));
-
     }
 
-    public void addNumberOfFilesChanged(Set<ChangeLogSet.AffectedFile> files) {
-        if (CollectionUtils.isEmpty(files)) {
-            facts.add(new Fact(NAME_NUMBER_OF_CHANGED_FILES, files.size()));
+    public void addNumberOfFilesChanged(int files) {
+        if (files == 0) {
+            return;
         }
+        facts.add(new Fact(NAME_NUMBER_OF_CHANGED_FILES, files));
     }
 
     public void addTests(Run run) {
