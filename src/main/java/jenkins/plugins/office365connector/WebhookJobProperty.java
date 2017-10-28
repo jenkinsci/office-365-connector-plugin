@@ -25,10 +25,9 @@ import org.kohsuke.stapler.DataBoundConstructor;
 /**
  * Job Property.
  */
-public class WebhookJobProperty extends
-        JobProperty<AbstractProject<?, ?>> {
+public class WebhookJobProperty extends JobProperty<AbstractProject<?, ?>> {
 
-    public final List<Webhook> webhooks;
+    private final List<Webhook> webhooks;
 
     @DataBoundConstructor
     public WebhookJobProperty(List<Webhook> webhooks) {
