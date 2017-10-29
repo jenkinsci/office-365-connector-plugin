@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Set;
 
 import hudson.model.Cause;
-import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.User;
 import hudson.tasks.test.AbstractTestResultAction;
@@ -53,6 +52,11 @@ public class FactsBuilder {
     final static String NAME_PASSED_TESTS = "Passed tests";
 
     private final List<Fact> facts = new ArrayList<>();
+    private final Run run;
+
+    public FactsBuilder(Run run) {
+        this.run = run;
+    }
 
     public void addStatusStarted() {
         facts.add(new Fact(NAME_STATUS, "Started"));
@@ -66,7 +70,7 @@ public class FactsBuilder {
         return new Fact(NAME_STATUS);
     }
 
-    public void addStartTime(Run run) {
+    public void addStartTime() {
         facts.add(new Fact(NAME_START_TIME, TimeUtils.dateToString(run.getStartTimeInMillis())));
     }
 
@@ -74,11 +78,11 @@ public class FactsBuilder {
         facts.add(new Fact(NAME_BACK_TO_NORMAL_TIME, TimeUtils.dateToString(duration)));
     }
 
-    public void addCompletionTime(Run run) {
-        facts.add(new Fact(NAME_COMPLETION_TIME, TimeUtils.dateToString(countCompletionTime(run))));
+    public void addCompletionTime() {
+        facts.add(new Fact(NAME_COMPLETION_TIME, TimeUtils.dateToString(countCompletionTime())));
     }
 
-    private long countCompletionTime(Run run) {
+    private long countCompletionTime() {
         long duration = run.getDuration() == 0L
                 ? System.currentTimeMillis() - run.getStartTimeInMillis()
                 : run.getDuration();
@@ -93,7 +97,8 @@ public class FactsBuilder {
         facts.add(new Fact(NAME_FAILING_SINCE_BUILD, buildNumber));
     }
 
-    public void addRemarks(List<Cause> causes) {
+    public void addRemarks() {
+        List<Cause> causes = run.getCauses();
         if (CollectionUtils.isEmpty(causes)) {
             return;
         }
@@ -105,11 +110,8 @@ public class FactsBuilder {
         facts.add(new Fact(NAME_REMARKS, causesStr.toString()));
     }
 
-    public void addCulprits(Result result, Set<User> authors) {
+    public void addCulprits(Set<User> authors) {
         if (CollectionUtils.isEmpty(authors)) {
-            return;
-        }
-        if (result == null || result.isBetterThan(Result.UNSTABLE)) {
             return;
         }
 
@@ -136,7 +138,7 @@ public class FactsBuilder {
         facts.add(new Fact(NAME_NUMBER_OF_CHANGED_FILES, files));
     }
 
-    public void addTests(Run run) {
+    public void addTests() {
         AbstractTestResultAction<?> action = run.getAction(AbstractTestResultAction.class);
         if (action == null) {
             return;

@@ -18,7 +18,6 @@ package jenkins.plugins.office365connector;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -51,7 +50,7 @@ public final class Office365ConnectorWebhookNotifier {
 
     private static final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY).create();
 
-    private final FactsBuilder factsBuilder = new FactsBuilder();
+    private final FactsBuilder factsBuilder;
 
     private final DecisionMaker decisionMaker;
     private final Run run;
@@ -62,6 +61,7 @@ public final class Office365ConnectorWebhookNotifier {
     public Office365ConnectorWebhookNotifier(Run run, TaskListener listener) {
         this.run = run;
         this.listener = listener;
+        this.factsBuilder = new FactsBuilder(run);
         this.decisionMaker = new DecisionMaker(run, listener);
         potentialActionBuilder = new ActionableBuilder(run, factsBuilder);
     }
@@ -135,8 +135,8 @@ public final class Office365ConnectorWebhookNotifier {
     private Card createJobStartedCard() {
 
         factsBuilder.addStatusStarted();
-        factsBuilder.addStartTime(run);
-        factsBuilder.addRemarks(run.getCauses());
+        factsBuilder.addStartTime();
+        factsBuilder.addRemarks();
         addScmDetails();
 
         String jobName = run.getParent().getDisplayName();
@@ -160,14 +160,14 @@ public final class Office365ConnectorWebhookNotifier {
 
         Fact statusFact = FactsBuilder.buildStatus();
         factsBuilder.addFact(statusFact);
-        factsBuilder.addStartTime(run);
+        factsBuilder.addStartTime();
 
         // Result is only set to a worse status in pipeline
         Result result = run.getResult() == null ? Result.SUCCESS : run.getResult();
         if (result != null) {
 
-            factsBuilder.addCompletionTime(run);
-            factsBuilder.addTests(run);
+            factsBuilder.addCompletionTime();
+            factsBuilder.addTests();
 
             String status;
             Run previousBuild = run.getPreviousBuild();
@@ -225,7 +225,7 @@ public final class Office365ConnectorWebhookNotifier {
             summary += " Completed";
         }
 
-        factsBuilder.addRemarks(run.getCauses());
+        factsBuilder.addRemarks();
         addScmDetails();
 
         String activityTitle = "Update from " + jobName + ".";
@@ -288,54 +288,31 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     private void addScmDetails() {
+        Set<User> users;
+        List<ChangeLogSet<ChangeLogSet.Entry>> sets;
+
         try {
-            if (run instanceof AbstractBuild) {
-                AbstractBuild build = (AbstractBuild) run;
-                factsBuilder.addCulprits(run.getResult(), build.getCulprits());
+            users = (Set<User>) run.getClass().getMethod("getCulprits").invoke(run);
+            sets = (List<ChangeLogSet<ChangeLogSet.Entry>>) run.getClass().getMethod("getChangeSets").invoke(run);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            users = Collections.emptySet();
+            sets = Collections.emptyList();
+        }
 
-                ChangeLogSet changeSet = build.getChangeSet();
-                Set<ChangeLogSet.AffectedFile> files = new HashSet<>();
-                Set<User> authors = new HashSet<>();
-
-                for (Object o : changeSet.getItems()) {
-                    ChangeLogSet.Entry entry = (ChangeLogSet.Entry) o;
-                    authors.add(entry.getAuthor());
-                    files.addAll(getAffectedFiles(entry));
-                }
-
-                factsBuilder.addDevelopers(authors);
-                factsBuilder.addNumberOfFilesChanged(files.size());
-            } else {
-                try {
-                    // newer Jenkins uses jenkins.scm.RunWithSCM interface so such casting is not needed
-                    Method getCulprits = run.getClass().getMethod("getCulprits");
-                    @SuppressWarnings("unchecked")
-                    Set<User> users = (Set<User>) getCulprits.invoke(run);
-                    factsBuilder.addCulprits(run.getResult(), users);
-
-                    Method getChangeSets = run.getClass().getMethod("getChangeSets");
-                    @SuppressWarnings("unchecked")
-                    List<ChangeLogSet<ChangeLogSet.Entry>> sets = (List<ChangeLogSet<ChangeLogSet.Entry>>) getChangeSets.invoke(run);
-                    Set<User> authors = new HashSet<>();
-                    Set<ChangeLogSet.AffectedFile> files = new HashSet<>();
-                    if (Iterables.all(sets, Predicates.instanceOf(ChangeLogSet.class))) {
-                        for (ChangeLogSet<ChangeLogSet.Entry> set : sets) {
-                            for (ChangeLogSet.Entry entry : set) {
-                                authors.add(entry.getAuthor());
-                                files.addAll(getAffectedFiles(entry));
-                            }
-                        }
+        factsBuilder.addCulprits(users);
+        if (!sets.isEmpty()) {
+            Set<User> authors = new HashSet<>();
+            Set<ChangeLogSet.AffectedFile> files = new HashSet<>();
+            if (Iterables.all(sets, Predicates.instanceOf(ChangeLogSet.class))) {
+                for (ChangeLogSet<ChangeLogSet.Entry> set : sets) {
+                    for (ChangeLogSet.Entry entry : set) {
+                        authors.add(entry.getAuthor());
+                        files.addAll(getAffectedFiles(entry));
                     }
-
-                    factsBuilder.addDevelopers(authors);
-                    factsBuilder.addNumberOfFilesChanged(files.size());
-
-                } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-                    e.printStackTrace(listener.error(String.format("Exception getting changesets for %s: %s", run, e)));
                 }
             }
-        } catch (SecurityException | IllegalArgumentException e) {
-            e.printStackTrace(listener.error(String.format("Unable to cast run to abstract build. %s", e)));
+            factsBuilder.addDevelopers(authors);
+            factsBuilder.addNumberOfFilesChanged(files.size());
         }
     }
 
