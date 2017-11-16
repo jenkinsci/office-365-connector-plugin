@@ -33,7 +33,6 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import hudson.model.AbstractBuild;
-import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -41,17 +40,9 @@ import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Fact;
-import jenkins.plugins.office365connector.model.Macro;
-import jenkins.plugins.office365connector.model.PotentialAction;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.StepParameters;
-import jenkins.scm.api.SCMHead;
-import jenkins.scm.api.metadata.ContributorMetadataAction;
-import jenkins.scm.api.metadata.ObjectMetadataAction;
-import jenkins.scm.api.mixin.ChangeRequestSCMHead;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 
 /**
  * @author srhebbar
@@ -66,10 +57,13 @@ public final class Office365ConnectorWebhookNotifier {
     private final Run run;
     private final TaskListener listener;
 
+    private final ActionableBuilder potentialActionBuilder;
+
     public Office365ConnectorWebhookNotifier(Run run, TaskListener listener) {
         this.run = run;
         this.listener = listener;
         this.decisionMaker = new DecisionMaker(run, listener);
+        potentialActionBuilder = new ActionableBuilder(run, factsBuilder);
     }
 
     public void sendBuildStartedNotification(boolean isFromPreBuild) {
@@ -155,7 +149,7 @@ public final class Office365ConnectorWebhookNotifier {
 
         String summary = jobName + ": Build #" + run.getNumber() + " Started";
         Card card = new Card(summary, sectionList);
-        addPotentialAction(card);
+        card.setPotentialAction(potentialActionBuilder.buildActionable());
 
         return card;
     }
@@ -249,7 +243,7 @@ public final class Office365ConnectorWebhookNotifier {
         } else {
             card.setThemeColor("FFCC5C");
         }
-        addPotentialAction(card);
+        card.setPotentialAction(potentialActionBuilder.buildActionable());
 
         return card;
     }
@@ -277,7 +271,7 @@ public final class Office365ConnectorWebhookNotifier {
             card.setThemeColor(stepParameters.getColor());
         }
 
-        addPotentialAction(card);
+        card.setPotentialAction(potentialActionBuilder.buildActionable());
 
         return card;
     }
@@ -351,49 +345,6 @@ public final class Office365ConnectorWebhookNotifier {
         } catch (UnsupportedOperationException e) {
             listener.getLogger().println(e.getMessage());
             return Collections.emptyList();
-        }
-    }
-
-    private void addPotentialAction(Card card) {
-        String urlString = DisplayURLProvider.get().getRunURL(run);
-        String build = Messages.Office365ConnectorWebhookNotifier_BuildPronoun();
-        String viewHeader = Messages.Office365ConnectorWebhookNotifier_ViewHeader(build);
-        PotentialAction viewBuildPotentialAction = new PotentialAction(viewHeader, urlString);
-        List<PotentialAction> paList = new ArrayList<>();
-        paList.add(viewBuildPotentialAction);
-        card.setPotentialAction(paList);
-        pullRequestActionable(paList);
-    }
-
-    private void pullRequestActionable(List<PotentialAction> paList) {
-        Job job = run.getParent();
-        SCMHead head = SCMHead.HeadByItem.findHead(job);
-        if (head instanceof ChangeRequestSCMHead) {
-            String pronoun = StringUtils.defaultIfBlank(
-                    head.getPronoun(),
-                    Messages.Office365ConnectorWebhookNotifier_ChangeRequestPronoun()
-            );
-            String viewHeader = Messages.Office365ConnectorWebhookNotifier_ViewHeader(pronoun);
-            String titleHeader = Messages.Office365ConnectorWebhookNotifier_TitleHeader(pronoun);
-            String authorHeader = Messages.Office365ConnectorWebhookNotifier_AuthorHeader(pronoun);
-
-            ObjectMetadataAction oma = job.getAction(ObjectMetadataAction.class);
-            if (oma != null) {
-                String urlString = oma.getObjectUrl();
-                PotentialAction viewPRPotentialAction = new PotentialAction(viewHeader, urlString);
-                paList.add(viewPRPotentialAction);
-                factsBuilder.addFact(titleHeader, oma.getObjectDisplayName());
-            }
-            ContributorMetadataAction cma = job.getAction(ContributorMetadataAction.class);
-            if (cma != null) {
-                String contributor = cma.getContributor();
-                String contributorDisplayName = cma.getContributorDisplayName();
-                String author = StringUtils.defaultIfBlank(cma.getContributor(), cma.getContributorDisplayName());
-                if (StringUtils.isNotBlank(contributor) && StringUtils.isNotBlank(contributorDisplayName)) {
-                    author = String.format("%s (%s)", cma.getContributor(), cma.getContributorDisplayName());
-                }
-                factsBuilder.addFact(authorHeader, author);
-            }
         }
     }
 }
