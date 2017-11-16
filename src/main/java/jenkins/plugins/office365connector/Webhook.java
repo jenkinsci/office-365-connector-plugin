@@ -150,7 +150,10 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     }
 
     public List<Macro> getMacros() {
-        return macros;
+		if (macros == null) {
+			this.macros = Util.fixNull(macros);
+		}
+		return macros;
     }
 
     @DataBoundSetter
