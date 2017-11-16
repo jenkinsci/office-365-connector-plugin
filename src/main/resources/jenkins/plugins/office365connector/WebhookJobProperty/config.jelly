@@ -1,9 +1,9 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  	<f:section title="Office 365 Connector">
-  		<f:entry title="Notification webhooks" field="webhooks">
-            <f:repeatableProperty field="webhooks" minimum="1" add="Add Webhook">
+    <f:section title="Office 365 Connector">
+        <f:entry title="Notification webhooks" field="webhooks">
+            <f:repeatableProperty field="webhooks" add="Add Webhook">
             </f:repeatableProperty>
         </f:entry>
-	</f:section>
+    </f:section>
 </j:jelly>
