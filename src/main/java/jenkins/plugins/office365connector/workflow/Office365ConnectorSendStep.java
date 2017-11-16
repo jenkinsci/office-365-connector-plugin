@@ -1,6 +1,7 @@
 package jenkins.plugins.office365connector.workflow;
 
 import java.util.Set;
+
 import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableSet;
@@ -10,7 +11,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
-import jenkins.plugins.office365connector.util.FormUtils;
+import jenkins.plugins.office365connector.utils.FormUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;

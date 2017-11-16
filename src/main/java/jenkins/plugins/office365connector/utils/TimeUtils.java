@@ -1,4 +1,4 @@
-package jenkins.plugins.office365connector;
+package jenkins.plugins.office365connector.utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +33,7 @@ public final class TimeUtils {
 
     /**
      * Converts duration to formatted string.
+     *
      * @param duration duration to convert
      * @return formatted duration
      */

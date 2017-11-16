@@ -16,6 +16,7 @@ package jenkins.plugins.office365connector;
 
 import java.util.Collections;
 import java.util.List;
+
 import javax.annotation.Nonnull;
 
 import hudson.Extension;
@@ -23,7 +24,7 @@ import hudson.Util;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
-import jenkins.plugins.office365connector.util.FormUtils;
+import jenkins.plugins.office365connector.utils.FormUtils;
 import jenkins.plugins.office365connector.model.Macro;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
