@@ -20,7 +20,7 @@ public class WebhookJobPropertyTest {
                 getClass().getResourceAsStream("WebhookJobPropertyTest/freestyleold1.xml")
         );
         WebhookJobProperty webhookJobProperty = foo.getProperty(WebhookJobProperty.class);
-        assertThat(webhookJobProperty.webhooks).isNotEmpty();
+        assertThat(webhookJobProperty.getWebhooks()).isNotEmpty();
         rule.assertBuildStatusSuccess(foo.scheduleBuild2(0, new Cause.UserIdCause()).get());
     }
 }
