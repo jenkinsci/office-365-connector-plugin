@@ -1,7 +1,7 @@
 # Office-365-Connector
 Office 365 Connector plugin for Jenkins
 
-Plugin is used to send actionable messages in [Outlook](http://outlook.com), [Office 365 Groups](https://support.office.com/en-us/article/Learn-about-Office-365-Groups-b565caa1-5c40-40ef-9915-60fdb2d97fa2), and [Microsoft Teams](https://products.office.com/en-us/microsoft-teams/group-chat-software).
+Plugin is used to send actionable messages in [Outlook](http://outlook.com) , [Office 365 Groups](https://support.office.com/en-us/article/Learn-about-Office-365-Groups-b565caa1-5c40-40ef-9915-60fdb2d97fa2), and [Microsoft Teams](https://products.office.com/en-us/microsoft-teams/group-chat-software).
 
 [Read more about actionable messages](https://docs.microsoft.com/en-us/outlook/actionable-messages/)
 
