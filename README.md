@@ -8,7 +8,7 @@ Plugin is used to send actionable messages in [Outlook](http://outlook.com), [Of
 ## Screenshots
 
 Configuration:
-![Configuration](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/config.png)
+![Configuration](https://github.com/olegfeferman/office-365-connector-plugin/raw/master/.README/config.png)
 
 Regular notifications:
 ![Regular Start Notification](https://github.com/olegfeferman/office-365-connector-plugin/raw/master/.README/regularStart.png)
