@@ -50,13 +50,49 @@ public class FactsBuilder {
     final static String NAME_FAILED_TESTS = "Failed tests";
     final static String NAME_SKIPPED_TESTS = "Skipped tests";
     final static String NAME_PASSED_TESTS = "Passed tests";
+    final static String NAME_TESTS = "Tests";
+    final static String NAME_CHANGES = "Changes";
+
 
     private final List<Fact> facts = new ArrayList<>();
+    private final List<Fact> comapactFacts = new ArrayList<>();
     private final Run run;
 
     public FactsBuilder(Run run) {
         this.run = run;
     }
+
+    public void addTestsCompact() {
+        
+        AbstractTestResultAction<?> action = run.getAction(AbstractTestResultAction.class);
+        if (action == null) {
+            return;
+        }
+        
+        int failedTests = action.getFailCount();
+        int skippedTests = action.getSkipCount();
+        int passedTests = action.getTotalCount() - action.getFailCount() - action.getSkipCount();
+
+        StringBuilder testStatus = new StringBuilder();
+        if (action.getTotalCount() == 0)
+            testStatus.append("No tests found");
+        else 
+        {
+            testStatus.append("Passed: ");
+            testStatus.append(passedTests);
+            testStatus.append(", Failed: ");
+            testStatus.append(failedTests);
+            testStatus.append(", Skipped: ");
+            testStatus.append(skippedTests);            
+        }
+        
+        comapactFacts.add(new Fact(NAME_TESTS, testStatus.toString()));
+    }
+
+    public void addChanges(String changes) {
+        comapactFacts.add(new Fact(NAME_CHANGES, changes));
+    }
+
 
     public void addStatusStarted() {
         facts.add(new Fact(NAME_STATUS, "Started"));
@@ -74,6 +110,10 @@ public class FactsBuilder {
         facts.add(new Fact(NAME_START_TIME, TimeUtils.dateToString(run.getStartTimeInMillis())));
     }
 
+    public String getBuildDuration() {
+        return TimeUtils.durationToString(getRunDuration() / 1000);
+    }
+
     public void addBackToNormalTime(long duration) {
         facts.add(new Fact(NAME_BACK_TO_NORMAL_TIME, TimeUtils.dateToString(duration)));
     }
@@ -82,11 +122,19 @@ public class FactsBuilder {
         facts.add(new Fact(NAME_COMPLETION_TIME, TimeUtils.dateToString(countCompletionTime())));
     }
 
-    private long countCompletionTime() {
-        long duration = run.getDuration() == 0L
-                ? System.currentTimeMillis() - run.getStartTimeInMillis()
-                : run.getDuration();
-        return run.getStartTimeInMillis() + duration;
+    private long getRunDuration()
+    {
+        long duration;
+        if (run.getDuration() == 0L)
+            duration = System.currentTimeMillis() - run.getStartTimeInMillis();
+        else 
+            duration = run.getDuration();
+        return duration;
+    }
+    
+    private long countCompletionTime() 
+    {        
+        return run.getStartTimeInMillis() + getRunDuration();
     }
 
     public void addFailingSinceTime(long duration) {
@@ -167,5 +215,9 @@ public class FactsBuilder {
      */
     public List<Fact> collect() {
         return facts;
+    }
+
+    public List<Fact> collectCompact() {
+        return comapactFacts;
     }
 }

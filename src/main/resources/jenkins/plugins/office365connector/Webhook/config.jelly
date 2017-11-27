@@ -6,6 +6,10 @@
     <f:entry title="Name" field="name">
         <f:textbox />
     </f:entry>
+	
+	<f:entry title="Compact notifications" field="compactNotification">
+        <f:checkbox />
+	</f:entry>
 
     <f:advanced>
         <f:section title="Build status">

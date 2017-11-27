@@ -1,15 +1,22 @@
 # Office-365-Connector
 Office 365 Connector plugin for Jenkins
 
-Plugin is used to send actionable messages in [Outlook](http://outlook.com) , [Office 365 Groups](https://support.office.com/en-us/article/Learn-about-Office-365-Groups-b565caa1-5c40-40ef-9915-60fdb2d97fa2), and [Microsoft Teams](https://products.office.com/en-us/microsoft-teams/group-chat-software).
+Plugin is used to send actionable messages in [Outlook](http://outlook.com), [Office 365 Groups](https://support.office.com/en-us/article/Learn-about-Office-365-Groups-b565caa1-5c40-40ef-9915-60fdb2d97fa2), and [Microsoft Teams](https://products.office.com/en-us/microsoft-teams/group-chat-software).
 
 [Read more about actionable messages](https://docs.microsoft.com/en-us/outlook/actionable-messages/)
 
 ## Screenshots
 
+Configuration:
 ![Configuration](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/config.png)
 
-![Message](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/message.png)
+Regular notifications:
+![Regular Start Notification](https://github.com/olegfeferman/office-365-connector-plugin/raw/master/.README/regularStart.png)
+![Regular Finish Notification](https://github.com/olegfeferman/office-365-connector-plugin/raw/master/.README/regularFinish.png)
+
+Compact notifications:
+![Compact Start Notification](https://github.com/olegfeferman/office-365-connector-plugin/raw/master/.README/compactStart.png)
+![Compact Finish Notification](https://github.com/olegfeferman/office-365-connector-plugin/raw/master/.README/compactFinish.png)
 
 ## Jenkins Instructions
 

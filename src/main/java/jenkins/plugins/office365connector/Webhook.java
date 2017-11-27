@@ -37,6 +37,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     private String name;
     private String url;
 
+    private boolean compactNotification;
     private boolean startNotification;
     private boolean notifySuccess;
     private boolean notifyAborted;
@@ -71,6 +72,8 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     public boolean isNotifySuccess() {
         return notifySuccess;
     }
+
+
 
     @DataBoundSetter
     public void setNotifySuccess(boolean notifySuccess) {
@@ -115,6 +118,16 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     public boolean isNotifyFailure() {
         return notifyFailure;
+    }
+
+
+    @DataBoundSetter
+    public void setCompactNotification(boolean compactNotification) {
+        this.compactNotification = compactNotification;
+    }
+
+    public boolean isCompactNotification() {
+        return compactNotification;
     }
 
     @DataBoundSetter
@@ -178,6 +191,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
         public int getDefaultTimeout() {
             return Webhook.DEFAULT_TIMEOUT;
         }
+
 
         public FormValidation doCheckUrl(@QueryParameter String value) {
             return FormUtils.formValidateUrl(value);

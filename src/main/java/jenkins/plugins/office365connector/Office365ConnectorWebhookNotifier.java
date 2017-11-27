@@ -37,11 +37,13 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
+import java.util.Iterator;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.StepParameters;
 import org.apache.commons.lang.StringUtils;
+import jenkins.plugins.office365connector.utils.Parser;
 
 /**
  * @author srhebbar
@@ -49,14 +51,14 @@ import org.apache.commons.lang.StringUtils;
 public final class Office365ConnectorWebhookNotifier {
 
     private static final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY).create();
-
     private final FactsBuilder factsBuilder;
-
     private final DecisionMaker decisionMaker;
     private final Run run;
     private final TaskListener listener;
-
-    private final ActionableBuilder potentialActionBuilder;
+    private final ActionableBuilder potentialActionBuilder;    
+        
+    Set<ChangeLogSet.AffectedFile> affectedFiles;    
+    private String changesSingleString;
 
     public Office365ConnectorWebhookNotifier(Run run, TaskListener listener) {
         this.run = run;
@@ -85,6 +87,7 @@ public final class Office365ConnectorWebhookNotifier {
             return;
         }
 
+
         for (Webhook webhook : property.getWebhooks()) {
             if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                 if (webhook.isStartNotification()) {
@@ -93,6 +96,21 @@ public final class Office365ConnectorWebhookNotifier {
             }
         }
     }
+
+    private boolean isCompactNotification() {
+
+        WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
+        if (property == null) {
+            //           listener.getLogger().println(String.format("No webhooks to notify"));
+            return false;
+        }
+        List<Webhook> webhooks = property.getWebhooks();
+        for (Webhook webhook : webhooks) {
+            return webhook.isCompactNotification();
+        }
+        return false;         
+    }
+
 
     public void sendBuildCompleteNotification() {
         Card card = createJobCompletedCard();
@@ -133,17 +151,30 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     private Card createJobStartedCard() {
-
-        factsBuilder.addStatusStarted();
-        factsBuilder.addStartTime();
-        factsBuilder.addRemarks();
-        addScmDetails();
-
         String jobName = run.getParent().getDisplayName();
-        String activityTitle = "Update from " + jobName + ".";
-        String activitySubtitle = "Latest status of build #" + run.getNumber();
-        Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
+        String activityTitle = "";
+        String activitySubtitle = "";
+        Section section;
 
+        if (isCompactNotification()) {
+            Parser parser = new Parser();
+            processScmDetails(false);
+            int fileCount = 0;
+            if (affectedFiles != null) 
+            {
+                fileCount = affectedFiles.size();
+            }
+            activityTitle = jobName + " - #" + run.getNumber() + " Started";
+            activitySubtitle = "by changes from " + parser.getAuthor(run.getCauses()) + " (" + fileCount + ") " + " file(s) changed";
+        } else {
+            factsBuilder.addStatusStarted();
+            factsBuilder.addStartTime();
+            factsBuilder.addRemarks();
+            processScmDetails(true);
+            activityTitle = "Update from " + jobName + ".";
+            activitySubtitle = "Latest status of build #" + run.getNumber();
+        }
+        section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
         List<Section> sectionList = new ArrayList<>();
         sectionList.add(section);
 
@@ -154,6 +185,7 @@ public final class Office365ConnectorWebhookNotifier {
         return card;
     }
 
+
     private Card createJobCompletedCard() {
         String jobName = run.getParent().getDisplayName();
         String summary = jobName + ": Build #" + run.getNumber();
@@ -162,14 +194,13 @@ public final class Office365ConnectorWebhookNotifier {
         factsBuilder.addFact(statusFact);
         factsBuilder.addStartTime();
 
+        String status = "";
+        long duration = 0;        
         // Result is only set to a worse status in pipeline
         Result result = run.getResult() == null ? Result.SUCCESS : run.getResult();
         if (result != null) {
-
             factsBuilder.addCompletionTime();
             factsBuilder.addTests();
-
-            String status;
             Run previousBuild = run.getPreviousBuild();
             Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
             Run rt = run.getPreviousNotFailedBuild();
@@ -185,9 +216,10 @@ public final class Office365ConnectorWebhookNotifier {
                 summary += " Back to Normal";
 
                 if (failingSinceRun != null) {
-                    long duration = run.getDuration() == 0L
-                            ? System.currentTimeMillis() - run.getStartTimeInMillis()
-                            : run.getDuration();
+
+                    if (run.getDuration() == 0L)
+                        duration = System.currentTimeMillis() - run.getStartTimeInMillis();
+                    else duration = run.getDuration();
                     long currentBuildCompletionTime = run.getStartTimeInMillis() + duration;
                     factsBuilder.addBackToNormalTime(currentBuildCompletionTime - failingSinceRun.getStartTimeInMillis());
                 }
@@ -218,7 +250,6 @@ public final class Office365ConnectorWebhookNotifier {
                 status = result.toString();
                 summary += " " + status;
             }
-
             statusFact.setValue(status);
         } else {
             statusFact.setValue(" Completed");
@@ -226,15 +257,26 @@ public final class Office365ConnectorWebhookNotifier {
         }
 
         factsBuilder.addRemarks();
-        addScmDetails();
+        processScmDetails(true);
 
-        String activityTitle = "Update from " + jobName + ".";
-        String activitySubtitle = "Latest status of build #" + run.getNumber();
-        Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
+        String activityTitle = "";
+        String activitySubtitle = "";
+        Section section = null;
 
+        if (isCompactNotification()) {
+            activityTitle = jobName + " - #" + run.getNumber() + " " + status;
+            activitySubtitle = factsBuilder.getBuildDuration();
+            factsBuilder.addChanges(changesSingleString);
+            factsBuilder.addTestsCompact();
+            section = new Section(activityTitle, activitySubtitle, factsBuilder.collectCompact());            
+        } else {
+            activityTitle = "Update from " + jobName + ".";
+            activitySubtitle = "Latest status of build #" + run.getNumber();
+            section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
+        }
+        
         List<Section> sectionList = new ArrayList<>();
         sectionList.add(section);
-
         Card card = new Card(summary, sectionList);
         if (result == Result.SUCCESS) {
             card.setThemeColor("96CEB4");
@@ -247,7 +289,7 @@ public final class Office365ConnectorWebhookNotifier {
 
         return card;
     }
-
+    
     private Card createBuildMessageCard(StepParameters stepParameters) {
         String jobName = run.getParent().getDisplayName();
         if (stepParameters.getStatus() != null) {
@@ -287,7 +329,7 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    private void addScmDetails() {
+    private void processScmDetails(boolean addToFactsBuilder) {
         Set<User> users;
         List<ChangeLogSet<ChangeLogSet.Entry>> sets;
 
@@ -299,20 +341,59 @@ public final class Office365ConnectorWebhookNotifier {
             sets = Collections.emptyList();
         }
 
-        factsBuilder.addCulprits(users);
+        if (addToFactsBuilder)
+            factsBuilder.addCulprits(users);
+        
         if (!sets.isEmpty()) {
-            Set<User> authors = new HashSet<>();
-            Set<ChangeLogSet.AffectedFile> files = new HashSet<>();
+            Set<User> authors;
+            ArrayList<String> changes;
+            authors = new HashSet<>();
+            affectedFiles = new HashSet<>();
+            changes = new ArrayList<>();
+
+
             if (Iterables.all(sets, Predicates.instanceOf(ChangeLogSet.class))) {
                 for (ChangeLogSet<ChangeLogSet.Entry> set : sets) {
                     for (ChangeLogSet.Entry entry : set) {
+                        changes.add(entry.getMsg() + " [" + entry.getAuthor().getDisplayName() + "]");
                         authors.add(entry.getAuthor());
-                        files.addAll(getAffectedFiles(entry));
+                        affectedFiles.addAll(getAffectedFiles(entry));
                     }
                 }
             }
-            factsBuilder.addDevelopers(authors);
-            factsBuilder.addNumberOfFilesChanged(files.size());
+            changesSingleString = getChangesAsOneString(changes);
+            
+            if (addToFactsBuilder)
+            {
+                factsBuilder.addDevelopers(authors);
+                factsBuilder.addNumberOfFilesChanged(affectedFiles.size());    
+            }
+        }
+    }
+
+    private String getAuthorsString(Set<User> authors) {
+        if (authors != null) {
+            StringBuilder auhtorString = new StringBuilder();
+            Iterator<User> iterator = authors.iterator();
+            while (iterator.hasNext()) {
+                auhtorString.append(iterator.next().getDisplayName() + " ");
+            }
+            return auhtorString.toString();
+        } else return "";
+    }
+
+    private String getChangesAsOneString(ArrayList<String> changes) {       
+
+        if (changes != null) {
+            StringBuilder changedFiles = new StringBuilder();
+            for (String change : changes) {
+                changedFiles.append(change + ". ");
+            }
+            return changedFiles.toString();
+        } 
+        else 
+        {
+            return "No changes";
         }
     }
 
