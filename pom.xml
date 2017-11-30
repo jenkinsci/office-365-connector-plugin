@@ -18,7 +18,7 @@
 
     <artifactId>Office-365-Connector</artifactId>
     <name>Office 365 Connector</name>
-    <version>4.5-SNAPSHOT</version>
+    <version>4.6</version>
     <packaging>hpi</packaging>
     <description>This plugin sends Job notifications to JenkinsCI Office 365 Connector.</description>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Office+365+Connector+Plugin</url>

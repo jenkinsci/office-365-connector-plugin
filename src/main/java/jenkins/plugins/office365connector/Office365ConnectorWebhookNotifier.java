@@ -44,6 +44,7 @@ import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.StepParameters;
 import org.apache.commons.lang.StringUtils;
 import jenkins.plugins.office365connector.utils.Parser;
+import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 
 /**
  * @author srhebbar
@@ -164,8 +165,9 @@ public final class Office365ConnectorWebhookNotifier {
             {
                 fileCount = affectedFiles.size();
             }
-            activityTitle = jobName + " - #" + run.getNumber() + " Started";
-            activitySubtitle = "by changes from " + parser.getAuthor(run.getCauses()) + " (" + fileCount + ") " + " file(s) changed";
+            String uri = DisplayURLProvider.get().getRunURL(run);
+            activityTitle = jobName + " - <a href=\"" + uri + "\">#" + run.getNumber() + "</a> Started";
+            activitySubtitle = "by " + parser.getAuthor(run.getCauses()) + " (" + fileCount + " file(s) changed)";
         } else {
             factsBuilder.addStatusStarted();
             factsBuilder.addStartTime();
@@ -180,8 +182,9 @@ public final class Office365ConnectorWebhookNotifier {
 
         String summary = jobName + ": Build #" + run.getNumber() + " Started";
         Card card = new Card(summary, sectionList);
-        card.setPotentialAction(potentialActionBuilder.buildActionable());
-
+        if (!isCompactNotification()) {
+            card.setPotentialAction(potentialActionBuilder.buildActionable());    
+        }
         return card;
     }
 
@@ -264,9 +267,9 @@ public final class Office365ConnectorWebhookNotifier {
         Section section = null;
 
         if (isCompactNotification()) {
-            activityTitle = jobName + " - #" + run.getNumber() + " " + status;
-            activitySubtitle = factsBuilder.getBuildDuration();
-            factsBuilder.addChanges(changesSingleString);
+            String uri = DisplayURLProvider.get().getRunURL(run);
+            activityTitle = jobName + " - <a href=\"" + uri + "\">#" + run.getNumber() + "</a> " + status + " after "+ factsBuilder.getBuildDuration();
+            activitySubtitle = changesSingleString;
             factsBuilder.addTestsCompact();
             section = new Section(activityTitle, activitySubtitle, factsBuilder.collectCompact());            
         } else {
@@ -285,7 +288,9 @@ public final class Office365ConnectorWebhookNotifier {
         } else {
             card.setThemeColor("FFCC5C");
         }
-        card.setPotentialAction(potentialActionBuilder.buildActionable());
+        if (!isCompactNotification()) {
+            card.setPotentialAction(potentialActionBuilder.buildActionable());
+        }
 
         return card;
     }
@@ -369,6 +374,8 @@ public final class Office365ConnectorWebhookNotifier {
                 factsBuilder.addNumberOfFilesChanged(affectedFiles.size());    
             }
         }
+        if (StringUtils.isEmpty(changesSingleString))
+            changesSingleString = getChangesAsOneString(null);
     }
 
     private String getAuthorsString(Set<User> authors) {
@@ -385,16 +392,20 @@ public final class Office365ConnectorWebhookNotifier {
     private String getChangesAsOneString(ArrayList<String> changes) {       
 
         if (changes != null) {
-            StringBuilder changedFiles = new StringBuilder();
-            for (String change : changes) {
-                changedFiles.append(change + ". ");
+            if (changes.size() > 0)
+            {
+                StringBuilder changedFiles = new StringBuilder();
+                changedFiles.append("<ul>");
+                for (String change : changes) {
+                    changedFiles.append("<li>");
+                    changedFiles.append(change);
+                    changedFiles.append("</li>");
+                }
+                changedFiles.append("</ul>");
+                return changedFiles.toString();    
             }
-            return changedFiles.toString();
         } 
-        else 
-        {
-            return "No changes";
-        }
+        return "No changes";
     }
 
     private Collection<? extends ChangeLogSet.AffectedFile> getAffectedFiles(ChangeLogSet.Entry entry) {
