@@ -6,7 +6,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.junit.AfterClass;
-import jenkins.plugins.office365connector.utils.TimeUtils;
 import org.junit.Test;
 
 /**
@@ -58,7 +57,7 @@ public final class TimeUtilsTest {
         String format = TimeUtils.durationToString(duration);
 
         // then
-       // assertThat(format).isEqualTo("1 day, 1 hour, 1 minute, 1 second");
+        assertThat(format).isEqualTo("1 day, 1 hour, 1 minute, 1 second");
     }
 
     @Test
@@ -71,7 +70,7 @@ public final class TimeUtilsTest {
         String format = TimeUtils.durationToString(duration);
 
         // then
-       // assertThat(format).isEqualTo("8 days, 7 hours, 6 minutes, 5 seconds");
+        assertThat(format).isEqualTo("8 days, 7 hours, 6 minutes, 5 seconds");
     }
 
 
@@ -85,6 +84,46 @@ public final class TimeUtilsTest {
         String format = TimeUtils.durationToString(duration);
 
         // then
-       // assertThat(format).isEqualTo("15 seconds");
+        assertThat(format).isEqualTo("15 seconds");
+    }
+    
+    @Test
+    public void durationToStringShort_OnSingularValues_ReturnsDurationAsString() {
+
+        // given
+        long duration = /* sec*/ 1 + /*min*/ 60 +/*hour*/ +60 * 60 +/*day*/+60 * 60 * 24;
+
+        // when
+        String format = TimeUtils.durationToStringShort(duration);
+
+        // then
+        assertThat(format).isEqualTo("1 day 1 hr 1 min 1 sec");
+    }
+
+    @Test
+    public void durationToStringShort_OnPluralValues_ReturnsDurationAsString() {
+
+        // given
+        long duration = /* sec*/ 5 + /*min*/60 * 6 +/*hour*/ +60 * 60 * 7 +/*day*/+60 * 60 * 24 * 8;
+
+        // when
+        String format = TimeUtils.durationToStringShort(duration);
+
+        // then
+        assertThat(format).isEqualTo("8 days 7 hr 6 min 5 sec");
+    }
+
+
+    @Test
+    public void durationToStringShort_OnOneSecond_ReturnsDurationOnlyWithSecond() {
+
+        // given
+        long duration = /* sec*/ 15;
+
+        // when
+        String format = TimeUtils.durationToStringShort(duration);
+
+        // then
+        assertThat(format).isEqualTo("15 sec");
     }
 }

@@ -111,7 +111,7 @@ public class FactsBuilder {
     }
 
     public String getBuildDuration() {
-        return TimeUtils.durationToString(getRunDuration() / 1000);
+        return TimeUtils.durationToStringShort(getRunDuration() / 1000);
     }
 
     public void addBackToNormalTime(long duration) {

@@ -32,48 +32,26 @@ public final class TimeUtils {
     }
 
     /**
-     * Converts duration to formatted string.
+     * Converts duration to formatted string (short format).
      *
      * @param duration duration to convert in seconds
      * @return formatted duration
      */
-    public static String durationToString(long duration) {
-        long diff[] = new long[4];
-        List<String> formats = new ArrayList<String>();
+    public static String durationToStringShort(long duration) {
+        String longDurationStr = durationToString(duration);
+        
+        final String[] keys = new String[]{"seconds", "second", "minutes", "minute", "hours", "hour", ","};
+        final String[] values = new String[]{"sec", "sec", "min", "min", "hr", "hr", ""};
 
-        // sec
-        diff[3] = (duration >= 60 ? duration % 60 : duration);
-        if (diff[3] > 0) {
-            formats.add(String.format("%d sec", diff[3]));
-        }
-
-        // min
-        diff[2] = (duration = (duration / 60)) >= 60 ? duration % 60 : duration;
-        if (diff[2] > 0) {
-            formats.add(0, String.format("%d min", diff[2]));
-        }
-
-        // hours
-        diff[1] = (duration = (duration / 60)) >= 24 ? duration % 24 : duration;
-        if (diff[1] > 0) {
-            formats.add(0, String.format("%d hr", diff[1]));
-        }
-
-        // days
-        diff[0] = duration / 24;
-        if (diff[0] > 0) {
-            formats.add(0, String.format("%d day", diff[0]));
-        }
-
-        return StringUtils.join(formats, " ");
+        return StringUtils.replaceEach( longDurationStr, keys, values );
     }
     
     /**
-     * Converts duration to formatted string (long formet).
+     * Converts duration to formatted string.
      * @param duration duration to convert
      * @return formatted duration
      */
-    public static String durationToStringLong(long duration) {
+    public static String durationToString(long duration) {
         long diff[] = new long[4];
         List<String> formats = new ArrayList<>();
 
