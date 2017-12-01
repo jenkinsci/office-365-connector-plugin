@@ -7,7 +7,7 @@ public class Parser {
 
     public String getAuthor(List<Cause> causesList) {
         StringBuilder allCauses = new StringBuilder();
-        for( Cause cause : causesList){
+        for (Cause cause : causesList) {
             allCauses.append(cause.getShortDescription());
             allCauses.append(" ");
         }
