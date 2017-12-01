@@ -50,7 +50,7 @@ public class FactsBuilder {
     final static String NAME_FAILED_TESTS = "Failed tests";
     final static String NAME_SKIPPED_TESTS = "Skipped tests";
     final static String NAME_PASSED_TESTS = "Passed tests";
-    final static String NAME_TESTS = "Tests";
+    final static String NAME_TESTS_COMPACT = "Tests";
     final static String NAME_CHANGES = "Changes";
 
 
@@ -86,7 +86,7 @@ public class FactsBuilder {
             testStatus.append(skippedTests);            
         }
         
-        comapactFacts.add(new Fact(NAME_TESTS, testStatus.toString()));
+        comapactFacts.add(new Fact(NAME_TESTS_COMPACT, testStatus.toString()));
     }
 
     public void addChanges(String changes) {
@@ -122,19 +122,15 @@ public class FactsBuilder {
         facts.add(new Fact(NAME_COMPLETION_TIME, TimeUtils.dateToString(countCompletionTime())));
     }
 
-    private long getRunDuration()
-    {
-        long duration;
-        if (run.getDuration() == 0L)
-            duration = System.currentTimeMillis() - run.getStartTimeInMillis();
-        else 
-            duration = run.getDuration();
-        return duration;
+    private long countCompletionTime(){        
+        return run.getStartTimeInMillis() + getRunDuration();
     }
     
-    private long countCompletionTime() 
-    {        
-        return run.getStartTimeInMillis() + getRunDuration();
+    private long getRunDuration(){
+        long duration = run.getDuration();
+        if (duration == 0L)
+            duration = System.currentTimeMillis() - run.getStartTimeInMillis();
+        return duration;
     }
 
     public void addFailingSinceTime(long duration) {

@@ -9,9 +9,6 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by olegfeferman on 25.11.2017.
- */
 public class ParserTest {
     @Test
     public void getAuthor() throws Exception {
@@ -44,9 +41,8 @@ public class ParserTest {
         causeListForTest2.add(cause1ForTest2);
         Parser parser = new Parser();
 
-        Assert.assertTrue(patternForTest1.equals(parser.getAuthor(causeListForTest1).trim()));
-        Assert.assertTrue(patternForTest2.equals(parser.getAuthor(causeListForTest2).trim()));
-
+        Assert.assertTrue(patternForTest1.equals(parser.getAuthor(causeListForTest1)));
+        Assert.assertTrue(patternForTest2.equals(parser.getAuthor(causeListForTest2)));
     }
 
 }

@@ -102,7 +102,6 @@ public final class Office365ConnectorWebhookNotifier {
 
         WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
         if (property == null) {
-            //           listener.getLogger().println(String.format("No webhooks to notify"));
             return false;
         }
         List<Webhook> webhooks = property.getWebhooks();
@@ -161,8 +160,7 @@ public final class Office365ConnectorWebhookNotifier {
             Parser parser = new Parser();
             processScmDetails(false);
             int fileCount = 0;
-            if (affectedFiles != null) 
-            {
+            if (affectedFiles != null){
                 fileCount = affectedFiles.size();
             }
             String uri = DisplayURLProvider.get().getRunURL(run);
