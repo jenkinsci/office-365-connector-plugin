@@ -73,15 +73,7 @@ public final class WebhookJobPropertyDescriptor extends JobPropertyDescriptor {
                     webhooks.addAll(req.bindJSONToList(Webhook.class, webhooksArrayData));
                 } else {
                     JSONObject webhooksObjectData = (JSONObject) webhooksData;
-                    Boolean isCompactNotificationOn = webhooksObjectData.getBoolean("compactNotification");
-                    Webhook webhook = req.bindJSON(Webhook.class, webhooksObjectData);
-                    if (isCompactNotificationOn==true){
-                        webhook.setCompactNotification(true);
-                    }
-                    else webhook.setCompactNotification(false);
-
-
-                    webhooks.add(webhook);
+                    webhooks.add(req.bindJSON(Webhook.class, webhooksObjectData));
                 }
             }
         }
