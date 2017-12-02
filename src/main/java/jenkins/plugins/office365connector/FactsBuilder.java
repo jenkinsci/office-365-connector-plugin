@@ -114,7 +114,8 @@ public class FactsBuilder {
         return TimeUtils.durationToStringShort(getRunDuration() / 1000);
     }
 
-    public void addBackToNormalTime(long duration) {
+    public void addBackToNormalTime(long failedRunStartTime) {
+        long duration = countCompletionTime() - failedRunStartTime;
         facts.add(new Fact(NAME_BACK_TO_NORMAL_TIME, TimeUtils.dateToString(duration)));
     }
 

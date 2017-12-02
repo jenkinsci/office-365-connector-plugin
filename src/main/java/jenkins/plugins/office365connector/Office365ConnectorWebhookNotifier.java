@@ -196,7 +196,6 @@ public final class Office365ConnectorWebhookNotifier {
         factsBuilder.addStartTime();
 
         String status = "";
-        long duration = 0;        
         // Result is only set to a worse status in pipeline
         Result result = run.getResult() == null ? Result.SUCCESS : run.getResult();
         if (result != null) {
@@ -217,12 +216,7 @@ public final class Office365ConnectorWebhookNotifier {
                 summary += " Back to Normal";
 
                 if (failingSinceRun != null) {
-
-                    if (run.getDuration() == 0L)
-                        duration = System.currentTimeMillis() - run.getStartTimeInMillis();
-                    else duration = run.getDuration();
-                    long currentBuildCompletionTime = run.getStartTimeInMillis() + duration;
-                    factsBuilder.addBackToNormalTime(currentBuildCompletionTime - failingSinceRun.getStartTimeInMillis());
+                    factsBuilder.addBackToNormalTime(failingSinceRun.getStartTimeInMillis());
                 }
             } else if (result == Result.FAILURE && failingSinceRun != null) {
                 if (previousResult == Result.FAILURE) {
