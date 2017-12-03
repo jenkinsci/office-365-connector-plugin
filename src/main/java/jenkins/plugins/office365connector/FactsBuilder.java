@@ -51,8 +51,6 @@ public class FactsBuilder {
     final static String NAME_SKIPPED_TESTS = "Skipped tests";
     final static String NAME_PASSED_TESTS = "Passed tests";
     final static String NAME_TESTS_COMPACT = "Tests";
-    final static String NAME_CHANGES = "Changes";
-
 
     private final List<Fact> facts = new ArrayList<>();
     private final List<Fact> comapactFacts = new ArrayList<>();
@@ -88,11 +86,6 @@ public class FactsBuilder {
         
         comapactFacts.add(new Fact(NAME_TESTS_COMPACT, testStatus.toString()));
     }
-
-    public void addChanges(String changes) {
-        comapactFacts.add(new Fact(NAME_CHANGES, changes));
-    }
-
 
     public void addStatusStarted() {
         facts.add(new Fact(NAME_STATUS, "Started"));
