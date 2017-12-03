@@ -39,10 +39,12 @@ public class ActionableBuilder {
         this.factsBuilder = factsBuilder;
     }
 
-    public List<PotentialAction> buildActionable() {
+    public List<PotentialAction> buildActionable(boolean excludeViewBuildAction) {
         List<PotentialAction> potentialActions = pullRequestActionable();
-
-        potentialActions.add(buildViewBuild());
+        
+        if (!excludeViewBuildAction){
+            potentialActions.add(buildViewBuild());    
+        }        
         potentialActions.addAll(pullRequestActionable());
 
         return potentialActions;

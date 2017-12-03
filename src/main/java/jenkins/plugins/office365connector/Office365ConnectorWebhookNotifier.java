@@ -180,9 +180,7 @@ public final class Office365ConnectorWebhookNotifier {
 
         String summary = jobName + ": Build #" + run.getNumber() + " Started";
         Card card = new Card(summary, sectionList);
-        if (!isCompactNotification()) {
-            card.setPotentialAction(potentialActionBuilder.buildActionable());    
-        }
+        card.setPotentialAction(potentialActionBuilder.buildActionable(isCompactNotification()));
         return card;
     }
 
@@ -280,9 +278,7 @@ public final class Office365ConnectorWebhookNotifier {
         } else {
             card.setThemeColor("FFCC5C");
         }
-        if (!isCompactNotification()) {
-            card.setPotentialAction(potentialActionBuilder.buildActionable());
-        }
+        card.setPotentialAction(potentialActionBuilder.buildActionable(isCompactNotification()));
 
         return card;
     }
@@ -310,7 +306,7 @@ public final class Office365ConnectorWebhookNotifier {
             card.setThemeColor(stepParameters.getColor());
         }
 
-        card.setPotentialAction(potentialActionBuilder.buildActionable());
+        card.setPotentialAction(potentialActionBuilder.buildActionable(isCompactNotification()));
 
         return card;
     }
