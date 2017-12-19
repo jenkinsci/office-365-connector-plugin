@@ -1,0 +1,31 @@
+{
+  "summary": "myFirstJob: Build #167 Started",
+  "themeColor": "3479BF",
+  "sections": [
+    {
+      "markdown": true,
+      "facts": [
+        {
+          "name": "Status",
+          "value": "Started"
+        },
+        {
+          "name": "Start time",
+          "value": "2017-10-21 22:21:45 CEST"
+        }
+      ],
+      "activityTitle": "Update from myFirstJob.",
+      "activitySubtitle": "Latest status of build #167"
+    }
+  ],
+  "potentialAction": [
+    {
+      "@context": "http://schema.org",
+      "@type": "ViewAction",
+      "name": "View Build",
+      "target": [
+        "http://localhost/job/Office365/167/display/redirect"
+      ]
+    }
+  ]
+}
