@@ -51,9 +51,12 @@ import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
  */
 public final class Office365ConnectorWebhookNotifier {
 
-    private static final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY).create();
+    private static final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
+            .setPrettyPrinting().create();
+
     private final FactsBuilder factsBuilder;
     private final DecisionMaker decisionMaker;
+
     private final Run run;
     private final TaskListener listener;
     private final ActionableBuilder potentialActionBuilder;    
@@ -128,7 +131,7 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    public void sendBuildMessage(StepParameters stepParameters) {
+    public void sendBuildNotification(StepParameters stepParameters) {
         Card card;
         if (StringUtils.isNotBlank(stepParameters.getMessage())) {
             card = createBuildMessageCard(stepParameters);

@@ -117,7 +117,7 @@ public class Office365ConnectorSendStep extends Step {
                     getContext().get(Run.class),
                     getContext().get(TaskListener.class)
             );
-            notifier.sendBuildMessage(stepParameters);
+            notifier.sendBuildNotification(stepParameters);
             return null;
         }
     }
