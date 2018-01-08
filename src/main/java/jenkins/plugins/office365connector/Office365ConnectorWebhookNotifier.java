@@ -301,19 +301,20 @@ public final class Office365ConnectorWebhookNotifier {
         }
 
         factsBuilder.addCulprits(users);
+
         if (!sets.isEmpty()) {
             Set<User> authors = new HashSet<>();
-            Set<ChangeLogSet.AffectedFile> files = new HashSet<>();
+            int filesCounter = 0;
             if (Iterables.all(sets, Predicates.instanceOf(ChangeLogSet.class))) {
                 for (ChangeLogSet<ChangeLogSet.Entry> set : sets) {
                     for (ChangeLogSet.Entry entry : set) {
                         authors.add(entry.getAuthor());
-                        files.addAll(getAffectedFiles(entry));
+                        filesCounter += getAffectedFiles(entry).size();
                     }
                 }
             }
             factsBuilder.addDevelopers(authors);
-            factsBuilder.addNumberOfFilesChanged(files.size());
+            factsBuilder.addNumberOfFilesChanged(filesCounter);
         }
     }
 

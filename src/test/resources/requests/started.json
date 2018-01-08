@@ -11,7 +11,19 @@
         },
         {
           "name": "Start time",
-          "value": "2017-10-21 22:21:45 CEST"
+          "value": "2017-10-21 20:21:45 UTC"
+        },
+        {
+          "name": "Remarks",
+          "value": "Started by John. "
+        },
+        {
+          "name": "Developers",
+          "value": "Mike"
+        },
+        {
+          "name": "Number of files changed",
+          "value": "2"
         }
       ],
       "activityTitle": "Update from myFirstJob.",

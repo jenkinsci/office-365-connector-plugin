@@ -6,7 +6,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.junit.AfterClass;
-import jenkins.plugins.office365connector.utils.TimeUtils;
 import org.junit.Test;
 
 /**
@@ -20,10 +19,14 @@ public final class TimeUtilsTest {
     // this code must be executed before tested class TimeUtils is loaded by class loader
     // @Before annotations are executed to late thus this conception must be used
     static {
+        setupTimeZoneAndLocale();
+    }
+
+    public static void setupTimeZoneAndLocale() {
         defaultTimeZone = TimeZone.getDefault();
         // because of the timezone, daylight etc
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-        
+
         defaultLocale = Locale.getDefault();
         // because of the how the date is formatted, displayed
         Locale.setDefault(Locale.US);
