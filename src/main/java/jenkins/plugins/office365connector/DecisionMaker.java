@@ -57,6 +57,7 @@ public class DecisionMaker {
             for (Macro macro : webhook.getMacros()) {
                 String evaluated = evaluateMacro(macro.getTemplate());
                 if (evaluated.equals(macro.getValue())) {
+                    log("Matched template '%s' for webhook '%s'.", macro.getTemplate(), webhook.getName());
                     return true;
                 }
             }
@@ -73,13 +74,18 @@ public class DecisionMaker {
     public boolean isStatusMatched(Webhook webhook) {
         Result result = run.getResult();
 
-        return isNotifyAborted(result, webhook)
+        boolean statusMatched = isNotifyAborted(result, webhook)
                 || isNotifyFailure(result, webhook)
                 || isNotifyRepeatedFailure(result, webhook)
                 || isNotifyNotBuilt(result, webhook)
                 || isNotifyBackToNormal(result, webhook)
                 || isNotifySuccess(result, webhook)
                 || isNotifyUnstable(result, webhook);
+
+        if (statusMatched) {
+            log("Matched status '%s' for webhook '%s'.", result, webhook.getName());
+        }
+        return statusMatched;
     }
 
     private boolean isNotifyAborted(Result result, Webhook webhook) {
@@ -124,5 +130,12 @@ public class DecisionMaker {
         } catch (InterruptedException | IOException | MacroEvaluationException e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    /**
+     * Helper method for logging.
+     */
+    private void log(String format, Object... args) {
+        this.listener.getLogger().println("[Office365connector] " + String.format(format, args));
     }
 }

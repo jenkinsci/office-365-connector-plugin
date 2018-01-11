@@ -29,6 +29,7 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Makes http post requests in a separate thread.
@@ -69,27 +70,28 @@ public class HttpWorker implements Runnable {
             tried++;
             RequestEntity requestEntity;
             try {
+                // uncomment to log what message has been sent
+                // log("Posted JSON: %s", data);
                 requestEntity = new StringRequestEntity(data, "application/json", StandardCharsets.UTF_8.name());
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace(logger);
                 break;
             }
-            //logger.println(String.format("Posting data to webhook - %s. Already Tried %s times", url, tried));
+
             PostMethod post = new PostMethod(url);
             try {
                 post.setRequestEntity(requestEntity);
                 int responseCode = client.executeMethod(post);
                 if (responseCode != HttpStatus.SC_OK) {
                     String response = post.getResponseBodyAsString();
-                    logger.println(String.format("Posting data to - %s may have failed. Webhook responded with status code - %s", url, responseCode));
-                    logger.println(String.format("Message from webhook - %s", response));
+                    log("Posting data to %s may have failed. Webhook responded with status code - %s", url, responseCode);
+                    log("Message from webhook - %s", response);
 
                 } else {
                     success = true;
-                    //logger.println(String.format("Posting data to webhook - %s completed ", url));
                 }
             } catch (IOException e) {
-                logger.println(String.format("Failed to post data to webhook - %s", url));
+                log("Failed to post data to webhook - %s", url);
                 e.printStackTrace(logger);
             } finally {
                 post.releaseConnection();
@@ -109,16 +111,19 @@ public class HttpWorker implements Runnable {
                 String username = proxy.getUserName();
                 String password = proxy.getPassword();
                 // Consider it to be passed if username specified. Sufficient?
-                if (username != null && !"".equals(username.trim())) {
-                    logger.println("Using proxy authentication (user=" + username + ")");
-                    // http://hc.apache.org/httpclient-3.x/authentication.html#Proxy_Authentication
-                    // and
-                    // http://svn.apache.org/viewvc/httpcomponents/oac.hc3x/trunk/src/examples/BasicAuthenticationExample.java?view=markup
+                if (StringUtils.isNotBlank(username)) {
                     client.getState().setProxyCredentials(AuthScope.ANY,
                             new UsernamePasswordCredentials(username, password));
                 }
             }
         }
         return client;
+    }
+
+    /**
+     * Helper method for logging.
+     */
+    private void log(String format, Object... args) {
+        this.logger.println("[Office365connector] " + String.format(format, args));
     }
 }

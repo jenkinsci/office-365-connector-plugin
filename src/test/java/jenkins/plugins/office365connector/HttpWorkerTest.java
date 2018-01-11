@@ -114,7 +114,6 @@ public class HttpWorkerTest {
                     trialTestRetries++;
                 }
                 PrintStream stream = response.getPrintStream();
-                stream.println("test");
                 stream.close();
             } catch (IOException e) {
                 e.printStackTrace();
