@@ -19,6 +19,7 @@ import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Job;
+import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.scm.ChangeLogSet;
@@ -26,6 +27,7 @@ import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.HttpWorkerAnswer;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
+import jenkins.plugins.office365connector.utils.TimeUtils;
 import jenkins.plugins.office365connector.utils.TimeUtilsTest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -34,7 +36,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -42,7 +43,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @author Damian Szczepanik (damianszczepanik@github)
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({DisplayURLProvider.class, Office365ConnectorWebhookNotifier.class, Run.class})
+@PrepareForTest({DisplayURLProvider.class, Office365ConnectorWebhookNotifier.class, Run.class, TimeUtils.class})
 public class Office365ConnectorWebhookNotifierIntegrationTest {
 
     private static final String REQUESTS_DIRECTORY = "requests" + File.separatorChar;
@@ -52,12 +53,19 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
     private static final String CAUSE_DESCRIPTION = "Started by John";
     private static final int BUILD_NUMBER = 167;
     private static final long START_TIME = 1508617305000L;
+    private static final long DURATION = 1000 * 60 * 60;
+
+    private static final String FORMATTED_START_TIME;
+    private static final String FORMATTED_COMPLETED_TIME;
 
     private AbstractBuild run;
     private HttpWorkerAnswer workerAnswer;
 
     static {
         TimeUtilsTest.setupTimeZoneAndLocale();
+
+        FORMATTED_START_TIME = TimeUtils.dateToString(START_TIME);
+        FORMATTED_COMPLETED_TIME = TimeUtils.dateToString(START_TIME + DURATION);
     }
 
     @Before
@@ -70,13 +78,15 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
         mockEnvironment();
         mockHttpWorker();
         mockGetChangeSets();
+        mockTimeUtils();
     }
 
     private AbstractBuild mockRun() {
         AbstractBuild run = mock(AbstractBuild.class);
 
         when(run.getNumber()).thenReturn(BUILD_NUMBER);
-        PowerMockito.when(run.getStartTimeInMillis()).thenReturn(START_TIME);
+        when(run.getStartTimeInMillis()).thenReturn(START_TIME);
+        when(run.getDuration()).thenReturn(DURATION);
 
         Job job = mockJob();
         when(run.getParent()).thenReturn(job);
@@ -99,6 +109,15 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
         when(job.getDisplayName()).thenReturn(JOB_NAME);
 
         return job;
+    }
+
+    private void mockResult(Result result) {
+        when(run.getResult()).thenReturn(result);
+
+        Run previousBuild = mock(Run.class);
+        if (result == Result.FAILURE) {
+            when(previousBuild.getResult()).thenReturn(Result.SUCCESS);
+        }
     }
 
     private TaskListener mockListener() {
@@ -140,6 +159,13 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
         when(run.getChangeSets()).thenReturn(files);
     }
 
+    private void mockTimeUtils() {
+        mockStatic(TimeUtils.class);
+        when(TimeUtils.countCompletionTime(START_TIME, DURATION)).thenReturn(START_TIME + DURATION);
+        when(TimeUtils.dateToString(START_TIME)).thenReturn(FORMATTED_START_TIME);
+        when(TimeUtils.dateToString(START_TIME + DURATION)).thenReturn(FORMATTED_COMPLETED_TIME);
+    }
+
 
     @Test
     public void validateRequest_OnStart() {
@@ -152,6 +178,20 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
 
         // then
         assertHasSameContent(workerAnswer.getData(), getContentFile("started.json"));
+    }
+
+    @Test
+    public void validateRequest_OnFailureStatus() {
+
+        // given
+        mockResult(Result.FAILURE);
+        Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
+
+        // when
+        notifier.sendBuildCompleteNotification();
+
+        // then
+        assertHasSameContent(workerAnswer.getData(), getContentFile("failure.json"));
     }
 
     // compares files without worrying about EOL

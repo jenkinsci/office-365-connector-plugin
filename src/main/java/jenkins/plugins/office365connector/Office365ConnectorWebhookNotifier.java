@@ -40,6 +40,7 @@ import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.model.Section;
+import jenkins.plugins.office365connector.utils.TimeUtils;
 import jenkins.plugins.office365connector.workflow.StepParameters;
 import org.apache.commons.lang.StringUtils;
 
@@ -186,14 +187,11 @@ public final class Office365ConnectorWebhookNotifier {
                 summary += " Back to Normal";
 
                 if (failingSinceRun != null) {
-                    long duration = run.getDuration() == 0L
-                            ? System.currentTimeMillis() - run.getStartTimeInMillis()
-                            : run.getDuration();
-                    long currentBuildCompletionTime = run.getStartTimeInMillis() + duration;
+                    long currentBuildCompletionTime = TimeUtils.countCompletionTime(run.getStartTimeInMillis(), run.getDuration());
                     factsBuilder.addBackToNormalTime(currentBuildCompletionTime - failingSinceRun.getStartTimeInMillis());
                 }
-            } else if (result == Result.FAILURE && failingSinceRun != null) {
-                if (previousResult == Result.FAILURE) {
+            } else if (result == Result.FAILURE) {
+                if (failingSinceRun != null && previousResult == Result.FAILURE) {
                     status = "Repeated Failure";
                     summary += " Repeated Failure";
 
@@ -216,6 +214,8 @@ public final class Office365ConnectorWebhookNotifier {
                 status = "Not Built";
                 summary += " Not Built";
             } else {
+                // if we are here it means that something went wrong in logic above
+                // and we are facing unsupported status or case
                 status = result.toString();
                 summary += " " + status;
             }

@@ -59,11 +59,11 @@ public class FactsBuilder {
     }
 
     public void addStatusStarted() {
-        facts.add(new Fact(NAME_STATUS, "Started"));
+        addFact(NAME_STATUS, "Started");
     }
 
     public void addStatusRunning() {
-        facts.add(new Fact(NAME_STATUS, "Running"));
+        addFact(NAME_STATUS, "Running");
     }
 
     public static Fact buildStatus() {
@@ -71,30 +71,24 @@ public class FactsBuilder {
     }
 
     public void addStartTime() {
-        facts.add(new Fact(NAME_START_TIME, TimeUtils.dateToString(run.getStartTimeInMillis())));
+        addFact(NAME_START_TIME, TimeUtils.dateToString(run.getStartTimeInMillis()));
     }
 
     public void addBackToNormalTime(long duration) {
-        facts.add(new Fact(NAME_BACK_TO_NORMAL_TIME, TimeUtils.dateToString(duration)));
+        addFact(NAME_BACK_TO_NORMAL_TIME, TimeUtils.dateToString(duration));
     }
 
     public void addCompletionTime() {
-        facts.add(new Fact(NAME_COMPLETION_TIME, TimeUtils.dateToString(countCompletionTime())));
-    }
-
-    private long countCompletionTime() {
-        long duration = run.getDuration() == 0L
-                ? System.currentTimeMillis() - run.getStartTimeInMillis()
-                : run.getDuration();
-        return run.getStartTimeInMillis() + duration;
+        long completionTime = TimeUtils.countCompletionTime(run.getStartTimeInMillis(), run.getDuration());
+        addFact(NAME_COMPLETION_TIME, TimeUtils.dateToString(completionTime));
     }
 
     public void addFailingSinceTime(long duration) {
-        facts.add(new Fact(NAME_FAILING_SINCE_TIME, TimeUtils.dateToString(duration)));
+        addFact(NAME_FAILING_SINCE_TIME, TimeUtils.dateToString(duration));
     }
 
     public void addFailingSinceBuild(int buildNumber) {
-        facts.add(new Fact(NAME_FAILING_SINCE_BUILD, buildNumber));
+        addFact(NAME_FAILING_SINCE_BUILD, String.valueOf(buildNumber));
     }
 
     public void addRemarks() {
@@ -107,7 +101,7 @@ public class FactsBuilder {
         for (Cause cause : causes) {
             causesStr.append(cause.getShortDescription()).append(". ");
         }
-        facts.add(new Fact(NAME_REMARKS, causesStr.toString()));
+        addFact(NAME_REMARKS, causesStr.toString());
     }
 
     public void addCulprits(Set<User> authors) {
@@ -120,7 +114,7 @@ public class FactsBuilder {
             culprits.add(user.getFullName());
         }
         if (!culprits.isEmpty()) {
-            facts.add(new Fact(NAME_CULPRITS, StringUtils.join(culprits, ", ")));
+            addFact(NAME_CULPRITS, StringUtils.join(culprits, ", "));
         }
     }
 
@@ -128,14 +122,14 @@ public class FactsBuilder {
         if (CollectionUtils.isEmpty(authors)) {
             return;
         }
-        facts.add(new Fact(NAME_DEVELOPERS, StringUtils.join(authors, ", ")));
+        addFact(NAME_DEVELOPERS, StringUtils.join(authors, ", "));
     }
 
     public void addNumberOfFilesChanged(int files) {
         if (files == 0) {
             return;
         }
-        facts.add(new Fact(NAME_NUMBER_OF_CHANGED_FILES, files));
+        addFact(NAME_NUMBER_OF_CHANGED_FILES, files);
     }
 
     public void addTests() {
@@ -144,10 +138,14 @@ public class FactsBuilder {
             return;
         }
 
-        facts.add(new Fact(NAME_TOTAL_TESTS, action.getTotalCount()));
-        facts.add(new Fact(NAME_PASSED_TESTS, action.getTotalCount() - action.getFailCount() - action.getSkipCount()));
-        facts.add(new Fact(NAME_FAILED_TESTS, action.getFailCount()));
-        facts.add(new Fact(NAME_SKIPPED_TESTS, action.getSkipCount()));
+        addFact(NAME_TOTAL_TESTS, action.getTotalCount());
+        addFact(NAME_PASSED_TESTS, action.getTotalCount() - action.getFailCount() - action.getSkipCount());
+        addFact(NAME_FAILED_TESTS, action.getFailCount());
+        addFact(NAME_SKIPPED_TESTS, action.getSkipCount());
+    }
+
+    public void addFact(String name, int value) {
+        addFact(name, String.valueOf(value));
     }
 
     public void addFact(String name, String value) {
