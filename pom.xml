@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>2.36</version><!-- Built against the Jenkins version specified in properties as 'jenkins.version' -->
+        <version>3.2</version><!-- Built against the Jenkins version specified in properties as 'jenkins.version' -->
     </parent>
 
     <licenses>
