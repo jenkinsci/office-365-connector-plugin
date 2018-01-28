@@ -31,6 +31,7 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import hudson.model.AbstractBuild;
+import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -55,6 +56,7 @@ public final class Office365ConnectorWebhookNotifier {
     private final DecisionMaker decisionMaker;
 
     private final Run run;
+    private final Job job;
     private final TaskListener listener;
 
     private final ActionableBuilder potentialActionBuilder;
@@ -64,6 +66,7 @@ public final class Office365ConnectorWebhookNotifier {
         this.listener = listener;
         this.factsBuilder = new FactsBuilder(run);
         this.decisionMaker = new DecisionMaker(run, listener);
+        this.job = this.run.getParent();
         potentialActionBuilder = new ActionableBuilder(run, factsBuilder);
     }
 
@@ -75,7 +78,7 @@ public final class Office365ConnectorWebhookNotifier {
             card = createJobStartedCard();
         }
 
-        WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
+        WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
         if (property == null) {
             log("No webhooks to notify");
             return;
@@ -93,7 +96,7 @@ public final class Office365ConnectorWebhookNotifier {
     public void sendBuildCompleteNotification() {
         Card card = createJobCompletedCard();
 
-        WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
+        WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
         if (property == null) {
             log("No webhooks to notify");
             return;
@@ -116,7 +119,7 @@ public final class Office365ConnectorWebhookNotifier {
             card = createJobCompletedCard();
         }
 
-        WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
+        WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
         if (property == null) {
             Webhook webhook = new Webhook(stepParameters.getWebhookUrl());
             executeWorker(webhook, card);
@@ -134,7 +137,7 @@ public final class Office365ConnectorWebhookNotifier {
         factsBuilder.addRemarks();
         addScmDetails();
 
-        String jobName = run.getParent().getDisplayName();
+        String jobName = getDisplayName();
         String activityTitle = "Update from " + jobName + ".";
         String activitySubtitle = "Latest status of build #" + run.getNumber();
         Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
@@ -147,7 +150,7 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     private Card createJobCompletedCard() {
-        String jobName = run.getParent().getDisplayName();
+        String jobName = getDisplayName();
         String summary = jobName + ": Build #" + run.getNumber();
 
         Fact statusFact = FactsBuilder.buildStatus();
@@ -169,7 +172,7 @@ public final class Office365ConnectorWebhookNotifier {
             if (rt != null) {
                 failingSinceRun = rt.getNextBuild();
             } else {
-                failingSinceRun = run.getParent().getFirstBuild();
+                failingSinceRun = job.getFirstBuild();
             }
 
             if (result == Result.SUCCESS && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)) {
@@ -237,7 +240,7 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     private Card createBuildMessageCard(StepParameters stepParameters) {
-        String jobName = run.getParent().getDisplayName();
+        String jobName = getDisplayName();
         if (stepParameters.getStatus() != null) {
             Fact fact = FactsBuilder.buildStatus();
             fact.setValue(stepParameters.getStatus());
@@ -309,6 +312,10 @@ public final class Office365ConnectorWebhookNotifier {
             log(e.getMessage());
             return Collections.emptyList();
         }
+    }
+
+    private String getDisplayName() {
+        return run.hasCustomDisplayName() ? run.getDisplayName() : job.getFullDisplayName();
     }
 
     /**

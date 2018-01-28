@@ -18,6 +18,7 @@ import java.util.List;
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
+import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -47,9 +48,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public class Office365ConnectorWebhookNotifierIntegrationTest {
 
     private static final String REQUESTS_DIRECTORY = "requests" + File.separatorChar;
-
-    public static final String JOB_NAME = "myFirstJob";
-
+    private static final String JOB_NAME = "myFirstJob";
     private static final String CAUSE_DESCRIPTION = "Started by John";
     private static final int BUILD_NUMBER = 167;
     private static final long START_TIME = 1508617305000L;
@@ -58,14 +57,32 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
     private static final String FORMATTED_START_TIME;
     private static final String FORMATTED_COMPLETED_TIME;
 
+    static {
+        TimeUtilsTest.setupTimeZoneAndLocale();
+        FORMATTED_START_TIME = TimeUtils.dateToString(START_TIME);
+        FORMATTED_COMPLETED_TIME = TimeUtils.dateToString(START_TIME + DURATION);
+    }
+
     private AbstractBuild run;
     private HttpWorkerAnswer workerAnswer;
 
-    static {
-        TimeUtilsTest.setupTimeZoneAndLocale();
+    /* package */ static Job mockJob(String parentDisplayName) {
+        Job job = mock(Job.class);
+        ItemGroup itemGroup = mock(ItemGroup.class);
+        when(itemGroup.getFullDisplayName()).thenReturn(parentDisplayName);
+        when(job.getParent()).thenReturn(itemGroup);
+        when(job.getFullDisplayName()).thenReturn(JOB_NAME);
 
-        FORMATTED_START_TIME = TimeUtils.dateToString(START_TIME);
-        FORMATTED_COMPLETED_TIME = TimeUtils.dateToString(START_TIME + DURATION);
+        return job;
+    }
+
+    private static String getContentFile(String fileName) {
+        try {
+            URL url = Office365ConnectorWebhookNotifierIntegrationTest.class.getClassLoader().getResource(REQUESTS_DIRECTORY + fileName);
+            return IOUtils.toString(url.toURI(), StandardCharsets.UTF_8);
+        } catch (IOException | URISyntaxException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     @Before
@@ -88,7 +105,7 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
         when(run.getStartTimeInMillis()).thenReturn(START_TIME);
         when(run.getDuration()).thenReturn(DURATION);
 
-        Job job = mockJob();
+        Job job = mockJob("");
         when(run.getParent()).thenReturn(job);
 
         // getProperty
@@ -101,14 +118,6 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
         when(run.getCauses()).thenReturn(Arrays.asList(cause));
 
         return run;
-    }
-
-    private Job mockJob() {
-        Job job = mock(Job.class);
-
-        when(job.getDisplayName()).thenReturn(JOB_NAME);
-
-        return job;
     }
 
     private void mockResult(Result result) {
@@ -197,14 +206,5 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
     // compares files without worrying about EOL
     private void assertHasSameContent(String value, String expected) {
         assertThat(StringUtils.normalizeSpace(value)).isEqualTo(StringUtils.normalizeSpace(expected));
-    }
-
-    protected static String getContentFile(String fileName) {
-        try {
-            URL url = Office365ConnectorWebhookNotifierIntegrationTest.class.getClassLoader().getResource(REQUESTS_DIRECTORY + fileName);
-            return IOUtils.toString(url.toURI(), StandardCharsets.UTF_8);
-        } catch (IOException | URISyntaxException e) {
-            throw new IllegalArgumentException(e);
-        }
     }
 }
