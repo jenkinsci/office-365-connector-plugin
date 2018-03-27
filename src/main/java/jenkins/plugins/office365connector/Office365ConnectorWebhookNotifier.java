@@ -74,14 +74,9 @@ public final class Office365ConnectorWebhookNotifier {
             card = createJobStartedCard();
         }
 
-        if (card == null) {
-            listener.getLogger().println(String.format("Build started card not generated."));
-            return;
-        }
-
         WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
         if (property == null) {
-            //     listener.getLogger().println(String.format("No webhooks to notify"));
+            log("No webhooks to notify");
             return;
         }
 
@@ -99,7 +94,7 @@ public final class Office365ConnectorWebhookNotifier {
 
         WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
         if (property == null) {
-            //           listener.getLogger().println(String.format("No webhooks to notify"));
+            log("No webhooks to notify");
             return;
         }
 
@@ -133,7 +128,6 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     private Card createJobStartedCard() {
-
         factsBuilder.addStatusStarted();
         factsBuilder.addStartTime();
         factsBuilder.addRemarks();
@@ -273,8 +267,8 @@ public final class Office365ConnectorWebhookNotifier {
                     webhook.getTimeout(), listener.getLogger());
             worker.submit();
         } catch (IOException | InterruptedException | RejectedExecutionException e) {
-            listener.getLogger().println(String.format("Failed to notify webhook '%s' - %s: %s", webhook,
-                    e.getClass().getName(), e.getMessage()));
+            log(String.format("Failed to notify webhook: %s", webhook.getName()));
+            e.printStackTrace(listener.getLogger());
         }
     }
 
@@ -312,8 +306,15 @@ public final class Office365ConnectorWebhookNotifier {
         try {
             return entry.getAffectedFiles();
         } catch (UnsupportedOperationException e) {
-            listener.getLogger().println(e.getMessage());
+            log(e.getMessage());
             return Collections.emptyList();
         }
+    }
+
+    /**
+     * Helper method for logging.
+     */
+    private void log(String message) {
+        listener.getLogger().println("[Office365connector] " + message);
     }
 }
