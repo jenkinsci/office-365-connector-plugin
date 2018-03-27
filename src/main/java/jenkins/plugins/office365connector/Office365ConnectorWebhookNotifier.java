@@ -18,7 +18,6 @@ package jenkins.plugins.office365connector;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -145,11 +144,8 @@ public final class Office365ConnectorWebhookNotifier {
         String activitySubtitle = "Latest status of build #" + run.getNumber();
         Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
 
-        List<Section> sectionList = new ArrayList<>();
-        sectionList.add(section);
-
         String summary = jobName + ": Build #" + run.getNumber() + " Started";
-        Card card = new Card(summary, sectionList);
+        Card card = new Card(summary, section);
         card.setPotentialAction(potentialActionBuilder.buildActionable());
 
         return card;
@@ -233,10 +229,7 @@ public final class Office365ConnectorWebhookNotifier {
         String activitySubtitle = "Latest status of build #" + run.getNumber();
         Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
 
-        List<Section> sectionList = new ArrayList<>();
-        sectionList.add(section);
-
-        Card card = new Card(summary, sectionList);
+        Card card = new Card(summary, section);
         if (result == Result.SUCCESS) {
             card.setThemeColor("96CEB4");
         } else if (result == Result.FAILURE) {
@@ -262,11 +255,8 @@ public final class Office365ConnectorWebhookNotifier {
         String activityTitle = "Message from " + jobName + ", Build #" + run.getNumber() + "";
         Section section = new Section(activityTitle, stepParameters.getMessage(), factsBuilder.collect());
 
-        List<Section> sectionList = new ArrayList<>();
-        sectionList.add(section);
-
         String summary = jobName + ": Build #" + run.getNumber() + " Status";
-        Card card = new Card(summary, sectionList);
+        Card card = new Card(summary, section);
 
         if (stepParameters.getColor() != null) {
             card.setThemeColor(stepParameters.getColor());
