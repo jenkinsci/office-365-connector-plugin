@@ -15,7 +15,7 @@ public class HttpWorkerAnswer implements Answer<HttpWorker> {
     private String data;
 
     @Override
-    public HttpWorker answer(InvocationOnMock invocation) throws Throwable {
+    public HttpWorker answer(InvocationOnMock invocation) {
         url = (String) (invocation.getArguments())[0];
         data = (String) (invocation.getArguments())[1];
 
