@@ -43,7 +43,6 @@ public class ActionableBuilder {
         List<PotentialAction> potentialActions = pullRequestActionable();
 
         potentialActions.add(buildViewBuild());
-        potentialActions.addAll(pullRequestActionable());
 
         return potentialActions;
     }
