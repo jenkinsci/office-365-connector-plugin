@@ -15,7 +15,6 @@
 package jenkins.plugins.office365connector.model;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author srhebbar
