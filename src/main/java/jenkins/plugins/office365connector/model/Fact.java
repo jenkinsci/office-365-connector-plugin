@@ -64,18 +64,4 @@ public class Fact {
             this.value += cause + ". ";
         }
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Fact fact = (Fact) o;
-        return Objects.equals(name, fact.name) &&
-                Objects.equals(value, fact.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, value);
-    }
 }

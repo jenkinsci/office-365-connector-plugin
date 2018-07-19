@@ -31,7 +31,7 @@ public class FactsBuilderTest {
 
     @Test
     public void addBackToNormalTime() {
-        long backToNormalDuration = 1000;
+        long backToNormalDuration = 1000L;
         String durationString = "16 minutes, 40 seconds";
 
         PowerMockito.mockStatic(TimeUtils.class);
@@ -40,7 +40,10 @@ public class FactsBuilderTest {
         FactsBuilder factBuilder = new FactsBuilder(run);
         factBuilder.addBackToNormalTime(backToNormalDuration);
 
-        Fact expectedFact = new Fact(FactsBuilder.NAME_BACK_TO_NORMAL_TIME, durationString);
-        assertThat(factBuilder.collect()).containsExactly(expectedFact);
+        assertThat(factBuilder.collect()).hasSize(1);
+
+        Fact actualFact = factBuilder.collect().get(0);
+        assertThat(actualFact.getName()).isEqualTo(FactsBuilder.NAME_BACK_TO_NORMAL_TIME);
+        assertThat(actualFact.getValue()).isEqualTo(durationString);
     }
 }
