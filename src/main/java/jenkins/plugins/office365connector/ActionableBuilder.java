@@ -33,6 +33,7 @@ public class ActionableBuilder {
 
     private final Run run;
     private final FactsBuilder factsBuilder;
+    private final List<PotentialAction> potentialActions = new ArrayList<>();
 
     public ActionableBuilder(Run run, FactsBuilder factsBuilder) {
         this.run = run;
@@ -40,24 +41,22 @@ public class ActionableBuilder {
     }
 
     public List<PotentialAction> buildActionable() {
-        List<PotentialAction> potentialActions = pullRequestActionable();
 
-        potentialActions.add(buildViewBuild());
-        potentialActions.addAll(pullRequestActionable());
+        pullRequestActionable();
+        buildViewBuild();
 
         return potentialActions;
     }
 
-    private PotentialAction buildViewBuild() {
+    private void buildViewBuild() {
         String urlString = DisplayURLProvider.get().getRunURL(run);
         String build = Messages.Office365ConnectorWebhookNotifier_BuildPronoun();
         String viewHeader = Messages.Office365ConnectorWebhookNotifier_ViewHeader(build);
 
-        return new PotentialAction(viewHeader, urlString);
+        potentialActions.add(new PotentialAction(viewHeader, urlString));
     }
 
-    private List<PotentialAction> pullRequestActionable() {
-        List<PotentialAction> potentialActions = new ArrayList<>();
+    private void pullRequestActionable() {
         Job job = run.getParent();
         SCMHead head = SCMHead.HeadByItem.findHead(job);
         if (head instanceof ChangeRequestSCMHead) {
@@ -87,7 +86,5 @@ public class ActionableBuilder {
                 factsBuilder.addFact(authorHeader, author);
             }
         }
-
-        return potentialActions;
     }
 }
