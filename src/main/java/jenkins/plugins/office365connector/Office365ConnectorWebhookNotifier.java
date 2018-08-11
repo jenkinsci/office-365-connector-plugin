@@ -71,17 +71,17 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     public void sendBuildStartedNotification(boolean isFromPreBuild) {
+        WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
+        if (property == null || property.getWebhooks() == null || property.getWebhooks().size() == 0) {
+            log("No webhooks to notify");
+            return;
+        }
+
         Card card = null;
 
         boolean isBuild = run instanceof AbstractBuild<?, ?>;
         if ((isBuild && isFromPreBuild) || (!isBuild && !isFromPreBuild)) {
             card = createJobStartedCard();
-        }
-
-        WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
-        if (property == null) {
-            log("No webhooks to notify");
-            return;
         }
 
         for (Webhook webhook : property.getWebhooks()) {
