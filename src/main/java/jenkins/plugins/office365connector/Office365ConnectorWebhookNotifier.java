@@ -94,13 +94,13 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     public void sendBuildCompleteNotification() {
-        Card card = createJobCompletedCard();
-
         WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
-        if (property == null) {
+        if (property == null || property.getWebhooks() == null || property.getWebhooks().size() == 0) {
             log("No webhooks to notify");
             return;
         }
+
+        Card card = createJobCompletedCard();
 
         for (Webhook webhook : property.getWebhooks()) {
             if (decisionMaker.isStatusMatched(webhook) && decisionMaker.isAtLeastOneRuleMatched(webhook)) {
