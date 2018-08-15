@@ -72,7 +72,7 @@ public final class Office365ConnectorWebhookNotifier {
 
     public void sendBuildStartedNotification(boolean isFromPreBuild) {
         WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
-        if (property == null || property.getWebhooks() == null || property.getWebhooks().size() == 0) {
+        if (property == null || property.getWebhooks() == null || property.getWebhooks().isEmpty()) {
             log("No webhooks to notify");
             return;
         }
@@ -95,7 +95,7 @@ public final class Office365ConnectorWebhookNotifier {
 
     public void sendBuildCompleteNotification() {
         WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
-        if (property == null || property.getWebhooks() == null || property.getWebhooks().size() == 0) {
+        if (property == null || property.getWebhooks() == null || property.getWebhooks().isEmpty()) {
             log("No webhooks to notify");
             return;
         }
