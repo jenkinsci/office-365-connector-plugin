@@ -34,3 +34,6 @@ Run unit tests
 Create an HPI file to install in Jenkins (HPI file will be in target/slack.hpi).
 
 `mvn package`
+
+##Fork Notes
+Merged the most recent master changes and added a Jenkins environmental variable (tag number) to the compact output

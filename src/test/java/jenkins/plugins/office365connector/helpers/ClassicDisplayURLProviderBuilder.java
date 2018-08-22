@@ -8,7 +8,7 @@ import org.jenkinsci.plugins.displayurlapi.ClassicDisplayURLProvider;
  */
 public class ClassicDisplayURLProviderBuilder extends ClassicDisplayURLProvider {
 
-    public static final String URL = "http://localhost/job/Office365/167/display/redirect";
+    public static final String URL = "http://localhost/job/myFirstJob/167/display/redirect";
 
     @Override
     public String getRunURL(Run run) {

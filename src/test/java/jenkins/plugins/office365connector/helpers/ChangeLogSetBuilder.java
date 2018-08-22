@@ -2,7 +2,7 @@ package jenkins.plugins.office365connector.helpers;
 
 import static org.powermock.api.mockito.PowerMockito.mock;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -15,10 +15,11 @@ import hudson.scm.RepositoryBrowser;
  */
 public class ChangeLogSetBuilder extends ChangeLogSet {
 
-    private List entries = new ArrayList();
+    private final List entries;
 
-    public ChangeLogSetBuilder(Run run) {
+    public ChangeLogSetBuilder(Run run, ChangeLogSet.Entry entry) {
         super(run, mock(RepositoryBrowser.class));
+        entries = Arrays.asList(entry);
     }
 
     @Override

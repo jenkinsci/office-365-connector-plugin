@@ -14,6 +14,7 @@
 
 package jenkins.plugins.office365connector.model;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -29,10 +30,10 @@ public class Card {
 
     private List<PotentialAction> potentialAction;
 
-    public Card(String summary, List<Section> sectionList) {
+    public Card(String summary, Section section) {
         this.summary = summary;
         this.themeColor = "3479BF";
-        this.sections = sectionList;
+        this.sections = Arrays.asList(section);
     }
 
     public String getSummary() {
@@ -51,19 +52,11 @@ public class Card {
         return this.sections;
     }
 
-    public void setSummary(String summary) {
-        this.summary = summary;
-    }
-
     public void setThemeColor(String themeColor) {
         this.themeColor = themeColor;
     }
 
     public void setPotentialAction(List<PotentialAction> pa) {
         this.potentialAction = pa;
-    }
-
-    public void setSections(List<Section> sections) {
-        this.sections = sections;
     }
 }

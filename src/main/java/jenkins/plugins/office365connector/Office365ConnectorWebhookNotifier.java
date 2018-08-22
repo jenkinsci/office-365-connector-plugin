@@ -32,6 +32,7 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import hudson.model.AbstractBuild;
+import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -41,6 +42,7 @@ import java.util.Iterator;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.model.Section;
+import jenkins.plugins.office365connector.utils.TimeUtils;
 import jenkins.plugins.office365connector.workflow.StepParameters;
 import org.apache.commons.lang.StringUtils;
 import jenkins.plugins.office365connector.utils.Parser;
@@ -58,10 +60,11 @@ public final class Office365ConnectorWebhookNotifier {
     private final DecisionMaker decisionMaker;
 
     private final Run run;
+    private final Job job;
     private final TaskListener listener;
-    private final ActionableBuilder potentialActionBuilder;    
-        
-    Set<ChangeLogSet.AffectedFile> affectedFiles;    
+    private final ActionableBuilder potentialActionBuilder;
+
+    Set<ChangeLogSet.AffectedFile> affectedFiles;
     private String changesSingleString;
 
     public Office365ConnectorWebhookNotifier(Run run, TaskListener listener) {
@@ -69,6 +72,7 @@ public final class Office365ConnectorWebhookNotifier {
         this.listener = listener;
         this.factsBuilder = new FactsBuilder(run);
         this.decisionMaker = new DecisionMaker(run, listener);
+        this.job = this.run.getParent();
         potentialActionBuilder = new ActionableBuilder(run, factsBuilder);
     }
 
@@ -80,14 +84,9 @@ public final class Office365ConnectorWebhookNotifier {
             card = createJobStartedCard();
         }
 
-        if (card == null) {
-            listener.getLogger().println(String.format("Build started card not generated."));
-            return;
-        }
-
-        WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
+        WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
         if (property == null) {
-            //     listener.getLogger().println(String.format("No webhooks to notify"));
+            log("No webhooks to notify");
             return;
         }
 
@@ -111,16 +110,16 @@ public final class Office365ConnectorWebhookNotifier {
         for (Webhook webhook : webhooks) {
             return webhook.isCompactNotification();
         }
-        return false;         
+        return false;
     }
 
 
     public void sendBuildCompleteNotification() {
         Card card = createJobCompletedCard();
 
-        WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
+        WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
         if (property == null) {
-            //           listener.getLogger().println(String.format("No webhooks to notify"));
+            log("No webhooks to notify");
             return;
         }
 
@@ -141,7 +140,7 @@ public final class Office365ConnectorWebhookNotifier {
             card = createJobCompletedCard();
         }
 
-        WebhookJobProperty property = (WebhookJobProperty) run.getParent().getProperty(WebhookJobProperty.class);
+        WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
         if (property == null) {
             Webhook webhook = new Webhook(stepParameters.getWebhookUrl());
             executeWorker(webhook, card);
@@ -161,35 +160,35 @@ public final class Office365ConnectorWebhookNotifier {
 
         if (isCompactNotification()) {
             Parser parser = new Parser();
-            processScmDetails(false);
+            addScmDetails(false);
             int fileCount = 0;
             if (affectedFiles != null){
                 fileCount = affectedFiles.size();
             }
             String uri = DisplayURLProvider.get().getRunURL(run);
-            activityTitle = jobName + " - <a href=\"" + uri + "\">#" + run.getNumber() + "</a> Started";
+            /*Agency Customization -- added gettagnumber to this message*/
+            activityTitle = jobName + " - <a href=\"" + uri + "\">#" + run.getNumber() + "</a> Started" + " <i>" + factsBuilder.getTagNumber() + "</i>";;
             activitySubtitle = "by " + parser.getAuthor(run.getCauses()) + " (" + fileCount + " file(s) changed)";
         } else {
             factsBuilder.addStatusStarted();
             factsBuilder.addStartTime();
             factsBuilder.addRemarks();
-            processScmDetails(true);
+            addScmDetails(true);
             activityTitle = "Update from " + jobName + ".";
             activitySubtitle = "Latest status of build #" + run.getNumber();
         }
         section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
-        List<Section> sectionList = new ArrayList<>();
-        sectionList.add(section);
 
         String summary = jobName + ": Build #" + run.getNumber() + " Started";
-        Card card = new Card(summary, sectionList);
+        Card card = new Card(summary, section);
         card.setPotentialAction(potentialActionBuilder.buildActionable(isCompactNotification()));
+
         return card;
     }
 
 
     private Card createJobCompletedCard() {
-        String jobName = run.getParent().getDisplayName();
+        String jobName = getDisplayName();
         String summary = jobName + ": Build #" + run.getNumber();
 
         Fact statusFact = FactsBuilder.buildStatus();
@@ -209,7 +208,7 @@ public final class Office365ConnectorWebhookNotifier {
             if (rt != null) {
                 failingSinceRun = rt.getNextBuild();
             } else {
-                failingSinceRun = run.getParent().getFirstBuild();
+                failingSinceRun = job.getFirstBuild();
             }
 
             if (result == Result.SUCCESS && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)) {
@@ -218,9 +217,11 @@ public final class Office365ConnectorWebhookNotifier {
 
                 if (failingSinceRun != null) {
                     factsBuilder.addBackToNormalTime(failingSinceRun.getStartTimeInMillis());
+                    long currentBuildCompletionTime = TimeUtils.countCompletionTime(run.getStartTimeInMillis(), run.getDuration());
+                    factsBuilder.addBackToNormalTime(currentBuildCompletionTime - failingSinceRun.getStartTimeInMillis());
                 }
-            } else if (result == Result.FAILURE && failingSinceRun != null) {
-                if (previousResult == Result.FAILURE) {
+            } else if (result == Result.FAILURE) {
+                if (failingSinceRun != null && previousResult == Result.FAILURE) {
                     status = "Repeated Failure";
                     summary += " Repeated Failure";
 
@@ -243,6 +244,8 @@ public final class Office365ConnectorWebhookNotifier {
                 status = "Not Built";
                 summary += " Not Built";
             } else {
+                // if we are here it means that something went wrong in logic above
+                // and we are facing unsupported status or case
                 status = result.toString();
                 summary += " " + status;
             }
@@ -253,7 +256,7 @@ public final class Office365ConnectorWebhookNotifier {
         }
 
         factsBuilder.addRemarks();
-        processScmDetails(true);
+        addScmDetails(true);
 
         String activityTitle = "";
         String activitySubtitle = "";
@@ -261,19 +264,19 @@ public final class Office365ConnectorWebhookNotifier {
 
         if (isCompactNotification()) {
             String uri = DisplayURLProvider.get().getRunURL(run);
-            activityTitle = jobName + " - <a href=\"" + uri + "\">#" + run.getNumber() + "</a> " + status + " after "+ factsBuilder.getBuildDuration();
+            /*Agency Customization -- added gettagnumber to this message*/
+            activityTitle = jobName + " - <a href=\"" + uri + "\">#" + run.getNumber() + "</a> " + status + " after "+ factsBuilder.getBuildDuration() + " <i>" + factsBuilder.getTagNumber() + "</i>";
             activitySubtitle = changesSingleString;
             factsBuilder.addTestsCompact();
-            section = new Section(activityTitle, activitySubtitle, factsBuilder.collectCompact());            
+            section = new Section(activityTitle, activitySubtitle, factsBuilder.collectCompact());
         } else {
             activityTitle = "Update from " + jobName + ".";
             activitySubtitle = "Latest status of build #" + run.getNumber();
             section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
         }
-        
-        List<Section> sectionList = new ArrayList<>();
-        sectionList.add(section);
-        Card card = new Card(summary, sectionList);
+
+        Card card = new Card(summary, section);
+
         if (result == Result.SUCCESS) {
             card.setThemeColor("96CEB4");
         } else if (result == Result.FAILURE) {
@@ -285,9 +288,9 @@ public final class Office365ConnectorWebhookNotifier {
 
         return card;
     }
-    
+
     private Card createBuildMessageCard(StepParameters stepParameters) {
-        String jobName = run.getParent().getDisplayName();
+        String jobName = getDisplayName();
         if (stepParameters.getStatus() != null) {
             Fact fact = FactsBuilder.buildStatus();
             fact.setValue(stepParameters.getStatus());
@@ -299,11 +302,8 @@ public final class Office365ConnectorWebhookNotifier {
         String activityTitle = "Message from " + jobName + ", Build #" + run.getNumber() + "";
         Section section = new Section(activityTitle, stepParameters.getMessage(), factsBuilder.collect());
 
-        List<Section> sectionList = new ArrayList<>();
-        sectionList.add(section);
-
         String summary = jobName + ": Build #" + run.getNumber() + " Status";
-        Card card = new Card(summary, sectionList);
+        Card card = new Card(summary, section);
 
         if (stepParameters.getColor() != null) {
             card.setThemeColor(stepParameters.getColor());
@@ -320,12 +320,12 @@ public final class Office365ConnectorWebhookNotifier {
                     webhook.getTimeout(), listener.getLogger());
             worker.submit();
         } catch (IOException | InterruptedException | RejectedExecutionException e) {
-            listener.getLogger().println(String.format("Failed to notify webhook '%s' - %s: %s", webhook,
-                    e.getClass().getName(), e.getMessage()));
+            log(String.format("Failed to notify webhook: %s", webhook.getName()));
+            e.printStackTrace(listener.getLogger());
         }
     }
 
-    private void processScmDetails(boolean addToFactsBuilder) {
+    private void addScmDetails(boolean addToFactsBuilder) {
         Set<User> users;
         List<ChangeLogSet<ChangeLogSet.Entry>> sets;
 
@@ -339,34 +339,36 @@ public final class Office365ConnectorWebhookNotifier {
 
         if (addToFactsBuilder)
             factsBuilder.addCulprits(users);
-        
-        if (!sets.isEmpty()) {
-            Set<User> authors;
-            ArrayList<String> changes;
-            authors = new HashSet<>();
-            affectedFiles = new HashSet<>();
-            changes = new ArrayList<>();
 
 
-            if (Iterables.all(sets, Predicates.instanceOf(ChangeLogSet.class))) {
-                for (ChangeLogSet<ChangeLogSet.Entry> set : sets) {
-                    for (ChangeLogSet.Entry entry : set) {
-                        changes.add(entry.getMsg() + " [" + entry.getAuthor().getDisplayName() + "]");
-                        authors.add(entry.getAuthor());
-                        affectedFiles.addAll(getAffectedFiles(entry));
+            if (!sets.isEmpty()) {
+                Set<User> authors = new HashSet<>();
+                int filesCounter = 0;
+                ArrayList<String> changes;
+                authors = new HashSet<>();
+                affectedFiles = new HashSet<>();
+                changes = new ArrayList<>();
+
+                if (Iterables.all(sets, Predicates.instanceOf(ChangeLogSet.class))) {
+                    for (ChangeLogSet<ChangeLogSet.Entry> set : sets) {
+                        for (ChangeLogSet.Entry entry : set) {
+                            changes.add(entry.getMsg() + " [" + entry.getAuthor().getDisplayName() + "]");
+                            authors.add(entry.getAuthor());
+                            filesCounter += getAffectedFiles(entry).size();
+                        }
                     }
                 }
+                changesSingleString = getChangesAsOneString(changes);
+
+                if (addToFactsBuilder)
+                {
+                    factsBuilder.addDevelopers(authors);
+                    factsBuilder.addNumberOfFilesChanged(filesCounter);
+                }
+
             }
-            changesSingleString = getChangesAsOneString(changes);
-            
-            if (addToFactsBuilder)
-            {
-                factsBuilder.addDevelopers(authors);
-                factsBuilder.addNumberOfFilesChanged(affectedFiles.size());    
-            }
-        }
-        if (StringUtils.isEmpty(changesSingleString))
-            changesSingleString = getChangesAsOneString(null);
+            if (StringUtils.isEmpty(changesSingleString))
+                changesSingleString = getChangesAsOneString(null);
     }
 
     private String getAuthorsString(Set<User> authors) {
@@ -380,7 +382,7 @@ public final class Office365ConnectorWebhookNotifier {
         } else return "";
     }
 
-    private String getChangesAsOneString(ArrayList<String> changes) {       
+    private String getChangesAsOneString(ArrayList<String> changes) {
 
         if (changes != null) {
             if (changes.size() > 0)
@@ -393,9 +395,9 @@ public final class Office365ConnectorWebhookNotifier {
                     changedFiles.append("</li>");
                 }
                 changedFiles.append("</ul>");
-                return changedFiles.toString();    
+                return changedFiles.toString();
             }
-        } 
+        }
         return "No changes";
     }
 
@@ -403,8 +405,19 @@ public final class Office365ConnectorWebhookNotifier {
         try {
             return entry.getAffectedFiles();
         } catch (UnsupportedOperationException e) {
-            listener.getLogger().println(e.getMessage());
+            log(e.getMessage());
             return Collections.emptyList();
         }
+    }
+
+    private String getDisplayName() {
+        return run.hasCustomDisplayName() ? run.getDisplayName() : job.getFullDisplayName();
+    }
+
+    /**
+     * Helper method for logging.
+     */
+    private void log(String message) {
+        listener.getLogger().println("[Office365connector] " + message);
     }
 }
