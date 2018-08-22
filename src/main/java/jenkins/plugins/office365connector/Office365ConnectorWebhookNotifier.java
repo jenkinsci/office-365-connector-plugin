@@ -167,7 +167,8 @@ public final class Office365ConnectorWebhookNotifier {
             }
             String uri = DisplayURLProvider.get().getRunURL(run);
             /*Agency Customization -- added gettagnumber to this message*/
-            activityTitle = jobName + " - <a href=\"" + uri + "\">#" + run.getNumber() + "</a> Started" + " <i>" + factsBuilder.getTagNumber() + "</i>";;
+            activityTitle = jobName + " - <a href=\"" + uri + "\">#" + run.getNumber() + "</a> Started";
+            if(factsBuilder.getTagNumber() != "NA") { activityTitle += " >> <i>" + factsBuilder.getTagNumber() + "</i>"; }
             activitySubtitle = "by " + parser.getAuthor(run.getCauses()) + " (" + fileCount + " file(s) changed)";
         } else {
             factsBuilder.addStatusStarted();
@@ -265,7 +266,8 @@ public final class Office365ConnectorWebhookNotifier {
         if (isCompactNotification()) {
             String uri = DisplayURLProvider.get().getRunURL(run);
             /*Agency Customization -- added gettagnumber to this message*/
-            activityTitle = jobName + " - <a href=\"" + uri + "\">#" + run.getNumber() + "</a> " + status + " after "+ factsBuilder.getBuildDuration() + " <i>" + factsBuilder.getTagNumber() + "</i>";
+            activityTitle = jobName + " - <a href=\"" + uri + "\">#" + run.getNumber() + "</a> " + status + " after "+ factsBuilder.getBuildDuration();
+            if(factsBuilder.getTagNumber() != "NA") { activityTitle += " >> <i>" + factsBuilder.getTagNumber() + "</i>"; }
             activitySubtitle = changesSingleString;
             factsBuilder.addTestsCompact();
             section = new Section(activityTitle, activitySubtitle, factsBuilder.collectCompact());
