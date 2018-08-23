@@ -135,11 +135,14 @@ public class FactsBuilder {
 
         String envBuildPrefix = envVars.get("BUILDPREFIX");
         String envCurrBuild = envVars.get("CURRBUILD");
-        if(envBuildPrefix != null && !envBuildPrefix.isEmpty()) {
+        if(envBuildPrefix != null && !envBuildPrefix.isEmpty() && envBuildPrefix != "null") {
           TagNumber = envBuildPrefix + envCurrBuild;
         }
         else{
-          TagNumber = envVars.get("ReleaseNumber");
+          String InstallRelease = envVars.get("InstallRelease");
+          if(InstallRelease != null && !InstallRelease.isEmpty() && InstallRelease != "null") {
+            TagNumber = InstallRelease;
+          }
         }
       } catch (Throwable t) { }
 
