@@ -36,7 +36,7 @@ public class FactsBuilder {
 
     final static String NAME_STATUS = "Status";
     final static String NAME_REMARKS = "Remarks";
-    final static String NAME_CULPRITS = "Culprits";
+    final static String NAME_SAVIOURS = "Saviours";
     final static String NAME_DEVELOPERS = "Developers";
     final static String NAME_NUMBER_OF_CHANGED_FILES = "Number of files changed";
 
@@ -104,17 +104,17 @@ public class FactsBuilder {
         addFact(NAME_REMARKS, causesStr.toString());
     }
 
-    public void addCulprits(Set<User> authors) {
+    public void addSaviours(Set<User> authors) {
         if (CollectionUtils.isEmpty(authors)) {
             return;
         }
 
-        Set<String> culprits = new HashSet<>();
+        Set<String> saviours = new HashSet<>();
         for (User user : authors) {
-            culprits.add(user.getFullName());
+            saviours.add(user.getFullName());
         }
-        if (!culprits.isEmpty()) {
-            addFact(NAME_CULPRITS, StringUtils.join(culprits, ", "));
+        if (!saviours.isEmpty()) {
+            addFact(NAME_SAVIOURS, StringUtils.join(saviours, ", "));
         }
     }
 

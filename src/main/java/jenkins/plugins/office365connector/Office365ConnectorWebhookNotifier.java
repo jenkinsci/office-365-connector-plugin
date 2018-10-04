@@ -280,14 +280,14 @@ public final class Office365ConnectorWebhookNotifier {
         List<ChangeLogSet<ChangeLogSet.Entry>> sets;
 
         try {
-            users = (Set<User>) run.getClass().getMethod("getCulprits").invoke(run);
+            users = (Set<User>) run.getClass().getMethod("getSaviours").invoke(run);
             sets = (List<ChangeLogSet<ChangeLogSet.Entry>>) run.getClass().getMethod("getChangeSets").invoke(run);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             users = Collections.emptySet();
             sets = Collections.emptyList();
         }
 
-        factsBuilder.addCulprits(users);
+        factsBuilder.addSaviours(users);
 
         if (!sets.isEmpty()) {
             Set<User> authors = new HashSet<>();
