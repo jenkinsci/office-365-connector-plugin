@@ -81,4 +81,18 @@ public final class TimeUtils {
 
         return StringUtils.join(formats, ", ");
     }
+
+    /**
+     * Counts build completion time.
+     *
+     * @param startTime moment when the build has started
+     * @param duration  build duration
+     * @return completion time
+     */
+    public static long countCompletionTime(long startTime, long duration) {
+        long fixedDuration = duration == 0L
+                ? System.currentTimeMillis() - startTime
+                : duration;
+        return startTime + fixedDuration;
+    }
 }
