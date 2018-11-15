@@ -231,6 +231,8 @@ public final class Office365ConnectorWebhookNotifier {
             card.setThemeColor("96CEB4");
         } else if (result == Result.FAILURE) {
             card.setThemeColor("FF6F69");
+        } else if (result == Result.ABORTED) {
+            card.setThemeColor("7F7F7F");
         } else {
             card.setThemeColor("FFCC5C");
         }
