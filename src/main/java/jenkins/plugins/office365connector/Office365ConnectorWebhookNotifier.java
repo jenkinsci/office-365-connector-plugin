@@ -73,11 +73,6 @@ public final class Office365ConnectorWebhookNotifier {
     public void sendBuildStartedNotification(boolean isFromPreBuild) {
         Card card = null;
 
-        boolean isBuild = run instanceof AbstractBuild<?, ?>;
-        if ((isBuild && isFromPreBuild) || (!isBuild && !isFromPreBuild)) {
-            card = createJobStartedCard();
-        }
-
         WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
         if (property == null) {
             log("No webhooks to notify");
@@ -87,6 +82,14 @@ public final class Office365ConnectorWebhookNotifier {
         for (Webhook webhook : property.getWebhooks()) {
             if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                 if (webhook.isStartNotification()) {
+                    boolean isBuild = run instanceof AbstractBuild<?, ?>;
+                    if(webhook.isIncludeCustomMessage()) {
+                        String message = webhook.getCustomMessage();
+                        card = createJobStartedCard(message);
+                    }
+                    else if ((isBuild && isFromPreBuild) || (!isBuild && !isFromPreBuild)) {
+                        card = createJobStartedCard();
+                    }
                     executeWorker(webhook, card);
                 }
             }
@@ -94,8 +97,7 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     public void sendBuildCompleteNotification() {
-        Card card = createJobCompletedCard();
-
+        Card card;
         WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
         if (property == null) {
             log("No webhooks to notify");
@@ -104,6 +106,12 @@ public final class Office365ConnectorWebhookNotifier {
 
         for (Webhook webhook : property.getWebhooks()) {
             if (decisionMaker.isStatusMatched(webhook) && decisionMaker.isAtLeastOneRuleMatched(webhook)) {
+                if(webhook.isIncludeCustomMessage()) {
+                    String message = webhook.getCustomMessage();
+                    card = createJobCompletedCard(message);
+                } else {
+                    card = createJobCompletedCard();
+                }
                 executeWorker(webhook, card);
             }
         }
@@ -131,11 +139,22 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    private Card createJobStartedCard() {
+    private Card createJobStartedCard(String... messages) {
         factsBuilder.addStatusStarted();
         factsBuilder.addStartTime();
         factsBuilder.addRemarks();
         addScmDetails();
+
+        if (messages.length > 0) {
+            try {
+                for (String message : messages) {
+                    factsBuilder.addCustom(message, run);
+                }
+            } catch (IOException | InterruptedException e) {
+                log(String.format("Failed to add custom message"));
+                e.printStackTrace(listener.getLogger());
+            }
+        }
 
         String jobName = getDisplayName();
         String activityTitle = "Update from " + jobName + ".";
@@ -149,7 +168,7 @@ public final class Office365ConnectorWebhookNotifier {
         return card;
     }
 
-    private Card createJobCompletedCard() {
+    private Card createJobCompletedCard(String... messages) {
         String jobName = getDisplayName();
         String summary = jobName + ": Build #" + run.getNumber();
 
@@ -221,6 +240,17 @@ public final class Office365ConnectorWebhookNotifier {
 
         factsBuilder.addRemarks();
         addScmDetails();
+
+        if (messages.length > 0) {
+            try {
+                for (String message : messages) {
+                    factsBuilder.addCustom(message, run);
+                }
+            } catch (IOException | InterruptedException e) {
+                log(String.format("Failed to add custom message"));
+                e.printStackTrace(listener.getLogger());
+            }
+        }
 
         String activityTitle = "Update from " + jobName + ".";
         String activitySubtitle = "Latest status of build #" + run.getNumber();
