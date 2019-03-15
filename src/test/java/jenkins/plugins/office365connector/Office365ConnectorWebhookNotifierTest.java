@@ -27,6 +27,7 @@ import org.junit.rules.ExpectedException;
  */
 public class Office365ConnectorWebhookNotifierTest {
 
+    private static final int RUN_NUMBER = 42;
     private static final String CUSTOM_RUN_NAME = "myCustomRunName";
     private static final String JOB_NAME = "myFirstJob";
     private static final String MULTI_BRANCH_NAME = "myFirstMultiBranchProject";
@@ -110,17 +111,34 @@ public class Office365ConnectorWebhookNotifierTest {
     }
 
     @Test
-    public void getDisplayName_RunWithCustomName() throws Exception {
+    public void getDisplayName_RunWithoutCustomName() throws Exception {
 
         // given
-        when(run.hasCustomDisplayName()).thenReturn(true);
+        when(run.hasCustomDisplayName()).thenReturn(false);
+        when(run.getNumber()).thenReturn(RUN_NUMBER);
         when(run.getDisplayName()).thenReturn(CUSTOM_RUN_NAME);
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, listener);
 
         // when,
-        String getDisplayName = Deencapsulation.invoke(notifier, "getDisplayName");
+        String getRunName = Deencapsulation.invoke(notifier, "getRunName");
 
         // then
-        assertThat(getDisplayName).isEqualTo(CUSTOM_RUN_NAME);
+        assertThat(getRunName).isEqualTo("#" + RUN_NUMBER);
+    }
+  
+    @Test
+    public void getDisplayName_RunWithCustomName() throws Exception {
+
+        // given
+        when(run.hasCustomDisplayName()).thenReturn(true);
+        when(run.getNumber()).thenReturn(RUN_NUMBER);
+        when(run.getDisplayName()).thenReturn(CUSTOM_RUN_NAME);
+        Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, listener);
+
+        // when,
+        String getRunName = Deencapsulation.invoke(notifier, "getRunName");
+
+        // then
+        assertThat(getRunName).isEqualTo(CUSTOM_RUN_NAME);
     }
 }

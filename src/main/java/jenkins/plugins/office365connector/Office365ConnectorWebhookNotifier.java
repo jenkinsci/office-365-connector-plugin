@@ -139,10 +139,10 @@ public final class Office365ConnectorWebhookNotifier {
 
         String jobName = getDisplayName();
         String activityTitle = "Update from " + jobName + ".";
-        String activitySubtitle = "Latest status of build #" + run.getNumber();
+        String activitySubtitle = "Latest status of build " + getRunName();
         Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
 
-        String summary = jobName + ": Build #" + run.getNumber() + " Started";
+        String summary = jobName + ": Build " + getRunName() + " Started";
         Card card = new Card(summary, section);
         card.setPotentialAction(potentialActionBuilder.buildActionable());
 
@@ -151,7 +151,7 @@ public final class Office365ConnectorWebhookNotifier {
 
     private Card createJobCompletedCard() {
         String jobName = getDisplayName();
-        String summary = jobName + ": Build #" + run.getNumber();
+        String summary = jobName + ": Build " + getRunName();
 
         Fact statusFact = FactsBuilder.buildStatus();
         factsBuilder.addFact(statusFact);
@@ -223,7 +223,7 @@ public final class Office365ConnectorWebhookNotifier {
         addScmDetails();
 
         String activityTitle = "Update from " + jobName + ".";
-        String activitySubtitle = "Latest status of build #" + run.getNumber();
+        String activitySubtitle = "Latest status of build " + getRunName();
         Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
 
         Card card = new Card(summary, section);
@@ -249,10 +249,10 @@ public final class Office365ConnectorWebhookNotifier {
             factsBuilder.addStatusRunning();
         }
 
-        String activityTitle = "Message from " + jobName + ", Build #" + run.getNumber() + "";
+        String activityTitle = "Message from " + jobName + ", Build " + getRunName() + "";
         Section section = new Section(activityTitle, stepParameters.getMessage(), factsBuilder.collect());
 
-        String summary = jobName + ": Build #" + run.getNumber() + " Status";
+        String summary = jobName + ": Build " + getRunName() + " Status";
         Card card = new Card(summary, section);
 
         if (stepParameters.getColor() != null) {
@@ -315,9 +315,13 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     private String getDisplayName() {
-        return run.hasCustomDisplayName() ? run.getDisplayName() : job.getFullDisplayName();
+        return job.getFullDisplayName();
     }
 
+    private String getRunName() {
+        return run.hasCustomDisplayName() ? run.getDisplayName() : "#" + run.getNumber();
+    }
+  
     /**
      * Helper method for logging.
      */
