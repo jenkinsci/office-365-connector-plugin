@@ -164,7 +164,7 @@ public final class Office365ConnectorWebhookNotifier {
             factsBuilder.addCompletionTime();
             factsBuilder.addTests();
 
-            String status;
+            String status = null;
             Run previousBuild = run.getPreviousBuild();
             Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
             Run rt = run.getPreviousNotFailedBuild();
@@ -175,13 +175,21 @@ public final class Office365ConnectorWebhookNotifier {
                 failingSinceRun = job.getFirstBuild();
             }
 
-            if (result == Result.SUCCESS && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)) {
-                status = "Back to Normal";
-                summary += " Back to Normal";
+            if (result == Result.SUCCESS) {
+                // back to normal
+                if (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) {
+                    status = "Back to Normal";
+                    summary += " Back to Normal";
 
-                if (failingSinceRun != null) {
-                    long currentBuildCompletionTime = TimeUtils.countCompletionTime(run.getStartTimeInMillis(), run.getDuration());
-                    factsBuilder.addBackToNormalTime(currentBuildCompletionTime - failingSinceRun.getStartTimeInMillis());
+                    if (failingSinceRun != null) {
+                        long currentBuildCompletionTime = TimeUtils.countCompletionTime(run.getStartTimeInMillis(), run.getDuration());
+                        factsBuilder.addBackToNormalTime(currentBuildCompletionTime - failingSinceRun.getStartTimeInMillis());
+                    }
+                }
+                // still success
+                else {
+                    status = "Build Success";
+                    summary += " Success";
                 }
             } else if (result == Result.FAILURE) {
                 if (failingSinceRun != null && previousResult == Result.FAILURE) {
@@ -200,15 +208,13 @@ public final class Office365ConnectorWebhookNotifier {
             } else if (result == Result.UNSTABLE) {
                 status = "Build Unstable";
                 summary += " Unstable";
-            } else if (result == Result.SUCCESS) {
-                status = "Build Success";
-                summary += " Success";
             } else if (result == Result.NOT_BUILT) {
                 status = "Not Built";
                 summary += " Not Built";
             } else {
                 // if we are here it means that something went wrong in logic above
                 // and we are facing unsupported status or case
+                log("Unsupported result: " + result);
                 status = result.toString();
                 summary += " " + status;
             }
