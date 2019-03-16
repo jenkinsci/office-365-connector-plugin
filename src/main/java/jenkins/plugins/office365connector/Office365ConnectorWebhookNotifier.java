@@ -71,8 +71,8 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     public void sendBuildStartedNotification(boolean isFromPreBuild) {
-        WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
-        if (property == null || property.getWebhooks() == null || property.getWebhooks().isEmpty()) {
+        List<Webhook> webhooks = extractWebhooks(job);
+        if (webhooks.isEmpty()) {
             return;
         }
 
@@ -83,7 +83,7 @@ public final class Office365ConnectorWebhookNotifier {
             card = createJobStartedCard();
         }
 
-        for (Webhook webhook : property.getWebhooks()) {
+        for (Webhook webhook : webhooks) {
             if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                 if (webhook.isStartNotification()) {
                     executeWorker(webhook, card);
@@ -93,18 +93,26 @@ public final class Office365ConnectorWebhookNotifier {
     }
 
     public void sendBuildCompleteNotification() {
-        WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
-        if (property == null || property.getWebhooks() == null || property.getWebhooks().isEmpty()) {
+        List<Webhook> webhooks = extractWebhooks(job);
+        if (webhooks.isEmpty()) {
             return;
         }
 
         Card card = createJobCompletedCard();
 
-        for (Webhook webhook : property.getWebhooks()) {
+        for (Webhook webhook : webhooks) {
             if (decisionMaker.isStatusMatched(webhook) && decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                 executeWorker(webhook, card);
             }
         }
+    }
+
+    private static List<Webhook> extractWebhooks(Job job) {
+        WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
+        if (property != null && property.getWebhooks() != null) {
+            return property.getWebhooks();
+        }
+        return Collections.emptyList();
     }
 
     public void sendBuildNotification(StepParameters stepParameters) {
