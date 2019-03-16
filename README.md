@@ -1,3 +1,5 @@
+[![Build Travis](https://img.shields.io/travis/jenkinsci/office-365-connector-plugin/master.svg)](https://travis-ci.org/jenkinsci/office-365-connector-plugin)
+
 # Office-365-Connector
 Office 365 Connector plugin for Jenkins
 
