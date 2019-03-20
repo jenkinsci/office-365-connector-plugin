@@ -6,12 +6,8 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,7 +26,6 @@ import jenkins.plugins.office365connector.helpers.HttpWorkerAnswer;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
 import jenkins.plugins.office365connector.utils.TimeUtils;
 import jenkins.plugins.office365connector.utils.TimeUtilsTest;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.junit.Before;
@@ -47,7 +42,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest({DisplayURLProvider.class, Office365ConnectorWebhookNotifier.class, Run.class, TimeUtils.class})
 public class Office365ConnectorWebhookNotifierIntegrationTest {
 
-    private static final String REQUESTS_DIRECTORY = "requests" + File.separatorChar;
     private static final String JOB_NAME = "myFirstJob";
     private static final String CAUSE_DESCRIPTION = "Started by John";
     private static final int BUILD_NUMBER = 167;
@@ -66,25 +60,6 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
     private AbstractBuild run;
     private HttpWorkerAnswer workerAnswer;
 
-    /* package */ static Job mockJob(String parentDisplayName) {
-        Job job = mock(Job.class);
-        ItemGroup itemGroup = mock(ItemGroup.class);
-        when(itemGroup.getFullDisplayName()).thenReturn(parentDisplayName);
-        when(job.getParent()).thenReturn(itemGroup);
-        when(job.getFullDisplayName()).thenReturn(JOB_NAME);
-
-        return job;
-    }
-
-    private static String getContentFile(String fileName) {
-        try {
-            URL url = Office365ConnectorWebhookNotifierIntegrationTest.class.getClassLoader().getResource(REQUESTS_DIRECTORY + fileName);
-            return IOUtils.toString(url.toURI(), StandardCharsets.UTF_8);
-        } catch (IOException | URISyntaxException e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
-
     @Before
     public void setUp() {
         mockListener();
@@ -96,6 +71,16 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
         mockHttpWorker();
         mockGetChangeSets();
         mockTimeUtils();
+    }
+
+    private static Job mockJob(String parentDisplayName) {
+        Job job = mock(Job.class);
+        ItemGroup itemGroup = mock(ItemGroup.class);
+        when(itemGroup.getFullDisplayName()).thenReturn(parentDisplayName);
+        when(job.getParent()).thenReturn(itemGroup);
+        when(job.getFullDisplayName()).thenReturn(JOB_NAME);
+
+        return job;
     }
 
     private AbstractBuild mockRun() {
@@ -177,7 +162,7 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
 
 
     @Test
-    public void validateRequest_OnStart() {
+    public void validateStartedRequest_OnSuccess() {
 
         // given
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
@@ -186,21 +171,21 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
         notifier.sendBuildStartedNotification(true);
 
         // then
-        assertHasSameContent(workerAnswer.getData(), getContentFile("started.json"));
+        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("started-success.json"));
     }
 
     @Test
-    public void validateRequest_OnFailureStatus() {
+    public void validateCompletedRequest_OnFailure() {
 
         // given
         mockResult(Result.FAILURE);
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
 
         // when
-        notifier.sendBuildCompleteNotification();
+        notifier.sendBuildCompletedNotification();
 
         // then
-        assertHasSameContent(workerAnswer.getData(), getContentFile("failure.json"));
+        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("completed-failure.json"));
     }
 
     // compares files without worrying about EOL

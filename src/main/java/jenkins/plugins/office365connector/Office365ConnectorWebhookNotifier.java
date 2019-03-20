@@ -75,7 +75,7 @@ public final class Office365ConnectorWebhookNotifier {
         }
     }
 
-    public void sendBuildCompleteNotification() {
+    public void sendBuildCompletedNotification() {
         List<Webhook> webhooks = extractWebhooks(job);
         if (webhooks.isEmpty()) {
             return;
