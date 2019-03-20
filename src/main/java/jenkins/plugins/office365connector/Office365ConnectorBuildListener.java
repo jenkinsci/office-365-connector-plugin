@@ -4,7 +4,6 @@ import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
-
 import javax.annotation.Nonnull;
 
 /**
@@ -48,6 +47,6 @@ public class Office365ConnectorBuildListener extends RunListener<Run> {
     @Override
     public void onCompleted(final Run run, @Nonnull final TaskListener listener) {
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, listener);
-        notifier.sendBuildCompleteNotification();
+        notifier.sendBuildCompletedNotification();
     }
 }
