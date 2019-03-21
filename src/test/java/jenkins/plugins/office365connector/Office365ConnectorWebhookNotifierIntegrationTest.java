@@ -175,6 +175,20 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
     }
 
     @Test
+    public void validateCompletedRequest_OnSuccess() {
+
+        // given
+        mockResult(Result.SUCCESS);
+        Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
+
+        // when
+        notifier.sendBuildCompletedNotification();
+
+        // then
+        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("completed-success.json"));
+    }
+
+    @Test
     public void validateCompletedRequest_OnFailure() {
 
         // given
