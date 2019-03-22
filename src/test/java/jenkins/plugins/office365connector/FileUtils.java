@@ -17,7 +17,7 @@ public final class FileUtils {
 
     public static String getContentFile(String fileName) {
         try {
-            URL url = Office365ConnectorWebhookNotifierIntegrationTest.class.getClassLoader().getResource(REQUESTS_DIRECTORY + fileName);
+            URL url = FileUtils.class.getClassLoader().getResource(REQUESTS_DIRECTORY + fileName);
             return IOUtils.toString(url.toURI(), StandardCharsets.UTF_8);
         } catch (IOException | URISyntaxException e) {
             throw new IllegalArgumentException(e);

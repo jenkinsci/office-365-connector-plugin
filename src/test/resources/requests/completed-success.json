@@ -1,0 +1,47 @@
+{
+    "summary": "myFirstJob: Build #167 Success",
+    "themeColor": "96CEB4",
+    "sections": [
+        {
+            "markdown": true,
+            "facts": [
+                {
+                    "name": "Status",
+                    "value": "Build Success"
+                },
+                {
+                    "name": "Start time",
+                    "value": "2017-10-21 20:21:45 UTC"
+                },
+                {
+                    "name": "Completion time",
+                    "value": "2017-10-21 21:21:45 UTC"
+                },
+                {
+                    "name": "Remarks",
+                    "value": "Started by John. "
+                },
+                {
+                    "name": "Developers",
+                    "value": "Mike"
+                },
+                {
+                    "name": "Number of files changed",
+                    "value": "2"
+                }
+            ],
+            "activityTitle": "Update from myFirstJob.",
+            "activitySubtitle": "Latest status of build #167"
+        }
+    ],
+    "potentialAction": [
+        {
+            "@context": "http://schema.org",
+            "@type": "ViewAction",
+            "name": "View Build",
+            "target": [
+                "http://localhost/job/myFirstJob/167/display/redirect"
+            ]
+        }
+    ]
+}
