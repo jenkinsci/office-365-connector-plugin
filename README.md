@@ -1,6 +1,8 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1fab6aea594f49928b80bfe55a81357c)](https://app.codacy.com/app/damianszczepanik/office-365-connector-plugin?utm_source=github.com&utm_medium=referral&utm_content=jenkinsci/office-365-connector-plugin&utm_campaign=Badge_Grade_Settings)
 [![Build Travis](https://img.shields.io/travis/jenkinsci/office-365-connector-plugin/master.svg)](https://travis-ci.org/jenkinsci/office-365-connector-plugin)
 
+[![Coverage Status](https://img.shields.io/codecov/c/github/jenkinsci/office-365-connector-plugin/master.svg?label=Unit%20tests%20coverage)](https://codecov.io/github/jenkinsci/office-365-connector-plugin)
+
 # Office-365-Connector
 Office 365 Connector plugin for Jenkins
 
