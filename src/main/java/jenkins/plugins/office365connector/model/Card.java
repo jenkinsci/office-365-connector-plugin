@@ -23,7 +23,7 @@ import java.util.List;
 public class Card {
 
     private String summary;
-    private String themeColor;
+    private String themeColor = "3479BF";
 
     // even plugin needs only single 'section' connector API expects arrays
     private List<Section> sections;
@@ -32,20 +32,11 @@ public class Card {
 
     public Card(String summary, Section section) {
         this.summary = summary;
-        this.themeColor = "3479BF";
         this.sections = Arrays.asList(section);
     }
 
     public String getSummary() {
         return summary;
-    }
-
-    public String getThemeColor() {
-        return themeColor;
-    }
-
-    public List<PotentialAction> getPotentialAction() {
-        return this.potentialAction;
     }
 
     public List<Section> getSections() {
@@ -56,7 +47,15 @@ public class Card {
         this.themeColor = themeColor;
     }
 
-    public void setPotentialAction(List<PotentialAction> pa) {
-        this.potentialAction = pa;
+    public String getThemeColor() {
+        return themeColor;
+    }
+
+    public void setPotentialAction(List<PotentialAction> potentialActions) {
+        this.potentialAction = potentialActions;
+    }
+
+    public List<PotentialAction> getPotentialAction() {
+        return this.potentialAction;
     }
 }
