@@ -27,7 +27,7 @@
         <powermock.version>1.6.6</powermock.version>
         <jenkins.version>1.651.2</jenkins.version>
         <workflow.version>2.13</workflow.version>
-        <java.level>7</java.level>
+        <java.level>8</java.level>
     </properties>
 
     <dependencies>

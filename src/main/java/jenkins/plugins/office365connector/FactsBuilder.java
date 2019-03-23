@@ -14,9 +14,9 @@
 package jenkins.plugins.office365connector;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import hudson.model.Cause;
 import hudson.model.Run;
@@ -109,10 +109,7 @@ public class FactsBuilder {
             return;
         }
 
-        Set<String> culprits = new HashSet<>();
-        for (User user : authors) {
-            culprits.add(user.getFullName());
-        }
+        List<String> culprits = authors.stream().map(User::getFullName).collect(Collectors.toList());
         if (!culprits.isEmpty()) {
             addFact(NAME_CULPRITS, StringUtils.join(culprits, ", "));
         }
@@ -145,7 +142,9 @@ public class FactsBuilder {
     }
 
     public void addFact(String name, int value) {
-        addFact(name, String.valueOf(value));
+        if (value != 0) {
+            addFact(name, String.valueOf(value));
+        }
     }
 
     public void addFact(String name, String value) {
