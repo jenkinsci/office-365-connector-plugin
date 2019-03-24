@@ -110,7 +110,8 @@ public final class Office365ConnectorWebhookNotifier {
 
         WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
         if (property == null) {
-            Webhook webhook = new Webhook(stepParameters.getWebhookUrl());
+            Webhook webhook = new Webhook();
+            webhook.setUrl(stepParameters.getWebhookUrl());
             executeWorker(webhook, card);
             return;
         }
@@ -122,7 +123,8 @@ public final class Office365ConnectorWebhookNotifier {
 
     private void executeWorker(Webhook webhook, Card card) {
         try {
-            HttpWorker worker = new HttpWorker(run.getEnvironment(listener).expand(webhook.getUrl()), gson.toJson(card),
+            String url = webhook.getUrl(run);
+            HttpWorker worker = new HttpWorker(run.getEnvironment(listener).expand(url), gson.toJson(card),
                     webhook.getTimeout(), listener.getLogger());
             worker.submit();
         } catch (IOException | InterruptedException | RejectedExecutionException e) {

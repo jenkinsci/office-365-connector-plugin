@@ -17,7 +17,14 @@ public class FormUtils {
      * @param value user input to validate
      * @return OK or Error on pending user input
      */
-    public static FormValidation formValidateUrl(String value) {
+    public static FormValidation formValidateUrl(String value, String urlCredentialsId) {
+        if (StringUtils.isBlank(value)) {
+            if (!StringUtils.isBlank(urlCredentialsId)) {
+                return FormValidation.ok();
+            } else {
+                return FormValidation.error("Either URL or URL Credentials must be non-empty");
+            }
+        }
         if (validateUrl(value)) {
             return FormValidation.ok();
         }
@@ -25,9 +32,6 @@ public class FormUtils {
     }
 
     public static boolean validateUrl(String value) {
-        if (StringUtils.isBlank(value)) {
-            return false;
-        }
         if (value.startsWith("$") && value.length() > 1) {
             return true;
         }

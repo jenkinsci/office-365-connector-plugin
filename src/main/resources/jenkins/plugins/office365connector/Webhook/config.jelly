@@ -3,6 +3,9 @@
     <f:entry title="URL" field="url">
         <f:textbox />
     </f:entry>
+    <f:entry title="URL Credentials" field="urlCredentialsId">
+        <f:textbox />
+    </f:entry>
     <f:entry title="Name" field="name">
         <f:textbox />
     </f:entry>

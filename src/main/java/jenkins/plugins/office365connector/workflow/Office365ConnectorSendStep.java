@@ -93,8 +93,8 @@ public class Office365ConnectorSendStep extends Step {
             return "office365ConnectorSend";
         }
 
-        public FormValidation doCheckWebhookUrl(@QueryParameter String value) {
-            return FormUtils.formValidateUrl(value);
+        public FormValidation doCheckWebhookUrl(@QueryParameter String value, @QueryParameter String urlCredentialsId) {
+            return FormUtils.formValidateUrl(value, urlCredentialsId);
         }
 
     }

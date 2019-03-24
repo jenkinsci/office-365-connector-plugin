@@ -23,9 +23,13 @@ import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
+import hudson.model.Run;
 import hudson.util.FormValidation;
+import hudson.util.Secret;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
 import jenkins.plugins.office365connector.utils.FormUtils;
 import jenkins.plugins.office365connector.model.Macro;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -36,6 +40,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     private String name;
     private String url;
+    private String urlCredentialsId;
 
     private boolean startNotification;
     private boolean notifySuccess;
@@ -51,12 +56,31 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     private List<Macro> macros = Collections.emptyList();
 
     @DataBoundConstructor
-    public Webhook(String url) {
-        this.url = url;
+    public Webhook() {
     }
 
-    public String getUrl() {
-        return url;
+    public String getUrl(Run run) {
+        if (this.url != null) {
+            return this.url;
+        } else if (this.urlCredentialsId != null){
+            StringCredentials urlCredentials = CredentialsProvider.findCredentialById(this.urlCredentialsId, StringCredentials.class, run);
+            if (urlCredentials == null) {
+                throw new RuntimeException("Cannot find a credential with the ID " + this.urlCredentialsId);
+            }
+            return Secret.toString(urlCredentials.getSecret());
+        } else {
+            throw new RuntimeException("Neither url nor urlCredentialsId specified!");
+        }
+    }
+
+    @DataBoundSetter
+    public void setUrl(String url) {
+        this.url = Util.fixEmptyAndTrim(url);
+    }
+
+    @DataBoundSetter
+    public void setUrlCredentialsId(String id) {
+        this.urlCredentialsId = Util.fixEmptyAndTrim(id);
     }
 
     public String getName() {
@@ -179,9 +203,8 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
             return Webhook.DEFAULT_TIMEOUT;
         }
 
-        public FormValidation doCheckUrl(@QueryParameter String value) {
-            return FormUtils.formValidateUrl(value);
+        public FormValidation doCheckUrl(@QueryParameter String value, @QueryParameter String urlCredentialsId) {
+            return FormUtils.formValidateUrl(value, urlCredentialsId);
         }
-
     }
 }
