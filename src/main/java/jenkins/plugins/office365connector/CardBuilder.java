@@ -72,7 +72,7 @@ public class CardBuilder {
 
     public Card createJobCompletedCard() {
         String jobName = getDisplayName();
-        String summary = jobName + ": Build " + getRunName();
+        String summary = String.format("%s: Build %s ", jobName, getRunName());
 
         Fact statusFact = FactsBuilder.buildStatus();
         factsBuilder.addFact(statusFact);
@@ -110,40 +110,40 @@ public class CardBuilder {
                 // still success
                 else {
                     status = "Build Success";
-                    summary += " Success";
+                    summary += "Success";
                 }
             } else if (result == Result.FAILURE) {
                 if (failingSinceRun != null && previousResult == Result.FAILURE) {
                     status = "Repeated Failure";
-                    summary += " Repeated Failure";
+                    summary += "Repeated Failure";
 
                     factsBuilder.addFailingSinceBuild(failingSinceRun.number);
                     factsBuilder.addFailingSinceTime(failingSinceRun.getStartTimeInMillis() + failingSinceRun.getDuration());
                 } else {
                     status = "Build Failed";
-                    summary += " Failed";
+                    summary += "Failed";
                 }
             } else if (result == Result.ABORTED) {
                 status = "Build Aborted";
-                summary += " Aborted";
+                summary += "Aborted";
             } else if (result == Result.UNSTABLE) {
                 status = "Build Unstable";
-                summary += " Unstable";
+                summary += "Unstable";
             } else if (result == Result.NOT_BUILT) {
                 status = "Not Built";
-                summary += " Not Built";
+                summary += "Not Built";
             } else {
                 // if we are here it means that something went wrong in logic above
                 // and we are facing unsupported status or case
                 log("Unsupported result: " + result);
                 status = result.toString();
-                summary += " " + status;
+                summary += status;
             }
 
             statusFact.setValue(status);
         } else {
             statusFact.setValue(" Completed");
-            summary += " Completed";
+            summary += "Completed";
         }
 
         factsBuilder.addRemarks();
