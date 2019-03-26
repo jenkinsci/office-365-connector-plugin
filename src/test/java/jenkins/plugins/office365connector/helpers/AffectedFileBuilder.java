@@ -11,7 +11,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.EditType;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 /**
@@ -51,13 +50,7 @@ public class AffectedFileBuilder {
         return user;
     }
 
-    public static <T> Answer<T> createAnswer(final T value) {
-        Answer<T> dummy = new Answer<T>() {
-            @Override
-            public T answer(InvocationOnMock invocation) {
-                return value;
-            }
-        };
-        return dummy;
+    public static <T> Answer<T> createAnswer(T value) {
+        return (invocation -> value);
     }
 }
