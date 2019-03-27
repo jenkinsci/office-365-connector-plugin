@@ -7,7 +7,7 @@ import org.junit.Test;
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public final class FactTest {
+public class FactTest {
 
     @Test
     public void getName_ReturnsName() {
