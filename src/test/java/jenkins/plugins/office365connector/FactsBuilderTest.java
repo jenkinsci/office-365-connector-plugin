@@ -40,7 +40,7 @@ public class FactsBuilderTest {
         String durationString = "16 minutes, 40 seconds";
 
         PowerMockito.mockStatic(TimeUtils.class);
-        BDDMockito.given(TimeUtils.durationToString(backToNormalDuration / 1000)).willReturn(durationString);
+        BDDMockito.given(TimeUtils.formatDuration(backToNormalDuration / 1000)).willReturn(durationString);
 
         FactsBuilder factBuilder = new FactsBuilder(run);
 

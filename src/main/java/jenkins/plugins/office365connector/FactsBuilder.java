@@ -75,7 +75,7 @@ public class FactsBuilder {
     }
 
     public void addBackToNormalTime(long duration) {
-        addFact(NAME_BACK_TO_NORMAL_TIME, TimeUtils.durationToString(duration / 1000));
+        addFact(NAME_BACK_TO_NORMAL_TIME, TimeUtils.formatDuration(duration / 1000));
     }
 
     public void addCompletionTime() {
