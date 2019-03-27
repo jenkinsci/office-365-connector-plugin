@@ -36,11 +36,11 @@ public class FactsBuilderTest {
     public void addBackToNormalTime_AddsFact() {
 
         // given
-        long backToNormalDuration = 1000L;
+        long backToNormalDuration = 1000000L;
         String durationString = "16 minutes, 40 seconds";
 
         PowerMockito.mockStatic(TimeUtils.class);
-        BDDMockito.given(TimeUtils.durationToString(backToNormalDuration)).willReturn(durationString);
+        BDDMockito.given(TimeUtils.durationToString(backToNormalDuration / 1000)).willReturn(durationString);
 
         FactsBuilder factBuilder = new FactsBuilder(run);
 
