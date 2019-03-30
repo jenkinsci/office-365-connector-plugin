@@ -50,7 +50,7 @@ public class CardBuilder {
         potentialActionBuilder = new ActionableBuilder(run, factsBuilder);
     }
 
-    public Card createJobStartedCard() {
+    public Card createStartedCard() {
         factsBuilder.addStatusStarted();
         factsBuilder.addStartTime();
         factsBuilder.addRemarks();
@@ -68,7 +68,7 @@ public class CardBuilder {
         return card;
     }
 
-    public Card createJobCompletedCard() {
+    public Card createCompletedCard() {
         String jobName = getDisplayName();
         String summary = String.format("%s: Build %s ", jobName, getRunName());
 

@@ -162,7 +162,7 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
 
 
     @Test
-    public void validateStartedRequest_OnSuccess() {
+    public void validateStartedRequest() {
 
         // given
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
@@ -171,7 +171,7 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
         notifier.sendBuildStartedNotification(true);
 
         // then
-        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("started-success.json"));
+        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("started.json"));
     }
 
     @Test
