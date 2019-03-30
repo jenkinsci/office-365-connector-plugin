@@ -11,7 +11,7 @@ import org.junit.Test;
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public final class TimeUtilsTest {
+public class TimeUtilsTest {
 
     private static TimeZone defaultTimeZone;
     private static Locale defaultLocale;

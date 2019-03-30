@@ -11,7 +11,7 @@ import org.apache.commons.io.IOUtils;
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public final class FileUtils {
+public class FileUtils {
 
     private static final String REQUESTS_DIRECTORY = "requests" + File.separatorChar;
 
