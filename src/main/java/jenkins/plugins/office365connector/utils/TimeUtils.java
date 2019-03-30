@@ -62,7 +62,7 @@ public final class TimeUtils {
      * @return formatted duration
      */
 
-    public static String formatDuration(long duration) {
+    public static String durationToString(long duration) {
         return DURATION_FORMATTER.print(new Period(0, duration * 1000));
     }
 

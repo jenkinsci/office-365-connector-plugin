@@ -58,7 +58,7 @@ public class TimeUtilsTest {
         long duration = /* sec*/ 1 + /*min*/ 60 +/*hour*/ +60 * 60 +/*day*/+60 * 60 * 24;
 
         // when
-        String format = TimeUtils.formatDuration(duration);
+        String format = TimeUtils.durationToString(duration);
 
         // then
         assertThat(format).isEqualTo("1 day, 1 hour, 1 minute, 1 second");
@@ -71,7 +71,7 @@ public class TimeUtilsTest {
         long duration = /* sec*/ 0 + /*min*/ 0 +/*hour*/ +60 * 60 +/*day*/+60 * 60 * 24;
 
         // when
-        String format = TimeUtils.formatDuration(duration);
+        String format = TimeUtils.durationToString(duration);
 
         // then
         assertThat(format).isEqualTo("1 day, 1 hour");
@@ -84,7 +84,7 @@ public class TimeUtilsTest {
         long duration = /* sec*/ 5 + /*min*/60 * 6 +/*hour*/ +60 * 60 * 7 +/*day*/+60 * 60 * 24 * 5 +/*weeks*/+60 * 60 * 24 * 14;
 
         // when
-        String format = TimeUtils.formatDuration(duration);
+        String format = TimeUtils.durationToString(duration);
 
         // then
         assertThat(format).isEqualTo("2 weeks, 5 days, 7 hours, 6 minutes, 5 seconds");
@@ -97,7 +97,7 @@ public class TimeUtilsTest {
         long duration = /* sec*/ 15;
 
         // when
-        String format = TimeUtils.formatDuration(duration);
+        String format = TimeUtils.durationToString(duration);
 
         // then
         assertThat(format).isEqualTo("15 seconds");

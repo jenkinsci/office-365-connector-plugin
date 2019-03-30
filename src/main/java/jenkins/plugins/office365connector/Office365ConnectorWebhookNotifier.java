@@ -63,7 +63,7 @@ public final class Office365ConnectorWebhookNotifier {
 
         boolean isBuild = run instanceof AbstractBuild;
         if ((isBuild && isFromPreBuild) || (!isBuild && !isFromPreBuild)) {
-            Card card = cardBuilder.createJobStartedCard();
+            Card card = cardBuilder.createStartedCard();
 
             for (Webhook webhook : webhooks) {
                 if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
@@ -81,7 +81,7 @@ public final class Office365ConnectorWebhookNotifier {
             return;
         }
 
-        Card card = cardBuilder.createJobCompletedCard();
+        Card card = cardBuilder.createCompletedCard();
 
         for (Webhook webhook : webhooks) {
             if (decisionMaker.isStatusMatched(webhook) && decisionMaker.isAtLeastOneRuleMatched(webhook)) {
@@ -103,9 +103,9 @@ public final class Office365ConnectorWebhookNotifier {
         if (StringUtils.isNotBlank(stepParameters.getMessage())) {
             card = cardBuilder.createBuildMessageCard(stepParameters);
         } else if (StringUtils.equalsIgnoreCase(stepParameters.getStatus(), "started")) {
-            card = cardBuilder.createJobStartedCard();
+            card = cardBuilder.createStartedCard();
         } else {
-            card = cardBuilder.createJobCompletedCard();
+            card = cardBuilder.createCompletedCard();
         }
 
         WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);

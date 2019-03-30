@@ -33,6 +33,52 @@ public class FactsBuilderTest {
     }
 
     @Test
+    public void addStatusStarted_AddsFact() {
+
+        // given
+        FactsBuilder factBuilder = new FactsBuilder(run);
+
+        // when
+        factBuilder.addStatusStarted();
+
+        // then
+        FactAssertion.assertThat(factBuilder.collect())
+                .hasName(FactsBuilder.NAME_STATUS)
+                .hasValue(FactsBuilder.VALUE_STATUS_STARTED);
+    }
+
+    @Test
+    public void addStatusRunning_AddsFact() {
+
+        // given
+        FactsBuilder factBuilder = new FactsBuilder(run);
+
+        // when
+        factBuilder.addStatusRunning();
+
+        // then
+        FactAssertion.assertThat(factBuilder.collect())
+                .hasName(FactsBuilder.NAME_STATUS)
+                .hasValue(FactsBuilder.VALUE_STATUS_RUNNING);
+    }
+
+
+    @Test
+    public void addStartTime_AddsFact() {
+
+        // given
+        FactsBuilder factBuilder = new FactsBuilder(run);
+
+        // when
+        factBuilder.addStartTime();
+
+        // then
+        FactAssertion.assertThat(factBuilder.collect())
+                .hasName(FactsBuilder.NAME_START_TIME)
+                .hasNotEmptyValue();
+    }
+
+    @Test
     public void addBackToNormalTime_AddsFact() {
 
         // given
@@ -40,7 +86,7 @@ public class FactsBuilderTest {
         String durationString = "16 minutes, 40 seconds";
 
         PowerMockito.mockStatic(TimeUtils.class);
-        BDDMockito.given(TimeUtils.formatDuration(backToNormalDuration / 1000)).willReturn(durationString);
+        BDDMockito.given(TimeUtils.durationToString(backToNormalDuration / 1000)).willReturn(durationString);
 
         FactsBuilder factBuilder = new FactsBuilder(run);
 
@@ -48,11 +94,56 @@ public class FactsBuilderTest {
         factBuilder.addBackToNormalTime(backToNormalDuration);
 
         // then
-        assertThat(factBuilder.collect())
-                .hasSize(1)
-                .first()
-                .hasFieldOrPropertyWithValue("name", FactsBuilder.NAME_BACK_TO_NORMAL_TIME)
-                .hasFieldOrPropertyWithValue("value", durationString);
+        FactAssertion.assertThat(factBuilder.collect())
+                .hasName(FactsBuilder.NAME_BACK_TO_NORMAL_TIME)
+                .hasValue(durationString);
+    }
+
+    @Test
+    public void addCompletionTime_AddsFact() {
+
+        // given
+        FactsBuilder factBuilder = new FactsBuilder(run);
+
+        // when
+        factBuilder.addCompletionTime();
+
+        // then
+        FactAssertion.assertThat(factBuilder.collect())
+                .hasName(FactsBuilder.NAME_COMPLETION_TIME)
+                .hasNotEmptyValue();
+    }
+
+    @Test
+    public void addFailingSinceTime_AddsFact() {
+
+        // given
+        FactsBuilder factBuilder = new FactsBuilder(run);
+        long date = System.currentTimeMillis();
+
+        // when
+        factBuilder.addFailingSinceTime(date);
+
+        // then
+        FactAssertion.assertThat(factBuilder.collect())
+                .hasName(FactsBuilder.NAME_FAILING_SINCE_TIME)
+                .hasValue(TimeUtils.dateToString(date));
+    }
+
+    @Test
+    public void addFailingSinceBuild_AddsFact() {
+
+        // given
+        FactsBuilder factBuilder = new FactsBuilder(run);
+        int buildNumber = 123;
+
+        // when
+        factBuilder.addFailingSinceBuild(buildNumber);
+
+        // then
+        FactAssertion.assertThat(factBuilder.collect())
+                .hasName(FactsBuilder.NAME_FAILING_SINCE_BUILD)
+                .hasValue(buildNumber);
     }
 
     @Test

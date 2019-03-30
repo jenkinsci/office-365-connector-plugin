@@ -34,22 +34,25 @@ import org.apache.commons.lang.StringUtils;
  */
 public class FactsBuilder {
 
-    private final static String NAME_STATUS = "Status";
+    final static String NAME_STATUS = "Status";
     private final static String NAME_REMARKS = "Remarks";
     final static String NAME_CULPRITS = "Culprits";
     private final static String NAME_DEVELOPERS = "Developers";
     private final static String NAME_NUMBER_OF_CHANGED_FILES = "Number of files changed";
 
-    private final static String NAME_START_TIME = "Start time";
-    private final static String NAME_COMPLETION_TIME = "Completion time";
+    final static String NAME_START_TIME = "Start time";
+    final static String NAME_COMPLETION_TIME = "Completion time";
     final static String NAME_BACK_TO_NORMAL_TIME = "Back to normal time";
-    private final static String NAME_FAILING_SINCE_TIME = "Failing since time";
-    private final static String NAME_FAILING_SINCE_BUILD = "Failing since build";
+    final static String NAME_FAILING_SINCE_TIME = "Failing since time";
+    final static String NAME_FAILING_SINCE_BUILD = "Failing since build";
 
     private final static String NAME_TOTAL_TESTS = "Total tests";
     private final static String NAME_FAILED_TESTS = "Failed tests";
     private final static String NAME_SKIPPED_TESTS = "Skipped tests";
     private final static String NAME_PASSED_TESTS = "Passed tests";
+
+    final static String VALUE_STATUS_STARTED = "Started";
+    final static String VALUE_STATUS_RUNNING = "Running";
 
     private final List<Fact> facts = new ArrayList<>();
     private final Run run;
@@ -59,11 +62,11 @@ public class FactsBuilder {
     }
 
     public void addStatusStarted() {
-        addFact(NAME_STATUS, "Started");
+        addFact(NAME_STATUS, VALUE_STATUS_STARTED);
     }
 
     public void addStatusRunning() {
-        addFact(NAME_STATUS, "Running");
+        addFact(NAME_STATUS, VALUE_STATUS_RUNNING);
     }
 
     public static Fact buildStatus() {
@@ -75,7 +78,7 @@ public class FactsBuilder {
     }
 
     public void addBackToNormalTime(long duration) {
-        addFact(NAME_BACK_TO_NORMAL_TIME, TimeUtils.formatDuration(duration / 1000));
+        addFact(NAME_BACK_TO_NORMAL_TIME, TimeUtils.durationToString(duration / 1000));
     }
 
     public void addCompletionTime() {
@@ -83,8 +86,8 @@ public class FactsBuilder {
         addFact(NAME_COMPLETION_TIME, TimeUtils.dateToString(completionTime));
     }
 
-    public void addFailingSinceTime(long duration) {
-        addFact(NAME_FAILING_SINCE_TIME, TimeUtils.dateToString(duration));
+    public void addFailingSinceTime(long date) {
+        addFact(NAME_FAILING_SINCE_TIME, TimeUtils.dateToString(date));
     }
 
     public void addFailingSinceBuild(int buildNumber) {
