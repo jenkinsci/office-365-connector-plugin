@@ -34,22 +34,22 @@ import org.apache.commons.lang.StringUtils;
  */
 public class FactsBuilder {
 
-    final static String NAME_STATUS = "Status";
-    final static String NAME_REMARKS = "Remarks";
+    private final static String NAME_STATUS = "Status";
+    private final static String NAME_REMARKS = "Remarks";
     final static String NAME_CULPRITS = "Culprits";
-    final static String NAME_DEVELOPERS = "Developers";
-    final static String NAME_NUMBER_OF_CHANGED_FILES = "Number of files changed";
+    private final static String NAME_DEVELOPERS = "Developers";
+    private final static String NAME_NUMBER_OF_CHANGED_FILES = "Number of files changed";
 
-    final static String NAME_START_TIME = "Start time";
-    final static String NAME_COMPLETION_TIME = "Completion time";
+    private final static String NAME_START_TIME = "Start time";
+    private final static String NAME_COMPLETION_TIME = "Completion time";
     final static String NAME_BACK_TO_NORMAL_TIME = "Back to normal time";
-    final static String NAME_FAILING_SINCE_TIME = "Failing since time";
-    final static String NAME_FAILING_SINCE_BUILD = "Failing since build";
+    private final static String NAME_FAILING_SINCE_TIME = "Failing since time";
+    private final static String NAME_FAILING_SINCE_BUILD = "Failing since build";
 
-    final static String NAME_TOTAL_TESTS = "Total tests";
-    final static String NAME_FAILED_TESTS = "Failed tests";
-    final static String NAME_SKIPPED_TESTS = "Skipped tests";
-    final static String NAME_PASSED_TESTS = "Passed tests";
+    private final static String NAME_TOTAL_TESTS = "Total tests";
+    private final static String NAME_FAILED_TESTS = "Failed tests";
+    private final static String NAME_SKIPPED_TESTS = "Skipped tests";
+    private final static String NAME_PASSED_TESTS = "Passed tests";
 
     private final List<Fact> facts = new ArrayList<>();
     private final Run run;
