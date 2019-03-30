@@ -61,7 +61,7 @@ public final class Office365ConnectorWebhookNotifier {
             return;
         }
 
-        boolean isBuild = run instanceof AbstractBuild<?, ?>;
+        boolean isBuild = run instanceof AbstractBuild;
         if ((isBuild && isFromPreBuild) || (!isBuild && !isFromPreBuild)) {
             Card card = cardBuilder.createJobStartedCard();
 
