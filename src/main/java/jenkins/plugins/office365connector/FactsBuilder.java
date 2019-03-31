@@ -14,6 +14,7 @@
 package jenkins.plugins.office365connector;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,9 +22,11 @@ import java.util.stream.Collectors;
 import hudson.model.Cause;
 import hudson.model.Run;
 import hudson.model.User;
+import hudson.scm.ChangeLogSet;
 import hudson.tasks.test.AbstractTestResultAction;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.utils.TimeUtils;
+import jenkins.scm.RunWithSCM;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -38,7 +41,6 @@ public class FactsBuilder {
     private final static String NAME_REMARKS = "Remarks";
     final static String NAME_CULPRITS = "Culprits";
     private final static String NAME_DEVELOPERS = "Developers";
-    private final static String NAME_NUMBER_OF_CHANGED_FILES = "Number of files changed";
 
     final static String NAME_START_TIME = "Start time";
     final static String NAME_COMPLETION_TIME = "Completion time";
@@ -107,7 +109,12 @@ public class FactsBuilder {
         addFact(NAME_REMARKS, causesStr.toString());
     }
 
-    public void addCulprits(Set<User> authors) {
+    public void addCulprits() {
+        if (!(run instanceof RunWithSCM)) {
+            return;
+        }
+        RunWithSCM runWithSCM = (RunWithSCM) run;
+        Set<User> authors = runWithSCM.getCulprits();
         if (CollectionUtils.isEmpty(authors)) {
             return;
         }
@@ -118,18 +125,26 @@ public class FactsBuilder {
         }
     }
 
-    public void addDevelopers(Set<User> authors) {
+    public void addDevelopers() {
+        if (!(run instanceof RunWithSCM)) {
+            return;
+        }
+        RunWithSCM runWithSCM = (RunWithSCM) run;
+
+        List<ChangeLogSet<ChangeLogSet.Entry>> sets = runWithSCM.getChangeSets();
+        if (sets.isEmpty()) {
+            return;
+        }
+        Set<User> authors = new HashSet<>();
+        sets.stream().filter(
+                set -> set instanceof ChangeLogSet).forEach(
+                set -> set.forEach(entry -> authors.add(entry.getAuthor()))
+        );
+
         if (CollectionUtils.isEmpty(authors)) {
             return;
         }
         addFact(NAME_DEVELOPERS, StringUtils.join(authors, ", "));
-    }
-
-    public void addNumberOfFilesChanged(int files) {
-        if (files == 0) {
-            return;
-        }
-        addFact(NAME_NUMBER_OF_CHANGED_FILES, files);
     }
 
     public void addTests() {
