@@ -13,23 +13,14 @@
  */
 package jenkins.plugins.office365connector;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import com.google.common.base.Predicates;
-import com.google.common.collect.Iterables;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.model.User;
-import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.utils.TimeUtils;
 import jenkins.plugins.office365connector.workflow.StepParameters;
-import jenkins.scm.RunWithSCM;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
@@ -54,7 +45,8 @@ public class CardBuilder {
         factsBuilder.addStatusStarted();
         factsBuilder.addStartTime();
         factsBuilder.addRemarks();
-        addScmDetails();
+        factsBuilder.addCulprits();
+        factsBuilder.addDevelopers();
 
         String jobName = getDisplayName();
         String activityTitle = "Update from " + jobName + ".";
@@ -145,7 +137,8 @@ public class CardBuilder {
         }
 
         factsBuilder.addRemarks();
-        addScmDetails();
+        factsBuilder.addCulprits();
+        factsBuilder.addDevelopers();
 
         String activityTitle = "Update from " + jobName + ".";
         String activitySubtitle = "Latest status of build " + getRunName();
@@ -189,41 +182,6 @@ public class CardBuilder {
         card.setPotentialAction(potentialActionBuilder.buildActionable());
 
         return card;
-    }
-
-    private void addScmDetails() {
-        if (!(run instanceof RunWithSCM)) {
-            return;
-        }
-        RunWithSCM runWithSCM = (RunWithSCM) run;
-        factsBuilder.addCulprits(runWithSCM.getCulprits());
-
-        List<ChangeLogSet<ChangeLogSet.Entry>> sets = runWithSCM.getChangeSets();
-        if (sets.isEmpty()) {
-            return;
-        }
-        Set<User> authors = new HashSet<>();
-        int filesCounter = 0;
-        if (Iterables.all(sets, Predicates.instanceOf(ChangeLogSet.class))) {
-            for (ChangeLogSet<ChangeLogSet.Entry> set : sets) {
-                for (ChangeLogSet.Entry entry : set) {
-                    authors.add(entry.getAuthor());
-                    filesCounter += countAffectedFiles(entry);
-                }
-            }
-        }
-        factsBuilder.addDevelopers(authors);
-        factsBuilder.addNumberOfFilesChanged(filesCounter);
-    }
-
-    private int countAffectedFiles(ChangeLogSet.Entry entry) {
-        try {
-            return entry.getAffectedFiles().size();
-        } catch (UnsupportedOperationException e) {
-            // countAffectedFiles() is not implemented by this scm
-            log(e.getMessage());
-            return 0;
-        }
     }
 
     private String getDisplayName() {

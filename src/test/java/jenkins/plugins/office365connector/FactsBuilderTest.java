@@ -4,12 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import hudson.model.Run;
+import hudson.model.AbstractBuild;
 import hudson.model.User;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.utils.TimeUtils;
@@ -25,11 +24,11 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest({TimeUtils.class})
 public class FactsBuilderTest {
 
-    private Run run;
+    private AbstractBuild run;
 
     @Before
     public void setUp() {
-        run = mock(Run.class);
+        run = mock(AbstractBuild.class);
     }
 
     @Test
@@ -156,9 +155,10 @@ public class FactsBuilderTest {
         Set<User> users = new HashSet<>();
         users.add(one);
         users.add(two);
+        when(run.getCulprits()).thenReturn(users);
 
         // when
-        factBuilder.addCulprits(users);
+        factBuilder.addCulprits();
 
         // then
         List<Fact> facts = factBuilder.collect();
@@ -180,7 +180,7 @@ public class FactsBuilderTest {
         FactsBuilder factBuilder = new FactsBuilder(run);
 
         // when
-        factBuilder.addCulprits(Collections.emptySet());
+        factBuilder.addCulprits();
 
         // then
         assertThat(factBuilder.collect()).isEmpty();

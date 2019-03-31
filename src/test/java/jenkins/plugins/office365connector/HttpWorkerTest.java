@@ -50,7 +50,7 @@ public class HttpWorkerTest {
     private static Connection connection;
 
     @BeforeClass
-    public static void setup() throws IOException {
+    public static void setUp() throws IOException {
         Container container = new MyHandler();
         Server server = new ContainerServer(container);
         connection = new SocketConnection(server);
