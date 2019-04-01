@@ -13,20 +13,9 @@
  */
 package jenkins.plugins.office365connector;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import com.google.common.base.Predicates;
-import com.google.common.collect.Iterables;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.model.User;
-import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.model.Section;
@@ -52,11 +41,12 @@ public class CardBuilder {
         potentialActionBuilder = new ActionableBuilder(run, factsBuilder);
     }
 
-    public Card createJobStartedCard() {
+    public Card createStartedCard() {
         factsBuilder.addStatusStarted();
         factsBuilder.addStartTime();
         factsBuilder.addRemarks();
-        addScmDetails();
+        factsBuilder.addCulprits();
+        factsBuilder.addDevelopers();
 
         String jobName = getDisplayName();
         String activityTitle = "Update from " + jobName + ".";
@@ -70,9 +60,9 @@ public class CardBuilder {
         return card;
     }
 
-    public Card createJobCompletedCard() {
+    public Card createCompletedCard() {
         String jobName = getDisplayName();
-        String summary = jobName + ": Build " + getRunName();
+        String summary = String.format("%s: Build %s ", jobName, getRunName());
 
         Fact statusFact = FactsBuilder.buildStatus();
         factsBuilder.addFact(statusFact);
@@ -110,44 +100,45 @@ public class CardBuilder {
                 // still success
                 else {
                     status = "Build Success";
-                    summary += " Success";
+                    summary += "Success";
                 }
             } else if (result == Result.FAILURE) {
                 if (failingSinceRun != null && previousResult == Result.FAILURE) {
                     status = "Repeated Failure";
-                    summary += " Repeated Failure";
+                    summary += "Repeated Failure";
 
                     factsBuilder.addFailingSinceBuild(failingSinceRun.number);
                     factsBuilder.addFailingSinceTime(failingSinceRun.getStartTimeInMillis() + failingSinceRun.getDuration());
                 } else {
                     status = "Build Failed";
-                    summary += " Failed";
+                    summary += "Failed";
                 }
             } else if (result == Result.ABORTED) {
                 status = "Build Aborted";
-                summary += " Aborted";
+                summary += "Aborted";
             } else if (result == Result.UNSTABLE) {
                 status = "Build Unstable";
-                summary += " Unstable";
+                summary += "Unstable";
             } else if (result == Result.NOT_BUILT) {
                 status = "Not Built";
-                summary += " Not Built";
+                summary += "Not Built";
             } else {
                 // if we are here it means that something went wrong in logic above
                 // and we are facing unsupported status or case
                 log("Unsupported result: " + result);
                 status = result.toString();
-                summary += " " + status;
+                summary += status;
             }
 
             statusFact.setValue(status);
         } else {
             statusFact.setValue(" Completed");
-            summary += " Completed";
+            summary += "Completed";
         }
 
         factsBuilder.addRemarks();
-        addScmDetails();
+        factsBuilder.addCulprits();
+        factsBuilder.addDevelopers();
 
         String activityTitle = "Update from " + jobName + ".";
         String activitySubtitle = "Latest status of build " + getRunName();
@@ -191,45 +182,6 @@ public class CardBuilder {
         card.setPotentialAction(potentialActionBuilder.buildActionable());
 
         return card;
-    }
-
-    private void addScmDetails() {
-        Set<User> users;
-        List<ChangeLogSet<ChangeLogSet.Entry>> sets;
-
-        try {
-            users = (Set<User>) run.getClass().getMethod("getCulprits").invoke(run);
-            sets = (List<ChangeLogSet<ChangeLogSet.Entry>>) run.getClass().getMethod("getChangeSets").invoke(run);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            users = Collections.emptySet();
-            sets = Collections.emptyList();
-        }
-
-        factsBuilder.addCulprits(users);
-
-        if (!sets.isEmpty()) {
-            Set<User> authors = new HashSet<>();
-            int filesCounter = 0;
-            if (Iterables.all(sets, Predicates.instanceOf(ChangeLogSet.class))) {
-                for (ChangeLogSet<ChangeLogSet.Entry> set : sets) {
-                    for (ChangeLogSet.Entry entry : set) {
-                        authors.add(entry.getAuthor());
-                        filesCounter += getAffectedFiles(entry).size();
-                    }
-                }
-            }
-            factsBuilder.addDevelopers(authors);
-            factsBuilder.addNumberOfFilesChanged(filesCounter);
-        }
-    }
-
-    private Collection<? extends ChangeLogSet.AffectedFile> getAffectedFiles(ChangeLogSet.Entry entry) {
-        try {
-            return entry.getAffectedFiles();
-        } catch (UnsupportedOperationException e) {
-            log(e.getMessage());
-            return Collections.emptyList();
-        }
     }
 
     private String getDisplayName() {

@@ -8,7 +8,7 @@ import org.junit.Test;
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public final class MacroTest {
+public class MacroTest {
 
     @Test
     public void newMacro_StoresPassedValues() {

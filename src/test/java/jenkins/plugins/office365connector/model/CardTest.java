@@ -9,7 +9,7 @@ import org.junit.Test;
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public final class CardTest {
+public class CardTest {
 
     @Test
     public void getSummary_ReturnsSummary() {

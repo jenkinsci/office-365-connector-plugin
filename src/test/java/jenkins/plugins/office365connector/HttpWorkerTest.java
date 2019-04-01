@@ -47,11 +47,10 @@ import org.simpleframework.transport.connect.SocketConnection;
 @RunWith(PowerMockRunner.class)
 public class HttpWorkerTest {
 
-    WebhookJobProperty property;
     private static Connection connection;
 
     @BeforeClass
-    public static void setup() throws IOException {
+    public static void setUp() throws IOException {
         Container container = new MyHandler();
         Server server = new ContainerServer(container);
         connection = new SocketConnection(server);
@@ -77,13 +76,13 @@ public class HttpWorkerTest {
         Assert.assertTrue(MyHandler.getTest2Result());
     }
 
-    static class MyHandler implements Container {
+    private static class MyHandler implements Container {
 
-        static int trialTestRetries = 0;
+        private static int trialTestRetries = 0;
 
-        static boolean test1Result = false;
+        private static boolean test1Result = false;
 
-        static boolean test2Result = false;
+        private static boolean test2Result = false;
 
         public static boolean getTest1Result() {
             return test1Result;

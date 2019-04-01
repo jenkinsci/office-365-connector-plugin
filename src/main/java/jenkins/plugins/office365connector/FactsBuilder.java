@@ -14,6 +14,7 @@
 package jenkins.plugins.office365connector;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,9 +22,11 @@ import java.util.stream.Collectors;
 import hudson.model.Cause;
 import hudson.model.Run;
 import hudson.model.User;
+import hudson.scm.ChangeLogSet;
 import hudson.tasks.test.AbstractTestResultAction;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.utils.TimeUtils;
+import jenkins.scm.RunWithSCM;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -35,10 +38,9 @@ import org.apache.commons.lang.StringUtils;
 public class FactsBuilder {
 
     final static String NAME_STATUS = "Status";
-    final static String NAME_REMARKS = "Remarks";
+    private final static String NAME_REMARKS = "Remarks";
     final static String NAME_CULPRITS = "Culprits";
-    final static String NAME_DEVELOPERS = "Developers";
-    final static String NAME_NUMBER_OF_CHANGED_FILES = "Number of files changed";
+    private final static String NAME_DEVELOPERS = "Developers";
 
     final static String NAME_START_TIME = "Start time";
     final static String NAME_COMPLETION_TIME = "Completion time";
@@ -46,10 +48,13 @@ public class FactsBuilder {
     final static String NAME_FAILING_SINCE_TIME = "Failing since time";
     final static String NAME_FAILING_SINCE_BUILD = "Failing since build";
 
-    final static String NAME_TOTAL_TESTS = "Total tests";
-    final static String NAME_FAILED_TESTS = "Failed tests";
-    final static String NAME_SKIPPED_TESTS = "Skipped tests";
-    final static String NAME_PASSED_TESTS = "Passed tests";
+    private final static String NAME_TOTAL_TESTS = "Total tests";
+    private final static String NAME_FAILED_TESTS = "Failed tests";
+    private final static String NAME_SKIPPED_TESTS = "Skipped tests";
+    private final static String NAME_PASSED_TESTS = "Passed tests";
+
+    final static String VALUE_STATUS_STARTED = "Started";
+    final static String VALUE_STATUS_RUNNING = "Running";
 
     private final List<Fact> facts = new ArrayList<>();
     private final Run run;
@@ -59,11 +64,11 @@ public class FactsBuilder {
     }
 
     public void addStatusStarted() {
-        addFact(NAME_STATUS, "Started");
+        addFact(NAME_STATUS, VALUE_STATUS_STARTED);
     }
 
     public void addStatusRunning() {
-        addFact(NAME_STATUS, "Running");
+        addFact(NAME_STATUS, VALUE_STATUS_RUNNING);
     }
 
     public static Fact buildStatus() {
@@ -75,7 +80,7 @@ public class FactsBuilder {
     }
 
     public void addBackToNormalTime(long duration) {
-        addFact(NAME_BACK_TO_NORMAL_TIME, TimeUtils.durationToString(duration));
+        addFact(NAME_BACK_TO_NORMAL_TIME, TimeUtils.durationToString(duration / 1000));
     }
 
     public void addCompletionTime() {
@@ -83,8 +88,8 @@ public class FactsBuilder {
         addFact(NAME_COMPLETION_TIME, TimeUtils.dateToString(completionTime));
     }
 
-    public void addFailingSinceTime(long duration) {
-        addFact(NAME_FAILING_SINCE_TIME, TimeUtils.dateToString(duration));
+    public void addFailingSinceTime(long date) {
+        addFact(NAME_FAILING_SINCE_TIME, TimeUtils.dateToString(date));
     }
 
     public void addFailingSinceBuild(int buildNumber) {
@@ -104,7 +109,12 @@ public class FactsBuilder {
         addFact(NAME_REMARKS, causesStr.toString());
     }
 
-    public void addCulprits(Set<User> authors) {
+    public void addCulprits() {
+        if (!(run instanceof RunWithSCM)) {
+            return;
+        }
+        RunWithSCM runWithSCM = (RunWithSCM) run;
+        Set<User> authors = runWithSCM.getCulprits();
         if (CollectionUtils.isEmpty(authors)) {
             return;
         }
@@ -115,18 +125,26 @@ public class FactsBuilder {
         }
     }
 
-    public void addDevelopers(Set<User> authors) {
+    public void addDevelopers() {
+        if (!(run instanceof RunWithSCM)) {
+            return;
+        }
+        RunWithSCM runWithSCM = (RunWithSCM) run;
+
+        List<ChangeLogSet<ChangeLogSet.Entry>> sets = runWithSCM.getChangeSets();
+        if (sets.isEmpty()) {
+            return;
+        }
+        Set<User> authors = new HashSet<>();
+        sets.stream().filter(
+                set -> set instanceof ChangeLogSet).forEach(
+                set -> set.forEach(entry -> authors.add(entry.getAuthor()))
+        );
+
         if (CollectionUtils.isEmpty(authors)) {
             return;
         }
         addFact(NAME_DEVELOPERS, StringUtils.join(authors, ", "));
-    }
-
-    public void addNumberOfFilesChanged(int files) {
-        if (files == 0) {
-            return;
-        }
-        addFact(NAME_NUMBER_OF_CHANGED_FILES, files);
     }
 
     public void addTests() {

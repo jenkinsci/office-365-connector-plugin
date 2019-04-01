@@ -14,8 +14,6 @@
 
 package jenkins.plugins.office365connector.model;
 
-import java.util.List;
-
 /**
  * @author srhebbar
  */
@@ -27,11 +25,6 @@ public class Fact {
     public Fact(String name, String value) {
         this.name = name;
         this.value = value;
-    }
-
-    public Fact(String name, int value) {
-        this.name = name;
-        this.value = Integer.toString(value);
     }
 
     public Fact(String name) {
@@ -56,11 +49,5 @@ public class Fact {
 
     public void setValue(int number) {
         this.value = Integer.toString(number);
-    }
-
-    public void setValue(List<String> causesStrList) {
-        for (String cause : causesStrList) {
-            this.value += cause + ". ";
-        }
     }
 }

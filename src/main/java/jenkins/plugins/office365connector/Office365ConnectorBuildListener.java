@@ -19,12 +19,6 @@ import javax.annotation.Nonnull;
 public class Office365ConnectorBuildListener extends RunListener<Run> {
 
     /**
-     * Runs when the {@link Office365ConnectorBuildListener} class is created.
-     */
-    public Office365ConnectorBuildListener() {
-    }
-
-    /**
      * Called when a build is first started.
      *
      * @param run      - A Run object representing a particular execution of Job.

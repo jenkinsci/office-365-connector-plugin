@@ -169,7 +169,7 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
 
 
     @Test
-    public void validateStartedRequest_OnSuccess() {
+    public void validateStartedRequest() {
         mockWebhook(WebhookBuilder.sampleWebhookWithAllStatuses());
 
         // given
@@ -179,7 +179,7 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
         notifier.sendBuildStartedNotification(true);
 
         // then
-        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("started-success.json"));
+        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("started.json"));
     }
 
     @Test
