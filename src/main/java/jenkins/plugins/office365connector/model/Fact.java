@@ -19,35 +19,19 @@ package jenkins.plugins.office365connector.model;
  */
 public class Fact {
 
-    private String name;
-    private String value;
+    private final String name;
+    private final String value;
 
     public Fact(String name, String value) {
         this.name = name;
         this.value = value;
     }
 
-    public Fact(String name) {
-        this.name = name;
-    }
-
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getValue() {
         return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public void setValue(int number) {
-        this.value = Integer.toString(number);
     }
 }

@@ -186,6 +186,22 @@ public class FactsBuilderTest {
         assertThat(factBuilder.collect()).isEmpty();
     }
 
+    @Test
+    public void addFact_AddStatusAtTheFirstPosition() {
+
+        // given
+        FactsBuilder factBuilder = new FactsBuilder(run);
+        factBuilder.addCompletionTime();
+        factBuilder.addFact("some name", "some value");
+
+        // when
+        factBuilder.addStatus("Ahoy");
+
+        // then
+        assertThat(factBuilder.collect()).hasSize(3);
+        assertThat(factBuilder.collect().get(0).getName()).isEqualTo(FactsBuilder.NAME_STATUS);
+    }
+
     private static User createUser(String fullName) {
         User user = mock(User.class);
         when(user.getFullName()).thenReturn(fullName);
