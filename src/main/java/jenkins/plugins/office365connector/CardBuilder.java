@@ -17,7 +17,6 @@ import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.model.Card;
-import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.utils.TimeUtils;
 import jenkins.plugins.office365connector.workflow.StepParameters;
@@ -64,8 +63,6 @@ public class CardBuilder {
         String jobName = getDisplayName();
         String summary = String.format("%s: Build %s ", jobName, getRunName());
 
-        Fact statusFact = FactsBuilder.buildStatus();
-        factsBuilder.addFact(statusFact);
         factsBuilder.addStartTime();
 
         // Result is only set to a worse status in pipeline
@@ -130,9 +127,9 @@ public class CardBuilder {
                 summary += status;
             }
 
-            statusFact.setValue(status);
+            factsBuilder.addStatus(status);
         } else {
-            statusFact.setValue(" Completed");
+            factsBuilder.addStatus("Completed");
             summary += "Completed";
         }
 
@@ -162,9 +159,7 @@ public class CardBuilder {
     public Card createBuildMessageCard(StepParameters stepParameters) {
         String jobName = getDisplayName();
         if (stepParameters.getStatus() != null) {
-            Fact fact = FactsBuilder.buildStatus();
-            fact.setValue(stepParameters.getStatus());
-            factsBuilder.addFact(fact);
+            factsBuilder.addStatus(stepParameters.getStatus());
         } else {
             factsBuilder.addStatusRunning();
         }

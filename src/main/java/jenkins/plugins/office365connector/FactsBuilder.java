@@ -37,7 +37,7 @@ import org.apache.commons.lang.StringUtils;
  */
 public class FactsBuilder {
 
-    final static String NAME_STATUS = "Status";
+    public final static String NAME_STATUS = "Status";
     private final static String NAME_REMARKS = "Remarks";
     final static String NAME_CULPRITS = "Culprits";
     private final static String NAME_DEVELOPERS = "Developers";
@@ -63,16 +63,16 @@ public class FactsBuilder {
         this.run = run;
     }
 
+    public void addStatus(String status) {
+        addFact(NAME_STATUS, status);
+    }
+
     public void addStatusStarted() {
         addFact(NAME_STATUS, VALUE_STATUS_STARTED);
     }
 
     public void addStatusRunning() {
         addFact(NAME_STATUS, VALUE_STATUS_RUNNING);
-    }
-
-    public static Fact buildStatus() {
-        return new Fact(NAME_STATUS);
     }
 
     public void addStartTime() {
@@ -166,13 +166,20 @@ public class FactsBuilder {
     }
 
     public void addFact(String name, String value) {
-        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(value)) {
-            facts.add(new Fact(name, value));
+        if (StringUtils.isBlank(name) || StringUtils.isBlank(value)) {
+            return;
         }
+
+        addFact(new Fact(name, value));
     }
 
     public void addFact(Fact fact) {
-        facts.add(fact);
+        // build status should be always at first position
+        if (fact.getName().equals(NAME_STATUS)) {
+            facts.add(0, fact);
+        } else {
+            facts.add(fact);
+        }
     }
 
     /**
