@@ -142,7 +142,7 @@ public class FactsBuilderTest {
         // then
         FactAssertion.assertThat(factBuilder.collect())
                 .hasName(FactsBuilder.NAME_FAILING_SINCE_BUILD)
-                .hasValue(buildNumber);
+                .hasValue("#" + buildNumber);
     }
 
     @Test
@@ -165,7 +165,7 @@ public class FactsBuilderTest {
         assertThat(facts).hasSize(1);
 
         Fact fact = facts.get(0);
-        assertThat(fact.getName()).isEqualTo(FactsBuilder.NAME_CULPRITS);
+        assertThat(fact.getName()).isEqualTo(FactsBuilder.CULPRITS);
         assertThat(fact.getValue())
                 .hasSize(one.getFullName().length() + two.getFullName().length() + 2)
                 // depends on JVM implementation 'one' could be listed on the first or last position
