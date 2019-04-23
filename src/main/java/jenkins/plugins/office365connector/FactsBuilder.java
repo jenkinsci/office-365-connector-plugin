@@ -39,7 +39,7 @@ public class FactsBuilder {
 
     public final static String NAME_STATUS = "Status";
     private final static String NAME_REMARKS = "Remarks";
-    final static String NAME_CULPRITS = "Culprits";
+    final static String CULPRITS = "Culprits";
     private final static String NAME_DEVELOPERS = "Developers";
 
     final static String NAME_START_TIME = "Start time";
@@ -93,7 +93,7 @@ public class FactsBuilder {
     }
 
     public void addFailingSinceBuild(int buildNumber) {
-        addFact(NAME_FAILING_SINCE_BUILD, String.valueOf(buildNumber));
+        addFact(NAME_FAILING_SINCE_BUILD, "#" + String.valueOf(buildNumber));
     }
 
     public void addRemarks() {
@@ -121,7 +121,7 @@ public class FactsBuilder {
 
         List<String> culprits = authors.stream().map(User::getFullName).collect(Collectors.toList());
         if (!culprits.isEmpty()) {
-            addFact(NAME_CULPRITS, StringUtils.join(culprits, ", "));
+            addFact(CULPRITS, StringUtils.join(culprits, ", "));
         }
     }
 
