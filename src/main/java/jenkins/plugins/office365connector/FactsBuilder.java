@@ -23,9 +23,7 @@ import hudson.model.Cause;
 import hudson.model.Run;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
-import hudson.tasks.test.AbstractTestResultAction;
 import jenkins.plugins.office365connector.model.Fact;
-import jenkins.plugins.office365connector.utils.TimeUtils;
 import jenkins.scm.RunWithSCM;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -42,16 +40,7 @@ public class FactsBuilder {
     final static String CULPRITS = "Culprits";
     private final static String NAME_DEVELOPERS = "Developers";
 
-    final static String NAME_START_TIME = "Start time";
-    final static String NAME_COMPLETION_TIME = "Completion time";
-    final static String NAME_BACK_TO_NORMAL_TIME = "Back to normal time";
-    final static String NAME_FAILING_SINCE_TIME = "Failing since time";
     final static String NAME_FAILING_SINCE_BUILD = "Failing since build";
-
-    private final static String NAME_TOTAL_TESTS = "Total tests";
-    private final static String NAME_FAILED_TESTS = "Failed tests";
-    private final static String NAME_SKIPPED_TESTS = "Skipped tests";
-    private final static String NAME_PASSED_TESTS = "Passed tests";
 
     final static String VALUE_STATUS_STARTED = "Started";
     final static String VALUE_STATUS_RUNNING = "Running";
@@ -73,23 +62,6 @@ public class FactsBuilder {
 
     public void addStatusRunning() {
         addFact(NAME_STATUS, VALUE_STATUS_RUNNING);
-    }
-
-    public void addStartTime() {
-        addFact(NAME_START_TIME, TimeUtils.dateToString(run.getStartTimeInMillis()));
-    }
-
-    public void addBackToNormalTime(long duration) {
-        addFact(NAME_BACK_TO_NORMAL_TIME, TimeUtils.durationToString(duration / 1000));
-    }
-
-    public void addCompletionTime() {
-        long completionTime = TimeUtils.countCompletionTime(run.getStartTimeInMillis(), run.getDuration());
-        addFact(NAME_COMPLETION_TIME, TimeUtils.dateToString(completionTime));
-    }
-
-    public void addFailingSinceTime(long date) {
-        addFact(NAME_FAILING_SINCE_TIME, TimeUtils.dateToString(date));
     }
 
     public void addFailingSinceBuild(int buildNumber) {
@@ -136,33 +108,15 @@ public class FactsBuilder {
             return;
         }
         Set<User> authors = new HashSet<>();
-        sets.stream().filter(
-                set -> set instanceof ChangeLogSet).forEach(
-                set -> set.forEach(entry -> authors.add(entry.getAuthor()))
-        );
+        sets.stream()
+                .filter(set -> set instanceof ChangeLogSet)
+                .forEach(set -> set.forEach(entry -> authors.add(entry.getAuthor()))
+                );
 
         if (CollectionUtils.isEmpty(authors)) {
             return;
         }
         addFact(NAME_DEVELOPERS, StringUtils.join(authors, ", "));
-    }
-
-    public void addTests() {
-        AbstractTestResultAction<?> action = run.getAction(AbstractTestResultAction.class);
-        if (action == null) {
-            return;
-        }
-
-        addFact(NAME_TOTAL_TESTS, action.getTotalCount());
-        addFact(NAME_PASSED_TESTS, action.getTotalCount() - action.getFailCount() - action.getSkipCount());
-        addFact(NAME_FAILED_TESTS, action.getFailCount());
-        addFact(NAME_SKIPPED_TESTS, action.getSkipCount());
-    }
-
-    public void addFact(String name, int value) {
-        if (value != 0) {
-            addFact(name, String.valueOf(value));
-        }
     }
 
     public void addFact(String name, String value) {

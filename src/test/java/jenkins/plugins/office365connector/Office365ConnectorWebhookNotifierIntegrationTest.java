@@ -155,7 +155,6 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
 
     private void mockTimeUtils() {
         mockStatic(TimeUtils.class);
-        when(TimeUtils.countCompletionTime(START_TIME, DURATION)).thenReturn(START_TIME + DURATION);
         when(TimeUtils.dateToString(START_TIME)).thenReturn(FORMATTED_START_TIME);
         when(TimeUtils.dateToString(START_TIME + DURATION)).thenReturn(FORMATTED_COMPLETED_TIME);
     }

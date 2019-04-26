@@ -18,7 +18,6 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Section;
-import jenkins.plugins.office365connector.utils.TimeUtils;
 import jenkins.plugins.office365connector.workflow.StepParameters;
 
 /**
@@ -42,7 +41,6 @@ public class CardBuilder {
 
     public Card createStartedCard() {
         factsBuilder.addStatusStarted();
-        factsBuilder.addStartTime();
         factsBuilder.addRemarks();
         factsBuilder.addCulprits();
         factsBuilder.addDevelopers();
@@ -63,16 +61,11 @@ public class CardBuilder {
         String jobName = getDisplayName();
         String summary = String.format("%s: Build %s ", jobName, getRunName());
 
-        factsBuilder.addStartTime();
-
         // Result is only set to a worse status in pipeline
         Result result = run.getResult() == null ? Result.SUCCESS : run.getResult();
         if (result != null) {
 
-            factsBuilder.addCompletionTime();
-            factsBuilder.addTests();
-
-            String status = null;
+            String status;
             Run previousBuild = run.getPreviousBuild();
             Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
             Run rt = run.getPreviousNotFailedBuild();
@@ -88,11 +81,6 @@ public class CardBuilder {
                 if (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) {
                     status = "Back to Normal";
                     summary += " Back to Normal";
-
-                    if (failingSinceRun != null) {
-                        long currentBuildCompletionTime = TimeUtils.countCompletionTime(run.getStartTimeInMillis(), run.getDuration());
-                        factsBuilder.addBackToNormalTime(currentBuildCompletionTime - failingSinceRun.getStartTimeInMillis());
-                    }
                 }
                 // still success
                 else {
@@ -105,7 +93,6 @@ public class CardBuilder {
                     summary += "Repeated Failure";
 
                     factsBuilder.addFailingSinceBuild(failingSinceRun.number);
-                    factsBuilder.addFailingSinceTime(failingSinceRun.getStartTimeInMillis() + failingSinceRun.getDuration());
                 } else {
                     status = "Build Failed";
                     summary += "Failed";
