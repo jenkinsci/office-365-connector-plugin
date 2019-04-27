@@ -59,66 +59,62 @@ public class CardBuilder {
 
     public Card createCompletedCard() {
         String jobName = getDisplayName();
+        // not available @ Microsoft Teams but probably is for other Office365 clients
         String summary = String.format("%s: Build %s ", jobName, getRunName());
 
-        // Result is only set to a worse status in pipeline
-        Result result = run.getResult() == null ? Result.SUCCESS : run.getResult();
-        if (result != null) {
+        // result might be null for ongoing job
+        Result result = run.getResult();
 
-            String status;
-            Run previousBuild = run.getPreviousBuild();
-            Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
-            Run rt = run.getPreviousNotFailedBuild();
-            Run failingSinceRun;
-            if (rt != null) {
-                failingSinceRun = rt.getNextBuild();
-            } else {
-                failingSinceRun = run.getParent().getFirstBuild();
-            }
-
-            if (result == Result.SUCCESS) {
-                // back to normal
-                if (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) {
-                    status = "Back to Normal";
-                    summary += " Back to Normal";
-                }
-                // still success
-                else {
-                    status = "Build Success";
-                    summary += "Success";
-                }
-            } else if (result == Result.FAILURE) {
-                if (failingSinceRun != null && previousResult == Result.FAILURE) {
-                    status = "Repeated Failure";
-                    summary += "Repeated Failure";
-
-                    factsBuilder.addFailingSinceBuild(failingSinceRun.number);
-                } else {
-                    status = "Build Failed";
-                    summary += "Failed";
-                }
-            } else if (result == Result.ABORTED) {
-                status = "Build Aborted";
-                summary += "Aborted";
-            } else if (result == Result.UNSTABLE) {
-                status = "Build Unstable";
-                summary += "Unstable";
-            } else if (result == Result.NOT_BUILT) {
-                status = "Not Built";
-                summary += "Not Built";
-            } else {
-                // if we are here it means that something went wrong in logic above
-                // and we are facing unsupported status or case
-                log("Unsupported result: " + result);
-                status = result.toString();
-                summary += status;
-            }
-
-            factsBuilder.addStatus(status);
+        String status;
+        Run previousBuild = run.getPreviousBuild();
+        Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
+        Run rt = run.getPreviousNotFailedBuild();
+        Run failingSinceRun;
+        if (rt != null) {
+            failingSinceRun = rt.getNextBuild();
         } else {
-            factsBuilder.addStatus("Completed");
-            summary += "Completed";
+            failingSinceRun = run.getParent().getFirstBuild();
         }
+
+        if (result == Result.SUCCESS) {
+            // back to normal
+            if (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) {
+                status = "Back to Normal";
+                summary += " Back to Normal";
+            }
+            // still success
+            else {
+                status = "Build Success";
+                summary += "Success";
+            }
+        } else if (result == Result.FAILURE) {
+            if (failingSinceRun != null && previousResult == Result.FAILURE) {
+                status = "Repeated Failure";
+                summary += "Repeated Failure";
+
+                factsBuilder.addFailingSinceBuild(failingSinceRun.number);
+            } else {
+                status = "Build Failed";
+                summary += "Failed";
+            }
+        } else if (result == Result.ABORTED) {
+            status = "Build Aborted";
+            summary += "Aborted";
+        } else if (result == Result.UNSTABLE) {
+            status = "Build Unstable";
+            summary += "Unstable";
+        } else if (result == Result.NOT_BUILT) {
+            status = "Not Built";
+            summary += "Not Built";
+        } else {
+            // if we are here it means that something went wrong in logic above
+            // and we are facing unsupported status or case
+            log("Unknown result: " + result);
+            status = result.toString();
+            summary += status;
+        }
+
+        factsBuilder.addStatus(status);
 
         factsBuilder.addRemarks();
         factsBuilder.addCulprits();
