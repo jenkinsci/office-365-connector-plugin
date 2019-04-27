@@ -15,8 +15,6 @@ import jenkins.plugins.office365connector.utils.TimeUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.BDDMockito;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -61,73 +59,6 @@ public class FactsBuilderTest {
                 .hasValue(FactsBuilder.VALUE_STATUS_RUNNING);
     }
 
-
-    @Test
-    public void addStartTime_AddsFact() {
-
-        // given
-        FactsBuilder factBuilder = new FactsBuilder(run);
-
-        // when
-        factBuilder.addStartTime();
-
-        // then
-        FactAssertion.assertThat(factBuilder.collect())
-                .hasName(FactsBuilder.NAME_START_TIME)
-                .hasNotEmptyValue();
-    }
-
-    @Test
-    public void addBackToNormalTime_AddsFact() {
-
-        // given
-        long backToNormalDuration = 1000000L;
-        String durationString = "16 minutes, 40 seconds";
-
-        PowerMockito.mockStatic(TimeUtils.class);
-        BDDMockito.given(TimeUtils.durationToString(backToNormalDuration / 1000)).willReturn(durationString);
-
-        FactsBuilder factBuilder = new FactsBuilder(run);
-
-        // when
-        factBuilder.addBackToNormalTime(backToNormalDuration);
-
-        // then
-        FactAssertion.assertThat(factBuilder.collect())
-                .hasName(FactsBuilder.NAME_BACK_TO_NORMAL_TIME)
-                .hasValue(durationString);
-    }
-
-    @Test
-    public void addCompletionTime_AddsFact() {
-
-        // given
-        FactsBuilder factBuilder = new FactsBuilder(run);
-
-        // when
-        factBuilder.addCompletionTime();
-
-        // then
-        FactAssertion.assertThat(factBuilder.collect())
-                .hasName(FactsBuilder.NAME_COMPLETION_TIME)
-                .hasNotEmptyValue();
-    }
-
-    @Test
-    public void addFailingSinceTime_AddsFact() {
-
-        // given
-        FactsBuilder factBuilder = new FactsBuilder(run);
-        long date = System.currentTimeMillis();
-
-        // when
-        factBuilder.addFailingSinceTime(date);
-
-        // then
-        FactAssertion.assertThat(factBuilder.collect())
-                .hasName(FactsBuilder.NAME_FAILING_SINCE_TIME)
-                .hasValue(TimeUtils.dateToString(date));
-    }
 
     @Test
     public void addFailingSinceBuild_AddsFact() {
@@ -191,14 +122,13 @@ public class FactsBuilderTest {
 
         // given
         FactsBuilder factBuilder = new FactsBuilder(run);
-        factBuilder.addCompletionTime();
         factBuilder.addFact("some name", "some value");
 
         // when
         factBuilder.addStatus("Ahoy");
 
         // then
-        assertThat(factBuilder.collect()).hasSize(3);
+        assertThat(factBuilder.collect()).hasSize(2);
         assertThat(factBuilder.collect().get(0).getName()).isEqualTo(FactsBuilder.NAME_STATUS);
     }
 

@@ -65,18 +65,4 @@ public final class TimeUtils {
     public static String durationToString(long duration) {
         return DURATION_FORMATTER.print(new Period(0, duration * 1000));
     }
-
-    /**
-     * Counts build completion time.
-     *
-     * @param startTime moment when the build has started
-     * @param duration  build duration
-     * @return completion time
-     */
-    public static long countCompletionTime(long startTime, long duration) {
-        long fixedDuration = duration == 0L
-                ? System.currentTimeMillis() - startTime
-                : duration;
-        return startTime + fixedDuration;
-    }
 }
