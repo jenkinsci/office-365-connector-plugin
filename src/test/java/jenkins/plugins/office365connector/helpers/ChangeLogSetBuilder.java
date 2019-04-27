@@ -17,7 +17,7 @@ public class ChangeLogSetBuilder extends ChangeLogSet {
 
     private final List entries;
 
-    public ChangeLogSetBuilder(Run run, ChangeLogSet.Entry entry) {
+    public ChangeLogSetBuilder(Run run, ChangeLogSet.Entry... entry) {
         super(run, mock(RepositoryBrowser.class));
         entries = Arrays.asList(entry);
     }

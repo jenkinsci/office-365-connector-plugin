@@ -1,0 +1,31 @@
+{
+    "summary": "simple job: Build #1 Started",
+    "themeColor": "3479BF",
+    "sections": [
+        {
+            "markdown": true,
+            "facts": [
+                {
+                    "name": "Status",
+                    "value": "Started"
+                },
+                {
+                    "name": "Developers",
+                    "value": "Peter, George Great, Ann, the Queen"
+                }
+            ],
+            "activityTitle": "Update from simple job.",
+            "activitySubtitle": "Latest status of build #1"
+        }
+    ],
+    "potentialAction": [
+        {
+            "@context": "http://schema.org",
+            "@type": "ViewAction",
+            "name": "View Build",
+            "target": [
+                "http://localhost/job/simple job/1/display/redirect"
+            ]
+        }
+    ]
+}
