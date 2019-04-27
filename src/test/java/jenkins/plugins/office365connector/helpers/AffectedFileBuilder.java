@@ -4,7 +4,7 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import hudson.model.AbstractBuild;
@@ -17,8 +17,6 @@ import org.mockito.stubbing.Answer;
  * @author Damian Szczepanik (damianszczepanik@github)
  */
 public class AffectedFileBuilder {
-
-    private static final String DEVELOPER_NAME = "Mike";
 
     private class File implements ChangeLogSet.AffectedFile {
 
@@ -33,20 +31,36 @@ public class AffectedFileBuilder {
         }
     }
 
-    public List<ChangeLogSet> sampleFiles(AbstractBuild run) {
-        ChangeLogSet.Entry entry = mock(ChangeLogSet.Entry.class);
-        User user = mockUser();
-        when(entry.getAuthor()).thenReturn(user);
+    public List<ChangeLogSet> singleChangeLog(AbstractBuild run) {
+        ChangeLogSet.Entry entryMike = mockEntry("Mike");
 
-        Collection<? extends ChangeLogSet.AffectedFile> files = Arrays.asList(new File(), new File());
-        when(entry.getAffectedFiles()).thenAnswer(createAnswer(files));
+        when(entryMike.getAffectedFiles()).thenAnswer(createAnswer(Arrays.asList(new File(), new File())));
 
-        return Arrays.<ChangeLogSet>asList(new ChangeLogSetBuilder(run, entry));
+        return Arrays.asList(new ChangeLogSetBuilder(run, entryMike));
     }
 
-    private User mockUser() {
+    public List<ChangeLogSet> sampleChangeLogs(AbstractBuild run) {
+        ChangeLogSet.Entry entryPeter = mockEntry("Peter");
+        ChangeLogSet.Entry entryGeorge = mockEntry("George Great");
+        ChangeLogSet.Entry entryAnn = mockEntry("Ann, the Queen");
+
+        when(entryPeter.getAffectedFiles()).thenAnswer(createAnswer(Arrays.asList(new File(), new File())));
+        when(entryPeter.getAffectedFiles()).thenAnswer(createAnswer(Collections.emptyList()));
+        when(entryAnn.getAffectedFiles()).thenAnswer(createAnswer(Collections.emptyList()));
+
+        return Arrays.asList(new ChangeLogSetBuilder(run, entryPeter, entryGeorge, entryAnn));
+    }
+
+    private ChangeLogSet.Entry mockEntry(String userName) {
+        ChangeLogSet.Entry entry = mock(ChangeLogSet.Entry.class);
+        User user = mockUser(userName);
+        when(entry.getAuthor()).thenReturn(user);
+        return entry;
+    }
+
+    private User mockUser(String userName) {
         User user = mock(User.class);
-        when(user.toString()).thenReturn(DEVELOPER_NAME);
+        when(user.toString()).thenReturn(userName);
         return user;
     }
 

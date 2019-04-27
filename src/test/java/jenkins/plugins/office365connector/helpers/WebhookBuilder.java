@@ -11,7 +11,7 @@ import jenkins.plugins.office365connector.Webhook;
 public class WebhookBuilder {
 
     public static List<Webhook> sampleWebhookWithAllStatuses() {
-        Webhook webhook = new Webhook(ClassicDisplayURLProviderBuilder.URL);
+        Webhook webhook = new Webhook(ClassicDisplayURLProviderBuilder.URL_TEMPLATE);
 
         webhook.setNotifyAborted(true);
         webhook.setNotifyBackToNormal(true);
