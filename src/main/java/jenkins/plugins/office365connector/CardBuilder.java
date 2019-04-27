@@ -62,8 +62,8 @@ public class CardBuilder {
         // not available @ Microsoft Teams but probably is for other Office365 clients
         String summary = String.format("%s: Build %s ", jobName, getRunName());
 
-        // result might be null for ongoing job - check documentation of Result.getResult()
-        Result result = getResult(run);
+        // result might be null for ongoing job - check documentation of Result.getCompletedResult()
+        Result result = getCompletedResult(run);
 
         String status;
         Run previousBuild = run.getPreviousBuild();
@@ -115,7 +115,6 @@ public class CardBuilder {
         }
 
         factsBuilder.addStatus(status);
-
         factsBuilder.addRemarks();
         factsBuilder.addCulprits();
         factsBuilder.addDevelopers();
@@ -125,15 +124,7 @@ public class CardBuilder {
         Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
 
         Card card = new Card(summary, section);
-        if (result == Result.SUCCESS) {
-            card.setThemeColor("96CEB4");
-        } else if (result == Result.FAILURE) {
-            card.setThemeColor("FF6F69");
-        } else if (result == Result.ABORTED) {
-            card.setThemeColor("7F7F7F");
-        } else {
-            card.setThemeColor("FFCC5C");
-        }
+        card.setThemeColor(result.color.getHtmlBaseColor());
         card.setPotentialAction(potentialActionBuilder.buildActionable());
 
         return card;
@@ -141,7 +132,7 @@ public class CardBuilder {
 
     // this is tricky way to avoid findBugs NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE
     // which is not true in that case
-    private Result getResult(Run run) {
+    private Result getCompletedResult(Run run) {
         return run.getResult();
     }
 
