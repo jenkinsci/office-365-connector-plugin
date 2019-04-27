@@ -14,7 +14,6 @@
 package jenkins.plugins.office365connector;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -107,16 +106,16 @@ public class FactsBuilder {
         if (sets.isEmpty()) {
             return;
         }
-        Set<User> authors = new HashSet<>();
+
+        List<User> authors = new ArrayList<>();
         sets.stream()
                 .filter(set -> set instanceof ChangeLogSet)
-                .forEach(set -> set.forEach(entry -> authors.add(entry.getAuthor()))
-                );
+                .forEach(set -> set
+                        .forEach(entry -> authors.add(entry.getAuthor())));
 
-        if (CollectionUtils.isEmpty(authors)) {
-            return;
+        if (CollectionUtils.isNotEmpty(authors)) {
+            addFact(NAME_DEVELOPERS, StringUtils.join(authors, ", "));
         }
-        addFact(NAME_DEVELOPERS, StringUtils.join(authors, ", "));
     }
 
     public void addFact(String name, String value) {
