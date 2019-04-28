@@ -20,7 +20,6 @@ import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuild
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
 import jenkins.plugins.office365connector.utils.TimeUtils;
 import jenkins.plugins.office365connector.utils.TimeUtilsTest;
-import org.apache.commons.lang.StringUtils;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import jenkins.plugins.office365connector.workflow.AbstractIntegrationTest;

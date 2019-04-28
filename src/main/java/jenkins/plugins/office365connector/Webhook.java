@@ -30,7 +30,6 @@ import com.cloudbees.plugins.credentials.CredentialsProvider;
 import jenkins.plugins.office365connector.utils.FormUtils;
 import jenkins.plugins.office365connector.model.Macro;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
-import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -55,10 +54,6 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     private int timeout;
 
     private List<Macro> macros = Collections.emptyList();
-
-    @DataBoundConstructor
-    public Webhook() {
-    }
 
     public String getUrl(Run run) {
         if (this.url != null) {
