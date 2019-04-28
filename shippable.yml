@@ -1,0 +1,9 @@
+# Configuration for shippable.com 
+language: java
+
+jdk:
+  - oraclejdk8
+
+build:
+  ci:
+    - mvn verify

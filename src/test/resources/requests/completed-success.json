@@ -1,6 +1,6 @@
 {
     "summary": "myFirstJob: Build #167 Success",
-    "themeColor": "96CEB4",
+    "themeColor": "#729FCF",
     "sections": [
         {
             "markdown": true,
@@ -8,14 +8,6 @@
                 {
                     "name": "Status",
                     "value": "Build Success"
-                },
-                {
-                    "name": "Start time",
-                    "value": "2017-10-21 20:21:45 UTC"
-                },
-                {
-                    "name": "Completion time",
-                    "value": "2017-10-21 21:21:45 UTC"
                 },
                 {
                     "name": "Remarks",

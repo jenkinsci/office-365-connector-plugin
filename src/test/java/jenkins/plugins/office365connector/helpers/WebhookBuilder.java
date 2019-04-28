@@ -13,7 +13,7 @@ public class WebhookBuilder {
     public static List<Webhook> sampleWebhookWithAllStatuses() {
         Webhook webhook = new Webhook();
 
-        webhook.setUrl(ClassicDisplayURLProviderBuilder.URL);
+        webhook.setUrl(ClassicDisplayURLProviderBuilder.URL_TEMPLATE);
         webhook.setNotifyAborted(true);
         webhook.setNotifyBackToNormal(true);
         webhook.setNotifyFailure(true);

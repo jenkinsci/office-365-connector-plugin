@@ -14,7 +14,6 @@
 package jenkins.plugins.office365connector;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,9 +22,7 @@ import hudson.model.Cause;
 import hudson.model.Run;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
-import hudson.tasks.test.AbstractTestResultAction;
 import jenkins.plugins.office365connector.model.Fact;
-import jenkins.plugins.office365connector.utils.TimeUtils;
 import jenkins.scm.RunWithSCM;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -37,21 +34,12 @@ import org.apache.commons.lang.StringUtils;
  */
 public class FactsBuilder {
 
-    final static String NAME_STATUS = "Status";
+    public final static String NAME_STATUS = "Status";
     private final static String NAME_REMARKS = "Remarks";
-    final static String NAME_CULPRITS = "Culprits";
+    final static String CULPRITS = "Culprits";
     private final static String NAME_DEVELOPERS = "Developers";
 
-    final static String NAME_START_TIME = "Start time";
-    final static String NAME_COMPLETION_TIME = "Completion time";
-    final static String NAME_BACK_TO_NORMAL_TIME = "Back to normal time";
-    final static String NAME_FAILING_SINCE_TIME = "Failing since time";
     final static String NAME_FAILING_SINCE_BUILD = "Failing since build";
-
-    private final static String NAME_TOTAL_TESTS = "Total tests";
-    private final static String NAME_FAILED_TESTS = "Failed tests";
-    private final static String NAME_SKIPPED_TESTS = "Skipped tests";
-    private final static String NAME_PASSED_TESTS = "Passed tests";
 
     final static String VALUE_STATUS_STARTED = "Started";
     final static String VALUE_STATUS_RUNNING = "Running";
@@ -63,6 +51,10 @@ public class FactsBuilder {
         this.run = run;
     }
 
+    public void addStatus(String status) {
+        addFact(NAME_STATUS, status);
+    }
+
     public void addStatusStarted() {
         addFact(NAME_STATUS, VALUE_STATUS_STARTED);
     }
@@ -71,29 +63,8 @@ public class FactsBuilder {
         addFact(NAME_STATUS, VALUE_STATUS_RUNNING);
     }
 
-    public static Fact buildStatus() {
-        return new Fact(NAME_STATUS);
-    }
-
-    public void addStartTime() {
-        addFact(NAME_START_TIME, TimeUtils.dateToString(run.getStartTimeInMillis()));
-    }
-
-    public void addBackToNormalTime(long duration) {
-        addFact(NAME_BACK_TO_NORMAL_TIME, TimeUtils.durationToString(duration / 1000));
-    }
-
-    public void addCompletionTime() {
-        long completionTime = TimeUtils.countCompletionTime(run.getStartTimeInMillis(), run.getDuration());
-        addFact(NAME_COMPLETION_TIME, TimeUtils.dateToString(completionTime));
-    }
-
-    public void addFailingSinceTime(long date) {
-        addFact(NAME_FAILING_SINCE_TIME, TimeUtils.dateToString(date));
-    }
-
     public void addFailingSinceBuild(int buildNumber) {
-        addFact(NAME_FAILING_SINCE_BUILD, String.valueOf(buildNumber));
+        addFact(NAME_FAILING_SINCE_BUILD, "#" + String.valueOf(buildNumber));
     }
 
     public void addRemarks() {
@@ -121,7 +92,7 @@ public class FactsBuilder {
 
         List<String> culprits = authors.stream().map(User::getFullName).collect(Collectors.toList());
         if (!culprits.isEmpty()) {
-            addFact(NAME_CULPRITS, StringUtils.join(culprits, ", "));
+            addFact(CULPRITS, StringUtils.join(culprits, ", "));
         }
     }
 
@@ -135,44 +106,33 @@ public class FactsBuilder {
         if (sets.isEmpty()) {
             return;
         }
-        Set<User> authors = new HashSet<>();
-        sets.stream().filter(
-                set -> set instanceof ChangeLogSet).forEach(
-                set -> set.forEach(entry -> authors.add(entry.getAuthor()))
-        );
 
-        if (CollectionUtils.isEmpty(authors)) {
-            return;
-        }
-        addFact(NAME_DEVELOPERS, StringUtils.join(authors, ", "));
-    }
+        List<User> authors = new ArrayList<>();
+        sets.stream()
+                .filter(set -> set instanceof ChangeLogSet)
+                .forEach(set -> set
+                        .forEach(entry -> authors.add(entry.getAuthor())));
 
-    public void addTests() {
-        AbstractTestResultAction<?> action = run.getAction(AbstractTestResultAction.class);
-        if (action == null) {
-            return;
-        }
-
-        addFact(NAME_TOTAL_TESTS, action.getTotalCount());
-        addFact(NAME_PASSED_TESTS, action.getTotalCount() - action.getFailCount() - action.getSkipCount());
-        addFact(NAME_FAILED_TESTS, action.getFailCount());
-        addFact(NAME_SKIPPED_TESTS, action.getSkipCount());
-    }
-
-    public void addFact(String name, int value) {
-        if (value != 0) {
-            addFact(name, String.valueOf(value));
+        if (CollectionUtils.isNotEmpty(authors)) {
+            addFact(NAME_DEVELOPERS, StringUtils.join(authors, ", "));
         }
     }
 
     public void addFact(String name, String value) {
-        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(value)) {
-            facts.add(new Fact(name, value));
+        if (StringUtils.isBlank(name) || StringUtils.isBlank(value)) {
+            return;
         }
+
+        addFact(new Fact(name, value));
     }
 
     public void addFact(Fact fact) {
-        facts.add(fact);
+        // build status should be always at first position
+        if (fact.getName().equals(NAME_STATUS)) {
+            facts.add(0, fact);
+        } else {
+            facts.add(fact);
+        }
     }
 
     /**

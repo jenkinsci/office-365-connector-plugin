@@ -1,6 +1,6 @@
 {
     "summary": "myFirstJob: Build #167 Failed",
-    "themeColor": "FF6F69",
+    "themeColor": "#EF2929",
     "sections": [
         {
             "markdown": true,
@@ -8,14 +8,6 @@
                 {
                     "name": "Status",
                     "value": "Build Failed"
-                },
-                {
-                    "name": "Start time",
-                    "value": "2017-10-21 20:21:45 UTC"
-                },
-                {
-                    "name": "Completion time",
-                    "value": "2017-10-21 21:21:45 UTC"
                 },
                 {
                     "name": "Remarks",

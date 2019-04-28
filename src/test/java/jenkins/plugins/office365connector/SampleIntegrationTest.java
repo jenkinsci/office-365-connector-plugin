@@ -1,42 +1,35 @@
 package jenkins.plugins.office365connector;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
 
-import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
 
-import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
-import hudson.model.TaskListener;
 import hudson.scm.ChangeLogSet;
 import hudson.util.Secret;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
-import jenkins.plugins.office365connector.helpers.HttpWorkerAnswer;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
 import jenkins.plugins.office365connector.utils.TimeUtils;
 import jenkins.plugins.office365connector.utils.TimeUtilsTest;
 import org.apache.commons.lang.StringUtils;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
+import jenkins.plugins.office365connector.workflow.AbstractIntegrationTest;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -45,7 +38,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({DisplayURLProvider.class, Office365ConnectorWebhookNotifier.class, Run.class, TimeUtils.class, Secret.class, CredentialsProvider.class})
-public class Office365ConnectorWebhookNotifierIntegrationTest {
+public class SampleIntegrationTest extends AbstractIntegrationTest {
 
     private static final String JOB_NAME = "myFirstJob";
     private static final String CAUSE_DESCRIPTION = "Started by John";
@@ -62,16 +55,13 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
         FORMATTED_COMPLETED_TIME = TimeUtils.dateToString(START_TIME + DURATION);
     }
 
-    private AbstractBuild run;
-    private HttpWorkerAnswer workerAnswer;
-
     @Before
     public void setUp() {
         mockListener();
 
         run = mockRun();
 
-        mockDisplayURLProvider();
+        mockDisplayURLProvider(JOB_NAME, BUILD_NUMBER);
         mockEnvironment();
         mockHttpWorker();
         mockGetChangeSets();
@@ -112,57 +102,13 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
         when(job.getProperty(WebhookJobProperty.class)).thenReturn(property);
     }
 
-    private void mockResult(Result result) {
-        when(run.getResult()).thenReturn(result);
-
-        Run previousBuild = mock(Run.class);
-        if (result == Result.FAILURE) {
-            when(previousBuild.getResult()).thenReturn(Result.SUCCESS);
-        }
-    }
-
-    private TaskListener mockListener() {
-        TaskListener listener = mock(TaskListener.class);
-
-        PrintStream stream = mock(PrintStream.class);
-        when(listener.getLogger()).thenReturn(stream);
-
-        return listener;
-    }
-
-    private void mockDisplayURLProvider() {
-        mockStatic(DisplayURLProvider.class);
-        when(DisplayURLProvider.get()).thenReturn(new ClassicDisplayURLProviderBuilder());
-    }
-
-    private void mockEnvironment() {
-        EnvVars envVars = mock(EnvVars.class);
-        try {
-            TaskListener taskListener = Matchers.any();
-            when(run.getEnvironment(taskListener)).thenReturn(envVars);
-        } catch (IOException | InterruptedException e) {
-            throw new IllegalArgumentException(e);
-        }
-        when(envVars.expand(ClassicDisplayURLProviderBuilder.URL)).thenReturn(ClassicDisplayURLProviderBuilder.URL);
-    }
-
-    private void mockHttpWorker() {
-        workerAnswer = new HttpWorkerAnswer();
-        try {
-            whenNew(HttpWorker.class).withAnyArguments().thenAnswer(workerAnswer);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
-
     private void mockGetChangeSets() {
-        List<ChangeLogSet> files = new AffectedFileBuilder().sampleFiles(run);
+        List<ChangeLogSet> files = new AffectedFileBuilder().singleChangeLog(run);
         when(run.getChangeSets()).thenReturn(files);
     }
 
     private void mockTimeUtils() {
         mockStatic(TimeUtils.class);
-        when(TimeUtils.countCompletionTime(START_TIME, DURATION)).thenReturn(START_TIME + DURATION);
         when(TimeUtils.dateToString(START_TIME)).thenReturn(FORMATTED_START_TIME);
         when(TimeUtils.dateToString(START_TIME + DURATION)).thenReturn(FORMATTED_COMPLETED_TIME);
     }
@@ -213,7 +159,7 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
     }
 
     private void mockCredentials(String id) {
-        String savedUrl = ClassicDisplayURLProviderBuilder.URL;
+        String savedUrl = ClassicDisplayURLProviderBuilder.URL_TEMPLATE;
 
         Secret secret = mock(Secret.class);
         mockStatic(Secret.class);
@@ -225,7 +171,7 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
     }
 
     @Test
-    public void validateCompletedRequest_withCredentials() throws IOException {
+    public void validateCompletedRequest_withCredentials() {
         String id = "url";
         mockCredentials(id);
         mockWebhook(WebhookBuilder.sampleWebhookWithCredentialsURL(id));
@@ -239,10 +185,5 @@ public class Office365ConnectorWebhookNotifierIntegrationTest {
 
         // then
         assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("completed-failure.json"));
-    }
-
-    // compares files without worrying about EOL
-    private void assertHasSameContent(String value, String expected) {
-        assertThat(StringUtils.normalizeSpace(value)).isEqualTo(StringUtils.normalizeSpace(expected));
     }
 }

@@ -1,5 +1,5 @@
 {
-    "summary": "myFirstJob: Build #167 Started",
+    "summary": "simple job: Build #1 Started",
     "themeColor": "3479BF",
     "sections": [
         {
@@ -10,16 +10,12 @@
                     "value": "Started"
                 },
                 {
-                    "name": "Remarks",
-                    "value": "Started by John. "
-                },
-                {
                     "name": "Developers",
-                    "value": "Mike"
+                    "value": "Peter, George Great, Ann, the Queen"
                 }
             ],
-            "activityTitle": "Update from myFirstJob.",
-            "activitySubtitle": "Latest status of build #167"
+            "activityTitle": "Update from simple job.",
+            "activitySubtitle": "Latest status of build #1"
         }
     ],
     "potentialAction": [
@@ -28,7 +24,7 @@
             "@type": "ViewAction",
             "name": "View Build",
             "target": [
-                "http://localhost/job/myFirstJob/167/display/redirect"
+                "http://localhost/job/simple job/1/display/redirect"
             ]
         }
     ]
