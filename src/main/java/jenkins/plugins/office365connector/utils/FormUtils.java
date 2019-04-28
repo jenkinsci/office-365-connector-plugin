@@ -18,12 +18,11 @@ public class FormUtils {
      * @return OK or Error on pending user input
      */
     public static FormValidation formValidateUrl(String value, String urlCredentialsId) {
-        if (StringUtils.isBlank(value)) {
-            if (!StringUtils.isBlank(urlCredentialsId)) {
-                return FormValidation.ok();
-            } else {
-                return FormValidation.error("Either URL or URL Credentials must be non-empty");
-            }
+        if (StringUtils.isBlank(value) == StringUtils.isBlank(urlCredentialsId)) {
+            return FormValidation.error("Exactly one of URL or URL Credentials must be non-empty");
+        }
+        if (StringUtils.isBlank(value) && !StringUtils.isBlank(urlCredentialsId)) {
+            return FormValidation.ok();
         }
         if (validateUrl(value)) {
             return FormValidation.ok();

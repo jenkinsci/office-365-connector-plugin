@@ -39,6 +39,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     public static final Integer DEFAULT_TIMEOUT = 30000;
 
     private String name;
+    // The url can be specified using either a string or the id of plain text credentials
     private String url;
     private String urlCredentialsId;
 
