@@ -18,7 +18,7 @@
                     "value": "Mike"
                 }
             ],
-            "activityTitle": "Update from myFirstJob.",
+            "activityTitle": "<pre>Update from myFirstJob.</pre>",
             "activitySubtitle": "Latest status of build #167"
         }
     ],

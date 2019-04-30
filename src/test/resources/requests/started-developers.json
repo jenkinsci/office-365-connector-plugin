@@ -14,7 +14,7 @@
                     "value": "Peter, George Great, Ann, the Queen"
                 }
             ],
-            "activityTitle": "Update from simple job.",
+            "activityTitle": "<pre>Update from simple job.</pre>",
             "activitySubtitle": "Latest status of build #1"
         }
     ],

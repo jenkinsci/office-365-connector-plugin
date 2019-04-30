@@ -38,7 +38,7 @@ import org.apache.commons.lang.StringUtils;
 public final class Office365ConnectorWebhookNotifier {
 
     private static final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
-            .setPrettyPrinting().create();
+            .disableHtmlEscaping().setPrettyPrinting().create();
 
     private final CardBuilder cardBuilder;
     private final DecisionMaker decisionMaker;

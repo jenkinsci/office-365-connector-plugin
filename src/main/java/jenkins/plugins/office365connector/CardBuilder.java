@@ -46,7 +46,7 @@ public class CardBuilder {
         factsBuilder.addDevelopers();
 
         String jobName = getDisplayName();
-        String activityTitle = "Update from " + jobName + ".";
+        String activityTitle = "<pre>Update from " + jobName + ".</pre>";
         String activitySubtitle = "Latest status of build " + getRunName();
         Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
 
@@ -119,7 +119,7 @@ public class CardBuilder {
         factsBuilder.addCulprits();
         factsBuilder.addDevelopers();
 
-        String activityTitle = "Update from " + jobName + ".";
+        String activityTitle = "<pre>Update from " + jobName + ".</pre>";
         String activitySubtitle = "Latest status of build " + getRunName();
         Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
 
@@ -144,7 +144,7 @@ public class CardBuilder {
             factsBuilder.addStatusRunning();
         }
 
-        String activityTitle = "Message from " + jobName + ", Build " + getRunName() + "";
+        String activityTitle = "<pre>Message from " + jobName + ", Build " + getRunName() + "</pre>";
         Section section = new Section(activityTitle, stepParameters.getMessage(), factsBuilder.collect());
 
         String summary = jobName + ": Build " + getRunName() + " Status";
