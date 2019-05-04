@@ -30,14 +30,4 @@ public class FactAssertion {
         Assertions.assertThat(fact.getValue()).isEqualTo(value);
         return this;
     }
-
-    public FactAssertion hasValue(int value) {
-        Assertions.assertThat(fact.getValue()).isEqualTo(String.valueOf(value));
-        return this;
-    }
-
-    public FactAssertion hasNotEmptyValue() {
-        Assertions.assertThat(fact.getValue()).isNotEmpty();
-        return this;
-    }
 }
