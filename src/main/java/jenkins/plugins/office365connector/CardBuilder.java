@@ -69,12 +69,6 @@ public class CardBuilder {
         Run previousBuild = run.getPreviousBuild();
         Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
         Run rt = run.getPreviousNotFailedBuild();
-        Run failingSinceRun;
-        if (rt != null) {
-            failingSinceRun = rt.getNextBuild();
-        } else {
-            failingSinceRun = run.getParent().getFirstBuild();
-        }
 
         if (result == Result.SUCCESS) {
             // back to normal
@@ -88,6 +82,8 @@ public class CardBuilder {
                 summary += "Success";
             }
         } else if (result == Result.FAILURE) {
+            Run failingSinceRun = rt != null ? rt.getNextBuild() : run.getParent().getFirstBuild();
+
             if (failingSinceRun != null && previousResult == Result.FAILURE) {
                 status = "Repeated Failure";
                 summary += "Repeated Failure";
@@ -144,7 +140,7 @@ public class CardBuilder {
             factsBuilder.addStatusRunning();
         }
 
-        String activityTitle = "Message from " + jobName + ", Build " + getRunName() + "";
+        String activityTitle = "Message from " + jobName + ", Build " + getRunName();
         Section section = new Section(activityTitle, stepParameters.getMessage(), factsBuilder.collect());
 
         String summary = jobName + ": Build " + getRunName() + " Status";

@@ -24,7 +24,6 @@ import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.scm.RunWithSCM;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -35,9 +34,9 @@ import org.apache.commons.lang.StringUtils;
 public class FactsBuilder {
 
     public final static String NAME_STATUS = "Status";
-    private final static String NAME_REMARKS = "Remarks";
+    public final static String NAME_REMARKS = "Remarks";
     final static String CULPRITS = "Culprits";
-    private final static String NAME_DEVELOPERS = "Developers";
+    public final static String NAME_DEVELOPERS = "Developers";
 
     final static String NAME_FAILING_SINCE_BUILD = "Failing since build";
 
@@ -69,15 +68,11 @@ public class FactsBuilder {
 
     public void addRemarks() {
         List<Cause> causes = run.getCauses();
-        if (CollectionUtils.isEmpty(causes)) {
-            return;
-        }
 
-        StringBuilder causesStr = new StringBuilder();
-        for (Cause cause : causes) {
-            causesStr.append(cause.getShortDescription()).append(". ");
-        }
-        addFact(NAME_REMARKS, causesStr.toString());
+        String joinedCauses = causes.stream()
+                .map(cause -> cause.getShortDescription().concat("."))
+                .collect(Collectors.joining(" "));
+        addFact(NAME_REMARKS, joinedCauses);
     }
 
     public void addCulprits() {
@@ -86,14 +81,11 @@ public class FactsBuilder {
         }
         RunWithSCM runWithSCM = (RunWithSCM) run;
         Set<User> authors = runWithSCM.getCulprits();
-        if (CollectionUtils.isEmpty(authors)) {
-            return;
-        }
 
-        List<String> culprits = authors.stream().map(User::getFullName).collect(Collectors.toList());
-        if (!culprits.isEmpty()) {
-            addFact(CULPRITS, StringUtils.join(culprits, ", "));
-        }
+        String joinedCulprits = authors.stream()
+                .map(User::getFullName)
+                .collect(Collectors.joining(", "));
+        addFact(CULPRITS, joinedCulprits);
     }
 
     public void addDevelopers() {
@@ -103,9 +95,6 @@ public class FactsBuilder {
         RunWithSCM runWithSCM = (RunWithSCM) run;
 
         List<ChangeLogSet<ChangeLogSet.Entry>> sets = runWithSCM.getChangeSets();
-        if (sets.isEmpty()) {
-            return;
-        }
 
         List<User> authors = new ArrayList<>();
         sets.stream()
@@ -113,9 +102,7 @@ public class FactsBuilder {
                 .forEach(set -> set
                         .forEach(entry -> authors.add(entry.getAuthor())));
 
-        if (CollectionUtils.isNotEmpty(authors)) {
-            addFact(NAME_DEVELOPERS, StringUtils.join(authors, ", "));
-        }
+        addFact(NAME_DEVELOPERS, StringUtils.join(authors, ", "));
     }
 
     public void addFact(String name, String value) {
