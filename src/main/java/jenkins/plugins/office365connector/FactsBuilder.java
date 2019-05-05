@@ -106,14 +106,14 @@ public class FactsBuilder {
     }
 
     public void addFact(String name, String value) {
-        if (StringUtils.isBlank(name) || StringUtils.isBlank(value)) {
-            return;
-        }
-
         addFact(new Fact(name, value));
     }
 
-    public void addFact(Fact fact) {
+    private void addFact(Fact fact) {
+        if (StringUtils.isBlank(fact.getName()) || StringUtils.isBlank(fact.getValue())) {
+            return;
+        }
+
         // build status should be always at first position
         if (fact.getName().equals(NAME_STATUS)) {
             facts.add(0, fact);
