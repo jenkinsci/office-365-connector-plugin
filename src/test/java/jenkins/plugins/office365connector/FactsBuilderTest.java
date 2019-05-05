@@ -158,6 +158,20 @@ public class FactsBuilderTest {
     }
 
     @Test
+    public void addCulprits_OnNoSCMRun_SkipsAdding() {
+
+        // given
+        Run run = mock(Run.class);
+        FactsBuilder factsBuilder = new FactsBuilder(run);
+
+        // when
+        factsBuilder.addCulprits();
+
+        // then
+        assertThat(factsBuilder.collect()).isEmpty();
+    }
+
+    @Test
     public void addDevelopers_AddsFact() {
 
         // given
@@ -174,6 +188,46 @@ public class FactsBuilderTest {
         FactAssertion.assertThat(factBuilder.collect())
                 .hasName(FactsBuilder.NAME_DEVELOPERS)
                 .hasValue(StringUtils.join(AffectedFileBuilder.sampleAuthors, ", "));
+    }
+
+    @Test
+    public void addDevelopers_OnNoSCMRun_SkipsAdding() {
+
+        // given
+        Run run = mock(Run.class);
+        FactsBuilder factsBuilder = new FactsBuilder(run);
+
+        // when
+        factsBuilder.addDevelopers();
+
+        // then
+        assertThat(factsBuilder.collect()).isEmpty();
+    }
+
+    @Test
+    public void addFact_OnEmptyName_SkipsAdding() {
+
+        // given
+        FactsBuilder factBuilder = new FactsBuilder(run);
+
+        // when
+        factBuilder.addFact("someName", StringUtils.EMPTY);
+
+        // then
+        assertThat(factBuilder.collect()).isEmpty();
+    }
+
+    @Test
+    public void addFact_OnEmptyValue_SkipsAdding() {
+
+        // given
+        FactsBuilder factBuilder = new FactsBuilder(run);
+
+        // when
+        factBuilder.addFact(StringUtils.EMPTY, "someValue");
+
+        // then
+        assertThat(factBuilder.collect()).isEmpty();
     }
 
     @Test
