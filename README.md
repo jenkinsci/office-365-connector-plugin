@@ -20,9 +20,8 @@ Plugin is used to send actionable messages in [Outlook](http://outlook.com) , [O
 
 ## Jenkins Instructions
 
-0. Install this plugin on your Jenkins server
-
-0. Configure it in your Jenkins job and add webhook URL obtained from office 365 connector.
+  1. Install this plugin on your Jenkins server
+  1. Configure it in your Jenkins job and add webhook URL obtained from office 365 connector.
 
 ## Developer instructions
 Install Maven and JDK. This was last build with Maven 3.2.5 and OpenJDK 1.7.0_75 on KUbuntu 14.04.
