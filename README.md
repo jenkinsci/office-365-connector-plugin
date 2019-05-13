@@ -14,9 +14,13 @@ Plugin is used to send actionable messages in [Outlook](http://outlook.com) , [O
 
 ## Screenshots
 
+### Microsoft Teams
 ![Configuration](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/config.png)
 
 ![Message](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/message.png)
+
+### Microsoft Outlook
+![Outlook](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/outlook.png)
 
 ## Jenkins Instructions
 
@@ -33,3 +37,7 @@ Run unit tests
 Create an HPI file to install in Jenkins (HPI file will be in target/slack.hpi).
 
 `mvn package`
+
+# Documentation
+You may find useful below link if you like to contribute and add new feature:
+- https://docs.microsoft.com/en-us/outlook/actionable-messages/send-via-connectors
