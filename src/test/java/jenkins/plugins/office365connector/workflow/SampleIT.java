@@ -32,7 +32,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({DisplayURLProvider.class, Office365ConnectorWebhookNotifier.class, Run.class, TimeUtils.class})
-public class SampleIntegrationTest extends AbstractIntegrationTest {
+public class SampleIT extends AbstractIT {
 
     private static final String JOB_NAME = "myFirstJob";
     private static final String CAUSE_DESCRIPTION = "Started by John";
