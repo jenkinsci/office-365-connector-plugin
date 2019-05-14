@@ -29,7 +29,7 @@ import org.mockito.Matchers;
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class AbstractIntegrationTest {
+public class AbstractIT {
 
     protected AbstractBuild run;
     protected HttpWorkerAnswer workerAnswer;

@@ -1,18 +1,16 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import java.io.File;
 import java.util.List;
 
-import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.scm.ChangeLogSet;
+import jenkins.plugins.office365connector.FileUtils;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.WebhookJobProperty;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
@@ -20,7 +18,6 @@ import jenkins.plugins.office365connector.helpers.WebhookBuilder;
 import jenkins.plugins.office365connector.utils.TimeUtils;
 import jenkins.plugins.office365connector.utils.TimeUtilsTest;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
-import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,8 +28,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @author Damian Szczepanik (damianszczepanik@github)
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({DisplayURLProvider.class, Office365ConnectorWebhookNotifier.class, Run.class, TimeUtils.class, TokenMacro.class, FilePath.class})
-public class MacroIntegrationTest extends AbstractIntegrationTest {
+@PrepareForTest({DisplayURLProvider.class, Office365ConnectorWebhookNotifier.class, Run.class, TimeUtils.class})
+public class DevelopersIT extends AbstractIT {
 
     private static final String JOB_NAME = "simple job";
     private static final int BUILD_NUMBER = 1;
@@ -55,7 +52,6 @@ public class MacroIntegrationTest extends AbstractIntegrationTest {
         mockEnvironment();
         mockHttpWorker();
         mockGetChangeSets();
-        mockTokenMacro(String.valueOf(BUILD_NUMBER));
         mockTimeUtils();
     }
 
@@ -68,12 +64,8 @@ public class MacroIntegrationTest extends AbstractIntegrationTest {
         Job job = mockJob(JOB_NAME);
         when(run.getParent()).thenReturn(job);
 
-        File rootDir = mock(File.class);
-        when(run.getRootDir()).thenReturn(rootDir);
-
         // getProperty
-        WebhookJobProperty property = new WebhookJobProperty(
-                WebhookBuilder.sampleWebhookWithMacro("${BUILD_NUMBER", String.valueOf(BUILD_NUMBER)));
+        WebhookJobProperty property = new WebhookJobProperty(WebhookBuilder.sampleWebhookWithAllStatuses());
         when(job.getProperty(WebhookJobProperty.class)).thenReturn(property);
 
         return run;
@@ -91,7 +83,7 @@ public class MacroIntegrationTest extends AbstractIntegrationTest {
 
 
     @Test
-    public void validateStartedRequest_WithMacroConfiguration() {
+    public void validateStartedRequest_WithManyDevelopers() {
 
         // given
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
@@ -100,6 +92,6 @@ public class MacroIntegrationTest extends AbstractIntegrationTest {
         notifier.sendBuildStartedNotification(true);
 
         // then
-        assertThat(workerAnswer.getTimes()).isOne();
+        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("started-developers.json"));
     }
 }
