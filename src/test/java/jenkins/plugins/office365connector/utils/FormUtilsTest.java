@@ -1,5 +1,7 @@
 package jenkins.plugins.office365connector.utils;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -10,17 +12,19 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @RunWith(Parameterized.class)
 public class FormUtilsTest {
 
     private static final FormValidation.Kind OK = FormValidation.Kind.OK;
+
     private static final FormValidation.Kind ERROR = FormValidation.Kind.ERROR;
+
     @Parameter()
     public String input;
+
     @Parameter(value = 1)
     public FormValidation.Kind expectedKind;
+
     @Parameter(value = 2)
     public boolean expectedBoolean;
 
@@ -37,10 +41,16 @@ public class FormUtilsTest {
     }
 
     @Test
-    public void shouldValidateUrlOrVariableReference() {
+    public void isUrlValid_ValidatesUrl() {
+
+        // given
         FormValidation formValidation = FormUtils.formValidateUrl(input);
         FormValidation.Kind kind = formValidation.kind;
-        boolean output = FormUtils.validateUrl(input);
+
+        // when
+        boolean output = FormUtils.isUrlValid(input);
+
+        // then
         assertThat(kind).isEqualTo(expectedKind);
         assertThat(output).isEqualTo(expectedBoolean);
     }
