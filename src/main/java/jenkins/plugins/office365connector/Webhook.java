@@ -17,15 +17,14 @@ package jenkins.plugins.office365connector;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
-import jenkins.plugins.office365connector.utils.FormUtils;
+import javax.annotation.Nonnull;
 import jenkins.plugins.office365connector.model.Macro;
+import jenkins.plugins.office365connector.utils.FormUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -150,20 +149,12 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     }
 
     public List<Macro> getMacros() {
-		if (macros == null) {
-			this.macros = Util.fixNull(macros);
-		}
-		return macros;
+        return Util.fixNull(macros);
     }
 
     @DataBoundSetter
     public void setMacros(List<Macro> macros) {
         this.macros = Util.fixNull(macros);
-    }
-
-    @Override
-    public String toString() {
-        return url;
     }
 
     @Extension

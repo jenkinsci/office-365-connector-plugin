@@ -18,19 +18,21 @@ public class FormUtils {
      * @return OK or Error on pending user input
      */
     public static FormValidation formValidateUrl(String value) {
-        if (validateUrl(value)) {
+        if (isUrlValid(value)) {
             return FormValidation.ok();
         }
+
         return FormValidation.error("Valid URL or variable reference must be provided");
     }
 
-    public static boolean validateUrl(String value) {
+    public static boolean isUrlValid(String value) {
         if (StringUtils.isBlank(value)) {
             return false;
         }
         if (value.startsWith("$") && value.length() > 1) {
             return true;
         }
+
         return UrlValidator.getInstance().isValid(value);
     }
 }
