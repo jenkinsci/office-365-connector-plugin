@@ -1,5 +1,6 @@
 package jenkins.plugins.office365connector.helpers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,15 +19,21 @@ public class WebhookBuilder {
         return Arrays.asList(webhook);
     }
 
-    public static List<Webhook> sampleWebhookWithMacro(String template, String value) {
+    public static List<Webhook> sampleWebhookWithMacro(String template, String value, int repeated) {
+        List<Webhook> webhooks = new ArrayList<>();
+        for (int i = 0; i < repeated; i++) {
+            webhooks.add(createWebhook(template, value));
+        }
+        return webhooks;
+    }
+
+    private static Webhook createWebhook(String template, String value) {
         Webhook webhook = new Webhook(ClassicDisplayURLProviderBuilder.URL_TEMPLATE);
 
         enableAllStatuses(webhook);
 
-        Macro macro = new Macro(template, value);
-        webhook.setMacros(Arrays.asList(macro));
-
-        return Arrays.asList(webhook);
+        webhook.setMacros(Arrays.asList(new Macro(template, value)));
+        return webhook;
     }
 
     private static void enableAllStatuses(Webhook webhook) {
