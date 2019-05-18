@@ -5,9 +5,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
-public class Office365ConnectorSendStepTest {
+public class Office365ConnectorSendStepIT {
 
     private static Office365ConnectorSendStep before = new Office365ConnectorSendStep("https://office.com");
+
     @Rule
     public JenkinsRule rule = new JenkinsRule();
 
