@@ -14,6 +14,7 @@ import hudson.model.Job;
 import hudson.model.Run;
 import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
+import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.WebhookJobProperty;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
@@ -71,11 +72,6 @@ public class MacroIT extends AbstractIT {
         File rootDir = mock(File.class);
         when(run.getRootDir()).thenReturn(rootDir);
 
-        // getProperty
-        WebhookJobProperty property = new WebhookJobProperty(
-                WebhookBuilder.sampleWebhookWithMacro("${BUILD_NUMBER", String.valueOf(BUILD_NUMBER)));
-        when(job.getProperty(WebhookJobProperty.class)).thenReturn(property);
-
         return run;
     }
 
@@ -89,17 +85,67 @@ public class MacroIT extends AbstractIT {
         when(TimeUtils.dateToString(START_TIME)).thenReturn(FORMATTED_START_TIME);
     }
 
+    private void mockPropertyWithMatchedMacros(int repeated) {
+        WebhookJobProperty property = new WebhookJobProperty(
+                WebhookBuilder.sampleWebhookWithMacro("${BUILD_NUMBER}", String.valueOf(BUILD_NUMBER), repeated));
+        when(run.getParent().getProperty(WebhookJobProperty.class)).thenReturn(property);
+    }
+
+    private void mockPropertyWithMismatchedMacros(int repeated) {
+        WebhookJobProperty property = new WebhookJobProperty(
+                WebhookBuilder.sampleWebhookWithMacro("one", "two", repeated));
+        when(run.getParent().getProperty(WebhookJobProperty.class)).thenReturn(property);
+    }
+
+    private void mockPropertyWithDifferentMacros(int repeated) {
+        List<Webhook> webhooks = WebhookBuilder.sampleWebhookWithMacro("${BUILD_NUMBER}", String.valueOf(BUILD_NUMBER), repeated);
+        webhooks.addAll(WebhookBuilder.sampleWebhookWithMacro("one", "two", repeated));
+
+        WebhookJobProperty property = new WebhookJobProperty(webhooks);
+        when(run.getParent().getProperty(WebhookJobProperty.class)).thenReturn(property);
+    }
 
     @Test
-    public void validateStartedRequest_WithMacroConfiguration() {
+    public void validateStartedRequest_WithMismatchedMacros_CreatesNoRequest() {
 
         // given
+        mockPropertyWithMismatchedMacros(1);
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
 
         // when
         notifier.sendBuildStartedNotification(true);
 
         // then
-        assertThat(workerAnswer.getTimes()).isOne();
+        assertThat(workerAnswer.getTimes()).isZero();
+    }
+
+    @Test
+    public void validateStartedRequest_WithMatchedMacros_CreatesRequests() {
+
+        // given
+        int repeated = 15;
+        mockPropertyWithMatchedMacros(repeated);
+        Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
+
+        // when
+        notifier.sendBuildStartedNotification(true);
+
+        // then
+        assertThat(workerAnswer.getTimes()).isEqualTo(repeated);
+    }
+
+    @Test
+    public void validateStartedRequest_WithDifferentMacros_CreatesRequests() {
+
+        // given
+        int repeated = 15;
+        mockPropertyWithDifferentMacros(repeated);
+        Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
+
+        // when
+        notifier.sendBuildStartedNotification(true);
+
+        // then
+        assertThat(workerAnswer.getTimes()).isEqualTo(repeated);
     }
 }

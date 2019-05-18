@@ -25,9 +25,9 @@ public class StepParameters {
     private final String status;
     private final String color;
 
-    StepParameters(String message, String url, String status, String color) {
+    StepParameters(String message, String webhookUrl, String status, String color) {
         this.message = message;
-        this.webhookUrl = url;
+        this.webhookUrl = webhookUrl;
         this.status = status;
         this.color = color;
     }
