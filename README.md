@@ -38,6 +38,6 @@ Create an HPI file to install in Jenkins (HPI file will be in target/slack.hpi).
 
 `mvn package`
 
-# Documentation
+## Documentation
 You may find useful below link if you like to contribute and add new feature:
-- https://docs.microsoft.com/en-us/outlook/actionable-messages/send-via-connectors
+- [Actionable messages](https://docs.microsoft.com/en-us/outlook/actionable-messages/send-via-connectors)

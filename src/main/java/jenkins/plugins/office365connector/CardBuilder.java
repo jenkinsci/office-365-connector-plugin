@@ -184,18 +184,14 @@ public class CardBuilder {
         return card;
     }
 
+    /**
+     * Returns name of the job presented as display name without parent name such as folder.
+     */
     private String getDisplayName() {
-        return run.getParent().getFullDisplayName();
+        return run.getParent().getDisplayName();
     }
 
     private String getRunName() {
         return run.hasCustomDisplayName() ? run.getDisplayName() : "#" + run.getNumber();
-    }
-
-    /**
-     * Helper method for logging.
-     */
-    private void log(String message) {
-        listener.getLogger().println("[Office365connector] " + message);
     }
 }
