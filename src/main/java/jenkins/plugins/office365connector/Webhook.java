@@ -59,7 +59,8 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     }
 
     public String getName() {
-        return name;
+        // when the job is created and the name is not provided, then getName() returns null
+        return Util.fixEmptyAndTrim(name);
     }
 
     @DataBoundSetter

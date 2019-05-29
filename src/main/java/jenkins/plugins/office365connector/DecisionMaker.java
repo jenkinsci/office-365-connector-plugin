@@ -57,7 +57,7 @@ public class DecisionMaker {
             for (Macro macro : webhook.getMacros()) {
                 String evaluated = evaluateMacro(macro.getTemplate());
                 if (evaluated.equals(macro.getValue())) {
-                    log("Matched template '%s' for webhook '%s'.", macro.getTemplate(), webhook.getName());
+                    log("Matched template '%s' for webhook with name '%s'.", macro.getTemplate(), webhook.getName());
                     return true;
                 }
             }
@@ -83,7 +83,7 @@ public class DecisionMaker {
                 || isNotifyUnstable(result, webhook);
 
         if (statusMatched) {
-            log("Matched status '%s' for webhook '%s'.", result, webhook.getName());
+            log("Matched status '%s' for webhook with name '%s'.", result, webhook.getName());
         }
         return statusMatched;
     }
