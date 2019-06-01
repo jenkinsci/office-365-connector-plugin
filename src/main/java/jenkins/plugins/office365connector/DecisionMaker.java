@@ -109,7 +109,11 @@ public class DecisionMaker {
     }
 
     private boolean isNotifyBackToNormal(Result result, Webhook webhook) {
-        return result == Result.SUCCESS && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)
+        Run previousBuild = run.getPreviousBuild();
+        while (null != previousBuild && previousBuild.getResult() == Result.ABORTED) {
+            previousBuild = previousBuild.getPreviousCompletedBuild();
+        }
+        return result == Result.SUCCESS && previousBuild != null && (previousBuild.getResult() == Result.FAILURE || previousBuild.getResult() == Result.UNSTABLE)
                 && webhook.isNotifyBackToNormal();
     }
 
