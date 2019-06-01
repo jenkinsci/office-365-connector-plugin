@@ -20,7 +20,6 @@ import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
 import jenkins.plugins.office365connector.utils.TimeUtils;
 import jenkins.plugins.office365connector.utils.TimeUtilsTest;
-import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,8 +31,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @author Damian Szczepanik (damianszczepanik@github)
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({DisplayURLProvider.class, Office365ConnectorWebhookNotifier.class, Run.class, TimeUtils.class, TokenMacro.class, FilePath.class})
-public class MacroIT extends AbstractIT {
+@PrepareForTest({Office365ConnectorWebhookNotifier.class, Run.class, TimeUtils.class, TokenMacro.class, FilePath.class})
+public class MacroIT extends AbstractTest {
 
     private static final String JOB_NAME = "simple job";
     private static final int BUILD_NUMBER = 1;

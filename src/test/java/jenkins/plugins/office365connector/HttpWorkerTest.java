@@ -99,11 +99,11 @@ public class HttpWorkerTest {
                 String requestBody = IOUtils.toString(is);
                 String pathString = path.getPath();
                 if ("/test1".equals(pathString)) {
-                    if (requestBody.equals("test1body")) {
+                    if ("test1body".equals(requestBody)) {
                         test1Result = true;
                     }
                 } else if ("/test2".equals(pathString)) {
-                    if (requestBody.equals("test2body")) {
+                    if ("test2body".equals(requestBody)) {
                         test2Result = true;
                     }
                 } else if ("/retry-test".equals(pathString)) {

@@ -25,11 +25,13 @@ import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.mockito.Matchers;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class AbstractIT {
+@PrepareForTest({DisplayURLProvider.class})
+public abstract class AbstractTest {
 
     protected AbstractBuild run;
     protected HttpWorkerAnswer workerAnswer;

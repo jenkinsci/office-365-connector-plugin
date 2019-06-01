@@ -26,14 +26,12 @@ import jenkins.plugins.office365connector.workflow.StepParameters;
 public class CardBuilder {
 
     private final Run run;
-    private final TaskListener listener;
 
     private final FactsBuilder factsBuilder;
     private final ActionableBuilder potentialActionBuilder;
 
     public CardBuilder(Run run, TaskListener listener) {
         this.run = run;
-        this.listener = listener;
 
         this.factsBuilder = new FactsBuilder(run);
         potentialActionBuilder = new ActionableBuilder(run, factsBuilder);
@@ -192,6 +190,7 @@ public class CardBuilder {
     }
 
     private String getRunName() {
+        // TODO: This is probably not needed as mostly/always getNumber() is called
         return run.hasCustomDisplayName() ? run.getDisplayName() : "#" + run.getNumber();
     }
 }
