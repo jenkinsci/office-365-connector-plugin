@@ -96,6 +96,7 @@ public class FactsBuilder {
 
         List<ChangeLogSet<ChangeLogSet.Entry>> sets = runWithSCM.getChangeSets();
 
+        // TODO: this contains duplicates
         List<User> authors = new ArrayList<>();
         sets.stream()
                 .filter(set -> set instanceof ChangeLogSet)
