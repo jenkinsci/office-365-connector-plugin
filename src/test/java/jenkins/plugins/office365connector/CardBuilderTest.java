@@ -3,20 +3,22 @@ package jenkins.plugins.office365connector;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Job;
 import hudson.model.Result;
-import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.AbstractTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
+@PrepareForTest(CardBuilder.class)
 public class CardBuilderTest extends AbstractTest {
 
     private static final String JOB_DISPLAY_NAME = "myJobDisplayName";
@@ -25,18 +27,21 @@ public class CardBuilderTest extends AbstractTest {
     private CardBuilder cardBuilder;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         Job job = mock(Job.class);
         when(job.getDisplayName()).thenReturn(JOB_DISPLAY_NAME);
 
-        AbstractBuild run = mock(AbstractBuild.class);
+        run = mock(AbstractBuild.class);
         when(run.getNumber()).thenReturn(BUILD_NUMBER);
         when(run.getParent()).thenReturn(job);
 
-        TaskListener taskListener = mockListener();
-
         mockDisplayURLProvider(JOB_DISPLAY_NAME, BUILD_NUMBER);
-        cardBuilder = new CardBuilder(run, taskListener);
+
+        ActionableBuilder mockActionableBuilder = mock(ActionableBuilder.class);
+        whenNew(ActionableBuilder.class).withAnyArguments().thenReturn(mockActionableBuilder);
+        FactsBuilder mockFactsBuilder = mock(FactsBuilder.class);
+        whenNew(FactsBuilder.class).withAnyArguments().thenReturn(mockFactsBuilder);
+        cardBuilder = new CardBuilder(run);
     }
 
 
@@ -52,9 +57,28 @@ public class CardBuilderTest extends AbstractTest {
         // then
         assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER + " Started");
         assertThat(card.getSections()).hasSize(1);
+        assertThat(card.getThemeColor()).isEqualTo("3479BF");
         Section section = card.getSections().get(0);
         assertThat(section.getActivityTitle()).isEqualTo("Update from " + JOB_DISPLAY_NAME + ".");
-        assertThat(card.getPotentialAction()).hasSize(1);
+    }
+
+    @Test
+    public void createCompletedCard_OnAborted_ReturnsCard() {
+
+        // given
+        String status = "Aborted";
+        Result result = Result.fromString(status);
+        mockResult(result);
+
+        // when
+        Card card = cardBuilder.createCompletedCard();
+
+        // then
+        assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER + " " + status);
+        assertThat(card.getSections()).hasSize(1);
+        assertThat(card.getThemeColor()).isEqualTo(result.color.getHtmlBaseColor());
+        Section section = card.getSections().get(0);
+        assertThat(section.getActivityTitle()).isEqualTo("Update from " + JOB_DISPLAY_NAME + ".");
     }
 
     @Test

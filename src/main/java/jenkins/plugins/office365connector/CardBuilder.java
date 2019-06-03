@@ -15,7 +15,6 @@ package jenkins.plugins.office365connector;
 
 import hudson.model.Result;
 import hudson.model.Run;
-import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.StepParameters;
@@ -30,10 +29,10 @@ public class CardBuilder {
     private final FactsBuilder factsBuilder;
     private final ActionableBuilder potentialActionBuilder;
 
-    public CardBuilder(Run run, TaskListener listener) {
+    public CardBuilder(Run run) {
         this.run = run;
 
-        this.factsBuilder = new FactsBuilder(run);
+        factsBuilder = new FactsBuilder(run);
         potentialActionBuilder = new ActionableBuilder(run, factsBuilder);
     }
 
@@ -44,6 +43,7 @@ public class CardBuilder {
         factsBuilder.addDevelopers();
 
         String jobName = getDisplayName();
+        // TODO: dot in the message with single sentence should be removed
         String activityTitle = "Update from " + jobName + ".";
         String activitySubtitle = "Latest status of build " + getRunName();
         Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
@@ -57,7 +57,7 @@ public class CardBuilder {
 
     public Card createCompletedCard() {
         String jobName = getDisplayName();
-        // result might be null for ongoing job - check documentation of Result.getCompletedResult()
+        // result might be null only for ongoing job - check documentation of Result.getCompletedResult()
         Result lastResult = getCompletedResult(run);
 
         Run previousBuild = run.getPreviousBuild();
