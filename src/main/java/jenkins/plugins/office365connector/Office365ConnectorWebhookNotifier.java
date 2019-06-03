@@ -49,7 +49,7 @@ public final class Office365ConnectorWebhookNotifier {
     public Office365ConnectorWebhookNotifier(Run run, TaskListener listener) {
         this.run = run;
         this.listener = listener;
-        this.cardBuilder = new CardBuilder(run, listener);
+        this.cardBuilder = new CardBuilder(run);
         this.decisionMaker = new DecisionMaker(run, listener);
         this.job = this.run.getParent();
     }
