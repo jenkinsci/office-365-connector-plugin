@@ -2,17 +2,30 @@ package jenkins.plugins.office365connector;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.Arrays;
 import java.util.List;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.CredentialsScope;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
 import hudson.model.AbstractBuild;
+import hudson.util.Secret;
 import jenkins.plugins.office365connector.model.Macro;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
+import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({Secret.class, CredentialsProvider.class})
 public class WebhookTest {
 
     @Test
@@ -23,6 +36,31 @@ public class WebhookTest {
         String url = "myUrl";
         Webhook webhook = new Webhook();
         webhook.setUrl(url);
+
+        // when
+        String actualUrl = webhook.getUrl(run);
+
+        // then
+        assertThat(actualUrl).isEqualTo(url);
+    }
+
+    @Test
+    public void getUrl_ReturnsUrlCredential() {
+        AbstractBuild run = mock(AbstractBuild.class);
+
+        // given
+        String url = "myUrl";
+        String urlId = "myUrlId";
+        Secret secret = mock(Secret.class);
+        mockStatic(Secret.class);
+        when(Secret.toString(secret)).thenReturn(url);
+
+        StringCredentials urlCred = new StringCredentialsImpl(CredentialsScope.GLOBAL, urlId, "Credential", secret);
+        mockStatic(CredentialsProvider.class);
+        when(CredentialsProvider.findCredentialById(urlId, StringCredentials.class, run)).thenReturn(urlCred);
+
+        Webhook webhook = new Webhook();
+        webhook.setUrlCredentialsId(urlId);
 
         // when
         String actualUrl = webhook.getUrl(run);
