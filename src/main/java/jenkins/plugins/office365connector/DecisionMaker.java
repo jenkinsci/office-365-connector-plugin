@@ -57,7 +57,7 @@ public class DecisionMaker {
             for (Macro macro : webhook.getMacros()) {
                 String evaluated = evaluateMacro(macro.getTemplate());
                 if (evaluated.equals(macro.getValue())) {
-                    log("Matched template '%s' for webhook '%s'.", macro.getTemplate(), webhook.getName());
+                    log("Matched template '%s' for webhook with name '%s'.", macro.getTemplate(), webhook.getName());
                     return true;
                 }
             }
@@ -83,7 +83,7 @@ public class DecisionMaker {
                 || isNotifyUnstable(result, webhook);
 
         if (statusMatched) {
-            log("Matched status '%s' for webhook '%s'.", result, webhook.getName());
+            log("Matched status '%s' for webhook with name '%s'.", result, webhook.getName());
         }
         return statusMatched;
     }
@@ -109,7 +109,11 @@ public class DecisionMaker {
     }
 
     private boolean isNotifyBackToNormal(Result result, Webhook webhook) {
-        return result == Result.SUCCESS && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)
+        Run previousBuild = run.getPreviousBuild();
+        while (null != previousBuild && previousBuild.getResult() == Result.ABORTED) {
+            previousBuild = previousBuild.getPreviousCompletedBuild();
+        }
+        return result == Result.SUCCESS && previousBuild != null && (previousBuild.getResult() == Result.FAILURE || previousBuild.getResult() == Result.UNSTABLE)
                 && webhook.isNotifyBackToNormal();
     }
 

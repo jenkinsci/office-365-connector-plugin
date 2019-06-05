@@ -8,15 +8,14 @@ matrix:
   include:
     - jdk: oraclejdk8
       env:
-        - DESC="tests"
+        - DESC="verifications"
       script: mvn verify
 
     - jdk: oraclejdk8
       env:
         - DESC="static analysis"
-      script:
-        - mvn cobertura:cobertura
-
-after_success:
-  # push report to codecov server
-  bash <(curl -s https://codecov.io/bash)
+      # skip integration tests
+      script: mvn test cobertura:cobertura
+      after_success:
+        # push report to codecov server
+        bash <(curl -s https://codecov.io/bash)

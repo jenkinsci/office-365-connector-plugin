@@ -8,7 +8,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
-public class WebhookJobPropertyTest {
+public class WebhookJobPropertyIT {
 
     @Rule
     public JenkinsRule rule = new JenkinsRule();
@@ -17,7 +17,7 @@ public class WebhookJobPropertyTest {
     public void testDataCompatibility() throws Exception {
         FreeStyleProject foo = (FreeStyleProject) rule.jenkins.createProjectFromXML(
                 "bar",
-                getClass().getResourceAsStream("WebhookJobPropertyTest/freestyleold1.xml")
+                getClass().getResourceAsStream("WebhookJobProperty/freestyleold1.xml")
         );
         WebhookJobProperty webhookJobProperty = foo.getProperty(WebhookJobProperty.class);
         assertThat(webhookJobProperty.getWebhooks()).isNotEmpty();

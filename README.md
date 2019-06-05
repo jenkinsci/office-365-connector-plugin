@@ -14,15 +14,18 @@ Plugin is used to send actionable messages in [Outlook](http://outlook.com) , [O
 
 ## Screenshots
 
+### Microsoft Teams
 ![Configuration](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/config.png)
 
 ![Message](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/message.png)
 
+### Microsoft Outlook
+![Outlook](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/outlook.png)
+
 ## Jenkins Instructions
 
-0. Install this plugin on your Jenkins server
-
-0. Configure it in your Jenkins job and add webhook URL obtained from office 365 connector.
+  1. Install this plugin on your Jenkins server
+  1. Configure it in your Jenkins job and add webhook URL obtained from office 365 connector.
 
 ## Developer instructions
 Install Maven and JDK. This was last build with Maven 3.2.5 and OpenJDK 1.7.0_75 on KUbuntu 14.04.
@@ -34,3 +37,7 @@ Run unit tests
 Create an HPI file to install in Jenkins (HPI file will be in target/slack.hpi).
 
 `mvn package`
+
+## Documentation
+You may find useful below link if you like to contribute and add new feature:
+- [Actionable messages](https://docs.microsoft.com/en-us/outlook/actionable-messages/send-via-connectors)

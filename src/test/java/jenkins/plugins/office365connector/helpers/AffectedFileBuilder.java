@@ -18,21 +18,12 @@ import org.mockito.stubbing.Answer;
  */
 public class AffectedFileBuilder {
 
-    private class File implements ChangeLogSet.AffectedFile {
+    public static final String singleAuthor = "Mike";
 
-        @Override
-        public String getPath() {
-            return null;
-        }
-
-        @Override
-        public EditType getEditType() {
-            return null;
-        }
-    }
+    public static final String[] sampleAuthors = {"Peter", "George Great", "Ann, the Queen"};
 
     public List<ChangeLogSet> singleChangeLog(AbstractBuild run) {
-        ChangeLogSet.Entry entryMike = mockEntry("Mike");
+        ChangeLogSet.Entry entryMike = mockEntry(singleAuthor);
 
         when(entryMike.getAffectedFiles()).thenAnswer(createAnswer(Arrays.asList(new File(), new File())));
 
@@ -40,9 +31,9 @@ public class AffectedFileBuilder {
     }
 
     public List<ChangeLogSet> sampleChangeLogs(AbstractBuild run) {
-        ChangeLogSet.Entry entryPeter = mockEntry("Peter");
-        ChangeLogSet.Entry entryGeorge = mockEntry("George Great");
-        ChangeLogSet.Entry entryAnn = mockEntry("Ann, the Queen");
+        ChangeLogSet.Entry entryPeter = mockEntry(sampleAuthors[0]);
+        ChangeLogSet.Entry entryGeorge = mockEntry(sampleAuthors[1]);
+        ChangeLogSet.Entry entryAnn = mockEntry(sampleAuthors[2]);
 
         when(entryPeter.getAffectedFiles()).thenAnswer(createAnswer(Arrays.asList(new File(), new File())));
         when(entryPeter.getAffectedFiles()).thenAnswer(createAnswer(Collections.emptyList()));
@@ -66,5 +57,18 @@ public class AffectedFileBuilder {
 
     public static <T> Answer<T> createAnswer(T value) {
         return (invocation -> value);
+    }
+
+    private class File implements ChangeLogSet.AffectedFile {
+
+        @Override
+        public String getPath() {
+            return null;
+        }
+
+        @Override
+        public EditType getEditType() {
+            return null;
+        }
     }
 }

@@ -9,17 +9,21 @@ import java.util.List;
 import java.util.Set;
 
 import hudson.model.AbstractBuild;
+import hudson.model.Cause;
+import hudson.model.Run;
 import hudson.model.User;
+import hudson.scm.ChangeLogSet;
+import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
+import jenkins.plugins.office365connector.helpers.CauseBuilder;
 import jenkins.plugins.office365connector.model.Fact;
-import jenkins.plugins.office365connector.utils.TimeUtils;
+import jenkins.scm.RunWithSCM;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({TimeUtils.class})
+@PrepareForTest(Run.class)
 public class FactsBuilderTest {
 
     private AbstractBuild run;
@@ -27,6 +31,22 @@ public class FactsBuilderTest {
     @Before
     public void setUp() {
         run = mock(AbstractBuild.class);
+    }
+
+    @Test
+    public void addStatus_AddsFact() {
+
+        // given
+        FactsBuilder factBuilder = new FactsBuilder(run);
+        String status = "funnyStatus";
+
+        // when
+        factBuilder.addStatus(status);
+
+        // then
+        FactAssertion.assertThat(factBuilder.collect())
+                .hasName(FactsBuilder.NAME_STATUS)
+                .hasValue(status);
     }
 
     @Test
@@ -59,7 +79,6 @@ public class FactsBuilderTest {
                 .hasValue(FactsBuilder.VALUE_STATUS_RUNNING);
     }
 
-
     @Test
     public void addFailingSinceBuild_AddsFact() {
 
@@ -74,6 +93,24 @@ public class FactsBuilderTest {
         FactAssertion.assertThat(factBuilder.collect())
                 .hasName(FactsBuilder.NAME_FAILING_SINCE_BUILD)
                 .hasValue("#" + buildNumber);
+    }
+
+    @Test
+    public void addRemarks_AddsFact() {
+
+        // given
+        Run run = mock(Run.class);
+        FactsBuilder factBuilder = new FactsBuilder(run);
+        List<Cause> causes = CauseBuilder.sampleCauses();
+        when(run.getCauses()).thenReturn(causes);
+
+        // when
+        factBuilder.addRemarks();
+
+        // then
+        FactAssertion.assertThat(factBuilder.collect())
+                .hasName(FactsBuilder.NAME_REMARKS)
+                .hasValue(causes.get(0).getShortDescription() + ". " + causes.get(1).getShortDescription() + ".");
     }
 
     @Test
@@ -105,13 +142,86 @@ public class FactsBuilderTest {
     }
 
     @Test
-    public void addCulprits_OnNoUser_AddsNoFact() {
+    public void addCulprits_WithoutUser_AddsNoFact() {
 
         // given
         FactsBuilder factBuilder = new FactsBuilder(run);
 
         // when
         factBuilder.addCulprits();
+
+        // then
+        assertThat(factBuilder.collect()).isEmpty();
+    }
+
+    @Test
+    public void addCulprits_OnNoSCMRun_SkipsAdding() {
+
+        // given
+        Run run = mock(Run.class);
+        FactsBuilder factsBuilder = new FactsBuilder(run);
+
+        // when
+        factsBuilder.addCulprits();
+
+        // then
+        assertThat(factsBuilder.collect()).isEmpty();
+    }
+
+    @Test
+    public void addDevelopers_AddsFact() {
+
+        // given
+        AbstractBuild run = mock(AbstractBuild.class, Mockito.withSettings().extraInterfaces(RunWithSCM.class));
+        List<ChangeLogSet> files = new AffectedFileBuilder().sampleChangeLogs(run);
+        when(run.getChangeSets()).thenReturn(files);
+
+        FactsBuilder factBuilder = new FactsBuilder(run);
+
+        // when
+        factBuilder.addDevelopers();
+
+        // then
+        FactAssertion.assertThat(factBuilder.collect())
+                .hasName(FactsBuilder.NAME_DEVELOPERS)
+                .hasValue(StringUtils.join(AffectedFileBuilder.sampleAuthors, ", "));
+    }
+
+    @Test
+    public void addDevelopers_OnNoSCMRun_SkipsAdding() {
+
+        // given
+        Run run = mock(Run.class);
+        FactsBuilder factsBuilder = new FactsBuilder(run);
+
+        // when
+        factsBuilder.addDevelopers();
+
+        // then
+        assertThat(factsBuilder.collect()).isEmpty();
+    }
+
+    @Test
+    public void addFact_OnEmptyName_SkipsAdding() {
+
+        // given
+        FactsBuilder factBuilder = new FactsBuilder(run);
+
+        // when
+        factBuilder.addFact("someName", StringUtils.EMPTY);
+
+        // then
+        assertThat(factBuilder.collect()).isEmpty();
+    }
+
+    @Test
+    public void addFact_OnEmptyValue_SkipsAdding() {
+
+        // given
+        FactsBuilder factBuilder = new FactsBuilder(run);
+
+        // when
+        factBuilder.addFact(StringUtils.EMPTY, "someValue");
 
         // then
         assertThat(factBuilder.collect()).isEmpty();

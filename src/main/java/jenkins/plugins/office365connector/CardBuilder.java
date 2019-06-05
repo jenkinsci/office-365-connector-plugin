@@ -15,7 +15,6 @@ package jenkins.plugins.office365connector;
 
 import hudson.model.Result;
 import hudson.model.Run;
-import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.StepParameters;
@@ -26,16 +25,14 @@ import jenkins.plugins.office365connector.workflow.StepParameters;
 public class CardBuilder {
 
     private final Run run;
-    private final TaskListener listener;
 
     private final FactsBuilder factsBuilder;
     private final ActionableBuilder potentialActionBuilder;
 
-    public CardBuilder(Run run, TaskListener listener) {
+    public CardBuilder(Run run) {
         this.run = run;
-        this.listener = listener;
 
-        this.factsBuilder = new FactsBuilder(run);
+        factsBuilder = new FactsBuilder(run);
         potentialActionBuilder = new ActionableBuilder(run, factsBuilder);
     }
 
@@ -46,6 +43,7 @@ public class CardBuilder {
         factsBuilder.addDevelopers();
 
         String jobName = getDisplayName();
+        // TODO: dot in the message with single sentence should be removed
         String activityTitle = "Update from " + jobName + ".";
         String activitySubtitle = "Latest status of build " + getRunName();
         Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
@@ -59,62 +57,25 @@ public class CardBuilder {
 
     public Card createCompletedCard() {
         String jobName = getDisplayName();
-        // not available @ Microsoft Teams but probably is for other Office365 clients
-        String summary = String.format("%s: Build %s ", jobName, getRunName());
+        // result might be null only for ongoing job - check documentation of Result.getCompletedResult()
+        Result lastResult = getCompletedResult(run);
 
-        // result might be null for ongoing job - check documentation of Result.getCompletedResult()
-        Result result = getCompletedResult(run);
-
-        String status;
         Run previousBuild = run.getPreviousBuild();
-        Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
-        Run rt = run.getPreviousNotFailedBuild();
-        Run failingSinceRun;
-        if (rt != null) {
-            failingSinceRun = rt.getNextBuild();
-        } else {
-            failingSinceRun = run.getParent().getFirstBuild();
-        }
+        Result previousResult = previousBuild != null ? previousBuild.getResult() : Result.SUCCESS;
+        Run lastNotFailedBuild = run.getPreviousNotFailedBuild();
 
-        if (result == Result.SUCCESS) {
-            // back to normal
-            if (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) {
-                status = "Back to Normal";
-                summary += " Back to Normal";
-            }
-            // still success
-            else {
-                status = "Build Success";
-                summary += "Success";
-            }
-        } else if (result == Result.FAILURE) {
+        boolean isRepeatedFailure = isRepeatedFailure(previousResult, lastNotFailedBuild);
+        String summary = String.format("%s: Build %s %s", jobName, getRunName(),
+                calculateSummary(lastResult, previousResult, isRepeatedFailure));
+
+        if (lastResult == Result.FAILURE) {
+            Run failingSinceRun = getFailingSince(lastNotFailedBuild);
+
             if (failingSinceRun != null && previousResult == Result.FAILURE) {
-                status = "Repeated Failure";
-                summary += "Repeated Failure";
-
                 factsBuilder.addFailingSinceBuild(failingSinceRun.number);
-            } else {
-                status = "Build Failed";
-                summary += "Failed";
             }
-        } else if (result == Result.ABORTED) {
-            status = "Build Aborted";
-            summary += "Aborted";
-        } else if (result == Result.UNSTABLE) {
-            status = "Build Unstable";
-            summary += "Unstable";
-        } else if (result == Result.NOT_BUILT) {
-            status = "Not Built";
-            summary += "Not Built";
-        } else {
-            // if we are here it means that something went wrong in logic above
-            // and we are facing unsupported status or case
-            log("Unknown result: " + result);
-            status = result.toString();
-            summary += status;
         }
-
-        factsBuilder.addStatus(status);
+        factsBuilder.addStatus(calculateStatus(lastResult, previousResult, isRepeatedFailure));
         factsBuilder.addRemarks();
         factsBuilder.addCulprits();
         factsBuilder.addDevelopers();
@@ -124,10 +85,72 @@ public class CardBuilder {
         Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
 
         Card card = new Card(summary, section);
-        card.setThemeColor(result.color.getHtmlBaseColor());
+        card.setThemeColor(lastResult.color.getHtmlBaseColor());
         card.setPotentialAction(potentialActionBuilder.buildActionable());
 
         return card;
+    }
+
+    private boolean isRepeatedFailure(Result previousResult, Run lastNotFailedBuild) {
+        Run failingSinceRun = getFailingSince(lastNotFailedBuild);
+
+        return failingSinceRun != null && previousResult == Result.FAILURE;
+    }
+
+    private Run getFailingSince(Run lastNotFailedBuild) {
+        return lastNotFailedBuild != null
+                ? lastNotFailedBuild.getNextBuild() : run.getParent().getFirstBuild();
+    }
+
+    String calculateStatus(Result lastResult, Result previousResult, boolean isRepeatedFailure) {
+        if (lastResult == Result.SUCCESS) {
+            // back to normal
+            if (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) {
+                return "Back to Normal";
+            }
+            // success remains
+            return "Build Success";
+        }
+        if (lastResult == Result.FAILURE) {
+            if (isRepeatedFailure) {
+                return "Repeated Failure";
+            }
+            return "Build Failed";
+        }
+        if (lastResult == Result.ABORTED) {
+            return "Build Aborted";
+        }
+        if (lastResult == Result.UNSTABLE) {
+            return "Build Unstable";
+        }
+
+        return lastResult.toString();
+    }
+
+    String calculateSummary(Result completedResult, Result previousResult, boolean isRepeatedFailure) {
+
+        if (completedResult == Result.SUCCESS) {
+            // back to normal
+            if (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) {
+                return "Back to Normal";
+            }
+            // success remains
+            return "Success";
+        }
+        if (completedResult == Result.FAILURE) {
+            if (isRepeatedFailure) {
+                return "Repeated Failure";
+            }
+            return "Failed";
+        }
+        if (completedResult == Result.ABORTED) {
+            return "Aborted";
+        }
+        if (completedResult == Result.UNSTABLE) {
+            return "Unstable";
+        }
+
+        return completedResult.toString();
     }
 
     // this is tricky way to avoid findBugs NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE
@@ -144,7 +167,7 @@ public class CardBuilder {
             factsBuilder.addStatusRunning();
         }
 
-        String activityTitle = "Message from " + jobName + ", Build " + getRunName() + "";
+        String activityTitle = "Message from " + jobName + ", Build " + getRunName();
         Section section = new Section(activityTitle, stepParameters.getMessage(), factsBuilder.collect());
 
         String summary = jobName + ": Build " + getRunName() + " Status";
@@ -159,18 +182,15 @@ public class CardBuilder {
         return card;
     }
 
+    /**
+     * Returns name of the job presented as display name without parent name such as folder.
+     */
     private String getDisplayName() {
-        return run.getParent().getFullDisplayName();
+        return run.getParent().getDisplayName();
     }
 
     private String getRunName() {
+        // TODO: This is probably not needed as mostly/always getNumber() is called
         return run.hasCustomDisplayName() ? run.getDisplayName() : "#" + run.getNumber();
-    }
-
-    /**
-     * Helper method for logging.
-     */
-    private void log(String message) {
-        listener.getLogger().println("[Office365connector] " + message);
     }
 }

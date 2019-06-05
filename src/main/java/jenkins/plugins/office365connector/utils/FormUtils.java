@@ -24,16 +24,18 @@ public class FormUtils {
         if (StringUtils.isBlank(value) && !StringUtils.isBlank(urlCredentialsId)) {
             return FormValidation.ok();
         }
-        if (validateUrl(value)) {
+        if (isUrlValid(value)) {
             return FormValidation.ok();
         }
+
         return FormValidation.error("Valid URL or variable reference must be provided");
     }
 
-    public static boolean validateUrl(String value) {
+    public static boolean isUrlValid(String value) {
         if (value.startsWith("$") && value.length() > 1) {
             return true;
         }
+
         return UrlValidator.getInstance().isValid(value);
     }
 }

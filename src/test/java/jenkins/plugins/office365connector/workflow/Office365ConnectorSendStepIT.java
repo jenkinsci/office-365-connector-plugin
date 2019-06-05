@@ -5,24 +5,25 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
-public class Office365ConnectorSendStepTest {
+public class Office365ConnectorSendStepIT {
 
     private static Office365ConnectorSendStep before = new Office365ConnectorSendStep("https://office.com");
+
     @Rule
     public JenkinsRule rule = new JenkinsRule();
 
     @Test
     public void roundtrip() throws Exception {
-        configRoundTrip(before);
+        assertRoundTrip(before);
         before.setStatus("started");
-        configRoundTrip(before);
+        assertRoundTrip(before);
         before.setMessage("hello");
-        configRoundTrip(before);
+        assertRoundTrip(before);
         before.setColor("0000ff");
-        configRoundTrip(before);
+        assertRoundTrip(before);
     }
 
-    private void configRoundTrip(Office365ConnectorSendStep before) throws Exception {
+    private void assertRoundTrip(Office365ConnectorSendStep before) throws Exception {
         Office365ConnectorSendStep after = new StepConfigTester(rule).configRoundTrip(before);
         rule.assertEqualBeans(before, after, "webhookUrl");
         rule.assertEqualBeans(before, after, "status");

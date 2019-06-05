@@ -1,4 +1,4 @@
-package jenkins.plugins.office365connector;
+package jenkins.plugins.office365connector.workflow;
 
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -9,12 +9,15 @@ import java.util.List;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
-import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.scm.ChangeLogSet;
 import hudson.util.Secret;
+import jenkins.plugins.office365connector.FileUtils;
+import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
+import jenkins.plugins.office365connector.Webhook;
+import jenkins.plugins.office365connector.WebhookJobProperty;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
@@ -22,8 +25,6 @@ import jenkins.plugins.office365connector.utils.TimeUtils;
 import jenkins.plugins.office365connector.utils.TimeUtilsTest;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
-import jenkins.plugins.office365connector.workflow.AbstractIntegrationTest;
-import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.Before;
@@ -36,8 +37,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @author Damian Szczepanik (damianszczepanik@github)
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({DisplayURLProvider.class, Office365ConnectorWebhookNotifier.class, Run.class, TimeUtils.class, Secret.class, CredentialsProvider.class})
-public class SampleIntegrationTest extends AbstractIntegrationTest {
+@PrepareForTest({Office365ConnectorWebhookNotifier.class, Run.class, TimeUtils.class, Secret.class, CredentialsProvider.class})
+public class SampleIT extends AbstractTest {
 
     private static final String JOB_NAME = "myFirstJob";
     private static final String CAUSE_DESCRIPTION = "Started by John";
@@ -67,16 +68,6 @@ public class SampleIntegrationTest extends AbstractIntegrationTest {
         mockTimeUtils();
     }
 
-    private static Job mockJob(String parentDisplayName) {
-        Job job = mock(Job.class);
-        ItemGroup itemGroup = mock(ItemGroup.class);
-        when(itemGroup.getFullDisplayName()).thenReturn(parentDisplayName);
-        when(job.getParent()).thenReturn(itemGroup);
-        when(job.getFullDisplayName()).thenReturn(JOB_NAME);
-
-        return job;
-    }
-
     private AbstractBuild mockRun() {
         AbstractBuild run = mock(AbstractBuild.class);
 
@@ -93,7 +84,7 @@ public class SampleIntegrationTest extends AbstractIntegrationTest {
     }
 
     private void mockWebhook(List<Webhook> webhooks) {
-        Job job = mockJob("");
+        Job job = mockJob(JOB_NAME);
         when(run.getParent()).thenReturn(job);
 
         // getProperty

@@ -17,8 +17,7 @@ package jenkins.plugins.office365connector;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
+import com.cloudbees.plugins.credentials.CredentialsProvider;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractDescribableImpl;
@@ -26,10 +25,11 @@ import hudson.model.Descriptor;
 import hudson.model.Run;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
+import javax.annotation.Nonnull;
 import jenkins.plugins.office365connector.utils.FormUtils;
 import jenkins.plugins.office365connector.model.Macro;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
+import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -80,7 +80,8 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     }
 
     public String getName() {
-        return name;
+        // when the job is created and the name is not provided, then getName() returns null
+        return Util.fixEmptyAndTrim(name);
     }
 
     @DataBoundSetter
@@ -170,20 +171,12 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     }
 
     public List<Macro> getMacros() {
-		if (macros == null) {
-			this.macros = Util.fixNull(macros);
-		}
-		return macros;
+        return Util.fixNull(macros);
     }
 
     @DataBoundSetter
     public void setMacros(List<Macro> macros) {
         this.macros = Util.fixNull(macros);
-    }
-
-    @Override
-    public String toString() {
-        return url;
     }
 
     @Extension
