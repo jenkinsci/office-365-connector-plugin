@@ -26,6 +26,33 @@ Plugin is used to send actionable messages in [Outlook](http://outlook.com) , [O
 
   1. Install this plugin on your Jenkins server
   1. Configure it in your Jenkins job and add webhook URL obtained from office 365 connector.
+  
+### DSL Example
+```
+job('Example Job Name') {
+    description 'Example description'
+    configure { project ->
+        project / 'properties' << 'jenkins.plugins.office365connector.WebhookJobProperty' {
+            webhooks {
+                'jenkins.plugins.office365connector.Webhook' {
+                    name('Example Webhook Name')
+                    url('https://example.com')
+                    startNotification(false)
+                    notifySuccess(true)
+                    notifyAborted(false)
+                    notifyNotBuilt(false)
+                    notifyUnstable(true)
+                    notifyFailure(true)
+                    notifyBackToNormal(true)
+                    notifyRepeatedFailure(false)
+                    timeout(30000)
+                    macros(class: 'empty-list')
+                }
+            }
+        }
+    }
+}
+```
 
 ## Developer instructions
 Install Maven and JDK. This was last build with Maven 3.2.5 and OpenJDK 1.7.0_75 on KUbuntu 14.04.
