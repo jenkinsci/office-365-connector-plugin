@@ -46,6 +46,13 @@
             </f:entry>
         </f:section>
 
+        <f:optionalBlock title="Include Custom Message" name="includeCustomMessage" inline="true"
+            checked="${instance.customMessage != null}">
+            <f:entry title="Custom Message" field="customMessage">
+                <f:textarea />
+            </f:entry>
+        </f:optionalBlock>
+
         <f:section title="Advanced configuration">
             <f:entry title="Macros" field="macros">
                 <f:repeatableProperty minimum="0" field="macros" add="${%Add Macro}">

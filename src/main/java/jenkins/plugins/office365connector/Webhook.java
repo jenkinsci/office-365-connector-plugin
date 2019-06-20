@@ -35,6 +35,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     private String name;
     private String url;
+    private String customMessage;
 
     private boolean startNotification;
     private boolean notifySuccess;
@@ -44,6 +45,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     private boolean notifyFailure;
     private boolean notifyBackToNormal;
     private boolean notifyRepeatedFailure;
+    private boolean includeCustomMessage;
 
     private int timeout;
 
@@ -66,6 +68,15 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     @DataBoundSetter
     public void setName(String name) {
         this.name = Util.fixEmptyAndTrim(name);
+    }
+
+    public String getCustomMessage() {
+        return customMessage;
+    }
+
+    @DataBoundSetter
+    public void setCustomMessage(String customMessage) {
+        this.customMessage = Util.fixEmptyAndTrim(customMessage);
     }
 
     public boolean isNotifySuccess() {
@@ -156,6 +167,20 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     @DataBoundSetter
     public void setMacros(List<Macro> macros) {
         this.macros = Util.fixNull(macros);
+    }
+
+    @DataBoundSetter
+    public void setIncludeCustomMessage(boolean includeCustomMessage) {
+        this.includeCustomMessage = includeCustomMessage;
+    }
+
+    public boolean isIncludeCustomMessage() {
+        return includeCustomMessage;
+    }
+
+    @Override
+    public String toString() {
+        return url;
     }
 
     @Extension

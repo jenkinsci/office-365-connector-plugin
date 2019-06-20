@@ -13,8 +13,11 @@
  */
 package jenkins.plugins.office365connector;
 
+import java.io.IOException;
+
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.StepParameters;
@@ -25,22 +28,35 @@ import jenkins.plugins.office365connector.workflow.StepParameters;
 public class CardBuilder {
 
     private final Run run;
+    private final TaskListener listener;
 
     private final FactsBuilder factsBuilder;
     private final ActionableBuilder potentialActionBuilder;
 
-    public CardBuilder(Run run) {
+    public CardBuilder(Run run, TaskListener listener) {
         this.run = run;
+        this.listener = listener;
 
         factsBuilder = new FactsBuilder(run);
         potentialActionBuilder = new ActionableBuilder(run, factsBuilder);
     }
 
-    public Card createStartedCard() {
+    public Card createStartedCard(String... messages) {
         factsBuilder.addStatusStarted();
         factsBuilder.addRemarks();
         factsBuilder.addCulprits();
         factsBuilder.addDevelopers();
+
+        if (messages.length > 0) {
+            try {
+                for (String message : messages) {
+                    factsBuilder.addCustom(message, run);
+                }
+            } catch (IOException | InterruptedException e) {
+                log(String.format("Failed to add custom message"));
+                e.printStackTrace(listener.getLogger());
+            }
+        }
 
         String jobName = getDisplayName();
         // TODO: dot in the message with single sentence should be removed
@@ -55,7 +71,7 @@ public class CardBuilder {
         return card;
     }
 
-    public Card createCompletedCard() {
+    public Card createCompletedCard(String... messages) {
         String jobName = getDisplayName();
         // result might be null only for ongoing job - check documentation of Result.getCompletedResult()
         Result lastResult = getCompletedResult(run);
@@ -79,6 +95,18 @@ public class CardBuilder {
         factsBuilder.addRemarks();
         factsBuilder.addCulprits();
         factsBuilder.addDevelopers();
+
+        if (messages.length > 0) {
+            try {
+                for (String message : messages) {
+                    factsBuilder.addCustom(message, run);
+                }
+            } catch (IOException | InterruptedException e) {
+                log(String.format("Failed to add custom message"));
+                e.printStackTrace(listener.getLogger());
+            }
+        }
+
 
         String activityTitle = "Update from " + jobName + ".";
         String activitySubtitle = "Latest status of build " + getRunName();
@@ -192,5 +220,12 @@ public class CardBuilder {
     private String getRunName() {
         // TODO: This is probably not needed as mostly/always getNumber() is called
         return run.hasCustomDisplayName() ? run.getDisplayName() : "#" + run.getNumber();
+    }
+
+    /**
+     * Helper method for logging.
+     */
+    private void log(String message) {
+        listener.getLogger().println("[Office365connector] " + message);
     }
 }

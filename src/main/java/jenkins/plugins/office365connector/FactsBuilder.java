@@ -13,18 +13,24 @@
  */
 package jenkins.plugins.office365connector;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import hudson.EnvVars;
 import hudson.model.Cause;
 import hudson.model.Run;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
+import hudson.util.LogTaskListener;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.scm.RunWithSCM;
 import org.apache.commons.lang.StringUtils;
+
 
 /**
  * Collects helper methods that create instance of {@link jenkins.plugins.office365connector.model.Fact Fact} class.
@@ -42,6 +48,8 @@ public class FactsBuilder {
 
     final static String VALUE_STATUS_STARTED = "Started";
     final static String VALUE_STATUS_RUNNING = "Running";
+
+    final static String ADDITIONAL_INFO = "Additional info";
 
     private final List<Fact> facts = new ArrayList<>();
     private final Run run;
@@ -106,6 +114,12 @@ public class FactsBuilder {
         addFact(NAME_DEVELOPERS, StringUtils.join(authors, ", "));
     }
 
+    public void addCustom(String message, Run run) throws IOException, InterruptedException {
+        EnvVars envVars;
+        envVars = run.getEnvironment(new LogTaskListener(LOGGER, Level.INFO));
+        addFact(ADDITIONAL_INFO, envVars.expand(message));
+    }
+
     public void addFact(String name, String value) {
         addFact(new Fact(name, value));
     }
@@ -131,4 +145,6 @@ public class FactsBuilder {
     public List<Fact> collect() {
         return facts;
     }
+
+    private static final Logger LOGGER = Logger.getLogger(FactsBuilder.class.getName());
 }

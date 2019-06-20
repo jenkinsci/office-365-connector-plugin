@@ -49,7 +49,7 @@ public final class Office365ConnectorWebhookNotifier {
     public Office365ConnectorWebhookNotifier(Run run, TaskListener listener) {
         this.run = run;
         this.listener = listener;
-        this.cardBuilder = new CardBuilder(run);
+        this.cardBuilder = new CardBuilder(run, listener);
         this.decisionMaker = new DecisionMaker(run, listener);
         this.job = this.run.getParent();
     }
@@ -62,11 +62,17 @@ public final class Office365ConnectorWebhookNotifier {
 
         boolean isBuild = run instanceof AbstractBuild;
         if ((isBuild && isFromPreBuild) || (!isBuild && !isFromPreBuild)) {
-            Card card = cardBuilder.createStartedCard();
+            Card card;
 
             for (Webhook webhook : webhooks) {
                 if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                     if (webhook.isStartNotification()) {
+                        if (webhook.isIncludeCustomMessage()) {
+                            String message = webhook.getCustomMessage();
+                            card = cardBuilder.createStartedCard(message);
+                        } else {
+                            card = cardBuilder.createStartedCard();
+                        }
                         executeWorker(webhook, card);
                     }
                 }
@@ -80,10 +86,16 @@ public final class Office365ConnectorWebhookNotifier {
             return;
         }
 
-        Card card = cardBuilder.createCompletedCard();
+        Card card;
 
         for (Webhook webhook : webhooks) {
             if (decisionMaker.isStatusMatched(webhook) && decisionMaker.isAtLeastOneRuleMatched(webhook)) {
+                if(webhook.isIncludeCustomMessage()) {
+                    String message = webhook.getCustomMessage();
+                    card = cardBuilder.createCompletedCard(message);
+                } else {
+                    card = cardBuilder.createCompletedCard();
+                }
                 executeWorker(webhook, card);
             }
         }

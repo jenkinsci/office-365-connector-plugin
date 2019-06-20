@@ -41,7 +41,7 @@ public class CardBuilderTest extends AbstractTest {
         whenNew(ActionableBuilder.class).withAnyArguments().thenReturn(mockActionableBuilder);
         FactsBuilder mockFactsBuilder = mock(FactsBuilder.class);
         whenNew(FactsBuilder.class).withAnyArguments().thenReturn(mockFactsBuilder);
-        cardBuilder = new CardBuilder(run);
+        cardBuilder = new CardBuilder(run, mockListener());
     }
 
 
