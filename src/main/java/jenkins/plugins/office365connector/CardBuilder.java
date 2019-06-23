@@ -69,10 +69,10 @@ public class CardBuilder {
                 calculateSummary(lastResult, previousResult, isRepeatedFailure));
 
         if (lastResult == Result.FAILURE) {
-            Run failingSinceRun = getFailingSince(lastNotFailedBuild);
+            Run failingSinceBuild = getFailingSinceBuild(lastNotFailedBuild);
 
-            if (failingSinceRun != null && previousResult == Result.FAILURE) {
-                factsBuilder.addFailingSinceBuild(failingSinceRun.number);
+            if (failingSinceBuild != null && previousResult == Result.FAILURE) {
+                factsBuilder.addFailingSinceBuild(failingSinceBuild.getNumber());
             }
         }
         factsBuilder.addStatus(calculateStatus(lastResult, previousResult, isRepeatedFailure));
@@ -92,12 +92,12 @@ public class CardBuilder {
     }
 
     private boolean isRepeatedFailure(Result previousResult, Run lastNotFailedBuild) {
-        Run failingSinceRun = getFailingSince(lastNotFailedBuild);
+        Run failingSinceRun = getFailingSinceBuild(lastNotFailedBuild);
 
         return failingSinceRun != null && previousResult == Result.FAILURE;
     }
 
-    private Run getFailingSince(Run lastNotFailedBuild) {
+    private Run getFailingSinceBuild(Run lastNotFailedBuild) {
         return lastNotFailedBuild != null
                 ? lastNotFailedBuild.getNextBuild() : run.getParent().getFirstBuild();
     }

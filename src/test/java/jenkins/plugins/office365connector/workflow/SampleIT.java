@@ -112,7 +112,7 @@ public class SampleIT extends AbstractTest {
     public void validateCompletedRequest_OnSuccess() {
 
         // given
-        mockResult(Result.SUCCESS);
+        when(run.getResult()).thenReturn(Result.SUCCESS);
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
 
         // when
@@ -123,16 +123,30 @@ public class SampleIT extends AbstractTest {
     }
 
     @Test
-    public void validateCompletedRequest_OnFailure() {
+    public void validateCompletedRequest_OnFailed() {
 
         // given
-        mockResult(Result.FAILURE);
+        when(run.getResult()).thenReturn(Result.FAILURE);
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
 
         // when
         notifier.sendBuildCompletedNotification();
 
         // then
-        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("completed-failure.json"));
+        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("completed-failed.json"));
+    }
+
+    @Test
+    public void validateCompletedRequest_OnRepeatedFailure() {
+
+        // given
+        mockFailedResult();
+        Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
+
+        // when
+        notifier.sendBuildCompletedNotification();
+
+        // then
+        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("completed-repeated_failure.json"));
     }
 }

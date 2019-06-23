@@ -41,7 +41,7 @@ public class FactsBuilder {
     final static String CULPRITS = "Culprits";
     public final static String NAME_DEVELOPERS = "Developers";
 
-    final static String NAME_FAILING_SINCE_BUILD = "Failing since build";
+    final static String NAME_FAILING_SINCE_BUILD = "Failing since";
 
     final static String VALUE_STATUS_STARTED = "Started";
     final static String VALUE_STATUS_RUNNING = "Running";
@@ -66,7 +66,7 @@ public class FactsBuilder {
     }
 
     public void addFailingSinceBuild(int buildNumber) {
-        addFact(NAME_FAILING_SINCE_BUILD, "#" + String.valueOf(buildNumber));
+        addFact(NAME_FAILING_SINCE_BUILD, "build #" + buildNumber);
     }
 
     public void addRemarks() {

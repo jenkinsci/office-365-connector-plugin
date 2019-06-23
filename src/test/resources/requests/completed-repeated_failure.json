@@ -1,0 +1,39 @@
+{
+    "summary": "Parent project » myFirstJob: Build #167 Repeated Failure",
+    "themeColor": "#EF2929",
+    "sections": [
+        {
+            "markdown": true,
+            "facts": [
+                {
+                    "name": "Status",
+                    "value": "Repeated Failure"
+                },
+                {
+                    "name": "Failing since",
+                    "value": "build #10"
+                },
+                {
+                    "name": "Remarks",
+                    "value": "Started by John."
+                },
+                {
+                    "name": "Developers",
+                    "value": "Mike"
+                }
+            ],
+            "activityTitle": "Update from Parent project » myFirstJob.",
+            "activitySubtitle": "Latest status of build #167"
+        }
+    ],
+    "potentialAction": [
+        {
+            "@context": "http://schema.org",
+            "@type": "ViewAction",
+            "name": "View Build",
+            "target": [
+                "http://localhost/job/myFirstJob/167/display/redirect"
+            ]
+        }
+    ]
+}
