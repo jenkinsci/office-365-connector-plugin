@@ -73,7 +73,7 @@ public abstract class AbstractTest {
     protected Job mockJob(String jobName) {
         Job job = mock(Job.class);
         ItemGroup itemGroup = mock(ItemGroup.class);
-        when(itemGroup.getFullDisplayName()).thenReturn(StringUtils.EMPTY);
+        when(itemGroup.getFullDisplayName()).thenReturn("Parent project");
         when(job.getParent()).thenReturn(itemGroup);
         when(job.getFullDisplayName()).thenReturn(jobName);
 

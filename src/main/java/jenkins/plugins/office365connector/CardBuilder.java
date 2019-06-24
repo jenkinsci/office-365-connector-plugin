@@ -183,10 +183,11 @@ public class CardBuilder {
     }
 
     /**
-     * Returns name of the job presented as display name without parent name such as folder.
+     * Returns name of the job presented as display name with parent name such as folder.
+     * Parent is needed for multi-branch pipelines and for cases when job
      */
     private String getDisplayName() {
-        return run.getParent().getDisplayName();
+        return run.getParent().getFullDisplayName();
     }
 
     private String getRunName() {
