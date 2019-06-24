@@ -1,5 +1,5 @@
 {
-    "summary": "simple job: Build #1 Started",
+    "summary": "Parent project » simple job: Build #1 Started",
     "themeColor": "3479BF",
     "sections": [
         {
@@ -14,7 +14,7 @@
                     "value": "Peter, George Great, Ann, the Queen"
                 }
             ],
-            "activityTitle": "Update from simple job.",
+            "activityTitle": "Update from Parent project » simple job.",
             "activitySubtitle": "Latest status of build #1"
         }
     ],
