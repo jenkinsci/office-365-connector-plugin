@@ -43,9 +43,12 @@ public class AffectedFileBuilder {
     }
 
     private ChangeLogSet.Entry mockEntry(String userName) {
-        ChangeLogSet.Entry entry = mock(ChangeLogSet.Entry.class);
         User user = mockUser(userName);
+        when(user.getFullName()).thenReturn(userName);
+
+        ChangeLogSet.Entry entry = mock(ChangeLogSet.Entry.class);
         when(entry.getAuthor()).thenReturn(user);
+
         return entry;
     }
 
