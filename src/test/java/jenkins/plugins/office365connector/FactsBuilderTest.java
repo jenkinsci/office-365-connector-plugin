@@ -169,7 +169,7 @@ public class FactsBuilderTest {
     }
 
     @Test
-    public void addDevelopers_AddsFact() {
+    public void addDevelopers_AddsFactWithSortedAuthors() {
 
         // given
         AbstractBuild run = mock(AbstractBuild.class, Mockito.withSettings().extraInterfaces(RunWithSCM.class));
@@ -182,9 +182,10 @@ public class FactsBuilderTest {
         factBuilder.addDevelopers();
 
         // then
+        String[] sortedAuthors = {AffectedFileBuilder.sampleAuthors[2], AffectedFileBuilder.sampleAuthors[1], AffectedFileBuilder.sampleAuthors[0]};
         FactAssertion.assertThat(factBuilder.collect())
                 .hasName(FactsBuilder.NAME_DEVELOPERS)
-                .hasValue(StringUtils.join(AffectedFileBuilder.sampleAuthors, ", "));
+                .hasValue(StringUtils.join(sortedAuthors, ", "));
     }
 
     @Test

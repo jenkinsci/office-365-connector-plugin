@@ -14,6 +14,9 @@
 package jenkins.plugins.office365connector;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -96,14 +99,23 @@ public class FactsBuilder {
 
         List<ChangeLogSet<ChangeLogSet.Entry>> sets = runWithSCM.getChangeSets();
 
-        // TODO: this contains duplicates
-        List<User> authors = new ArrayList<>();
+        Set<User> authors = new HashSet<>();
         sets.stream()
                 .filter(set -> set instanceof ChangeLogSet)
                 .forEach(set -> set
                         .forEach(entry -> authors.add(entry.getAuthor())));
 
-        addFact(NAME_DEVELOPERS, StringUtils.join(authors, ", "));
+        addFact(NAME_DEVELOPERS, StringUtils.join(sortUsers(authors), ", "));
+    }
+
+    /**
+     * Users should be stored in set to eliminate duplicates and sorted so the results
+     * are presented same and deterministic way.
+     */
+    private Collection sortUsers(Set<User> authors) {
+        return authors.stream()
+                .sorted(Comparator.comparing(User::getFullName))
+                .collect(Collectors.toList());
     }
 
     public void addFact(String name, String value) {
