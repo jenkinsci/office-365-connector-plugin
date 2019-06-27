@@ -1,9 +1,10 @@
 [![Travis Status](https://img.shields.io/travis/jenkinsci/office-365-connector-plugin/master.svg?label=Travis%20bulid)](https://travis-ci.org/jenkinsci/office-365-connector-plugin)
-[![Shippable Status](https://api.shippable.com/projects/5a8bda80d0386507000ebf97/badge?branch=master?label=Shippable%20build)](https://app.shippable.com/github/jenkinsci/office-365-connector-plugin/dashboard)
+[![Shippable Status](https://api.shippable.com/projects/5a8bda80d0386507000ebf97/badge?branch=master&label=Shippable%20build)](https://app.shippable.com/github/jenkinsci/office-365-connector-plugin/dashboard)
 [![Popularity](https://img.shields.io/jenkins/plugin/i/Office-365-Connector.svg)](https://plugins.jenkins.io/Office-365-Connector)
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1fab6aea594f49928b80bfe55a81357c)](https://app.codacy.com/app/damianszczepanik/office-365-connector-plugin?utm_source=github.com&utm_medium=referral&utm_content=jenkinsci/office-365-connector-plugin&utm_campaign=Badge_Grade_Settings)
 [![Coverage Status](https://img.shields.io/codecov/c/github/jenkinsci/office-365-connector-plugin/master.svg?label=Unit%20tests%20coverage)](https://codecov.io/github/jenkinsci/office-365-connector-plugin)
+[![Vulnerabilities](https://snyk.io/test/github/jenkinsci/office-365-connector-plugin/badge.svg)](https://app.snyk.io/org/damianszczepanik/project/c78d3196-4d6a-4a74-a217-6f6bc5b2f6ac)
 
 # Office-365-Connector
 Office 365 Connector plugin for Jenkins
@@ -34,7 +35,7 @@ job('Example Job Name') {
             webhooks {
                 'jenkins.plugins.office365connector.Webhook' {
                     name('Example Webhook Name')
-                    url('https://example.com')
+                    url('https://outlook.office.com/webhook/123456...')
                     startNotification(false)
                     notifySuccess(true)
                     notifyAborted(false)
