@@ -13,10 +13,11 @@ Plugin is used to send actionable messages in [Outlook](http://outlook.com), [Of
 
 ## Screenshots
 
-### Microsoft Teams
+### Jenkins configuration
 ![Configuration](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/config.png)
 
-![Message](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/message.png)
+### Microsoft Teams
+![Teams](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/teams.png)
 
 ### Microsoft Outlook
 ![Outlook](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/outlook.png)
