@@ -31,10 +31,12 @@ public class FormUtilsTest {
     @Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
+                {"", ERROR, false},
                 {"demo", ERROR, false},
                 {"hpp://demo", ERROR, false},
                 {"http://demo", ERROR, false},
                 /* Still need to figure a way out with this*/// { "$$$$$demo", ERROR, false },
+                {"$", ERROR, false},
                 {"$demo", OK, true},
                 {"https://demo.com", OK, true},
         });
