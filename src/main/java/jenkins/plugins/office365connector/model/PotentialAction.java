@@ -19,10 +19,10 @@ import com.google.gson.annotations.SerializedName;
 import hudson.Util;
 
 /**
- *
  * @author srhebbar
  */
 public class PotentialAction {
+
     @SerializedName("@context")
     private String context = "http://schema.org";
 
