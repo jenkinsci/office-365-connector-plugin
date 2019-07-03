@@ -16,6 +16,10 @@ public class FactAssertion {
         this.fact = fact;
     }
 
+    public static FactAssertion assertThat(FactsBuilder factsBuilder) {
+        return assertThat(factsBuilder.collect());
+    }
+
     public static FactAssertion assertThat(List<Fact> facts) {
         Assertions.assertThat(facts).hasSize(1);
         return new FactAssertion(facts.get(0));
