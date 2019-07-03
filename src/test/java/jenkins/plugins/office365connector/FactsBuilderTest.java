@@ -92,7 +92,7 @@ public class FactsBuilderTest {
         // then
         FactAssertion.assertThat(factBuilder.collect())
                 .hasName(FactsBuilder.NAME_FAILING_SINCE_BUILD)
-                .hasValue("#" + buildNumber);
+                .hasValue("build #" + buildNumber);
     }
 
     @Test

@@ -74,7 +74,7 @@ public class CardBuilderTest extends AbstractTest {
         // given
         String status = "Aborted";
         Result result = Result.fromString(status);
-        mockResult(result);
+        when(run.getResult()).thenReturn(result);
 
         // when
         Card card = cardBuilder.createCompletedCard();

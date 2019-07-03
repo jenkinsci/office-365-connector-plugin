@@ -36,13 +36,20 @@ public abstract class AbstractTest {
     protected AbstractBuild run;
     protected HttpWorkerAnswer workerAnswer;
 
-    protected void mockResult(Result result) {
-        when(run.getResult()).thenReturn(result);
+    protected void mockFailedResult() {
+        Result lastResult = Result.FAILURE;
+        when(run.getResult()).thenReturn(lastResult);
 
-        Run previousBuild = mock(Run.class);
-        if (result == Result.FAILURE) {
-            when(previousBuild.getResult()).thenReturn(Result.SUCCESS);
-        }
+        AbstractBuild previousBuild = mock(AbstractBuild.class);
+        when(run.getPreviousBuild()).thenReturn(previousBuild);
+        when(previousBuild.getResult()).thenReturn(Result.FAILURE);
+
+        Run failingSinceBuild = mock(Run.class);
+        when(failingSinceBuild.getNumber()).thenReturn(10);
+
+        Run lastNotFailedBuild = mock(Run.class);
+        when(lastNotFailedBuild.getNextBuild()).thenReturn(failingSinceBuild);
+        when(run.getPreviousNotFailedBuild()).thenReturn(lastNotFailedBuild);
     }
 
     protected TaskListener mockListener() {
