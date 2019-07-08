@@ -90,7 +90,7 @@ public final class Office365ConnectorWebhookNotifier {
 
         for (Webhook webhook : webhooks) {
             if (decisionMaker.isStatusMatched(webhook) && decisionMaker.isAtLeastOneRuleMatched(webhook)) {
-                if(webhook.isIncludeCustomMessage()) {
+                if (webhook.isIncludeCustomMessage()) {
                     String message = webhook.getCustomMessage();
                     card = cardBuilder.createCompletedCard(message);
                 } else {
