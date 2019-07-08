@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
@@ -17,7 +18,7 @@
 
     <artifactId>Office-365-Connector</artifactId>
     <name>Office 365 Connector</name>
-    <version>4.8.1-SNAPSHOT</version>
+    <version>4.9.2-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <description>This plugin sends Job notifications to JenkinsCI Office 365 Connector.</description>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Office+365+Connector+Plugin</url>
@@ -25,7 +26,6 @@
     <properties>
         <powermock.version>1.6.6</powermock.version>
         <jenkins.version>2.60.3</jenkins.version>
-        <workflow.version>2.13</workflow.version>
         <java.level>8</java.level>
     </properties>
 
@@ -33,6 +33,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <version>4.12</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -71,18 +72,12 @@
             <groupId>org.simpleframework</groupId>
             <artifactId>simple</artifactId>
             <version>5.1.6</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jmockit</groupId>
             <artifactId>jmockit</artifactId>
-            <version>1.33</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-step-api</artifactId>
-            <version>${workflow.version}</version>
-            <classifier>tests</classifier>
+            <version>1.46</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -95,44 +90,38 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.2.4</version>
+            <version>2.8.5</version>
         </dependency>
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.10.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>junit</artifactId>
-            <version>1.5</version>
-            <type>jar</type>
+            <version>2.10.2</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
-            <version>${workflow.version}</version>
-            <type>jar</type>
+            <version>2.20</version>
+            <classifier>tests</classifier>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>token-macro</artifactId>
-            <version>2.3</version>
+            <version>2.6</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>display-url-api</artifactId>
-            <version>2.1.0</version>
+            <version>2.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>scm-api</artifactId>
-            <version>2.2.2</version>
+            <version>2.3.0</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>structs</artifactId>
-            <version>1.9</version>
+            <version>1.19</version>
         </dependency>
         <dependency>
             <groupId>commons-validator</groupId>
@@ -157,7 +146,13 @@
                         <format>html</format>
                         <format>xml</format>
                     </formats>
-                    <check />
+                    <instrumentation>
+                        <excludes>
+                            <!-- generated class -->
+                            <exclude>jenkins/plugins/office365connector/Messages.class</exclude>
+                        </excludes>
+                    </instrumentation>
+                    <check/>
                 </configuration>
             </plugin>
             <plugin>

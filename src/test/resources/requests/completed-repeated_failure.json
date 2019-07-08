@@ -1,13 +1,17 @@
 {
-    "summary": "Parent project » myFirstJob: Build #167 Started",
-    "themeColor": "3479BF",
+    "summary": "Parent project » myFirstJob: Build #167 Repeated Failure",
+    "themeColor": "#EF2929",
     "sections": [
         {
             "markdown": true,
             "facts": [
                 {
                     "name": "Status",
-                    "value": "Started"
+                    "value": "Repeated Failure"
+                },
+                {
+                    "name": "Failing since",
+                    "value": "build #10"
                 },
                 {
                     "name": "Remarks",

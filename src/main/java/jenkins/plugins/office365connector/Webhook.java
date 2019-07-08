@@ -199,6 +199,5 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
         public FormValidation doCheckUrl(@QueryParameter String value) {
             return FormUtils.formValidateUrl(value);
         }
-
     }
 }

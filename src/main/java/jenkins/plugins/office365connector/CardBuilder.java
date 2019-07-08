@@ -85,10 +85,10 @@ public class CardBuilder {
                 calculateSummary(lastResult, previousResult, isRepeatedFailure));
 
         if (lastResult == Result.FAILURE) {
-            Run failingSinceRun = getFailingSince(lastNotFailedBuild);
+            Run failingSinceBuild = getFailingSinceBuild(lastNotFailedBuild);
 
-            if (failingSinceRun != null && previousResult == Result.FAILURE) {
-                factsBuilder.addFailingSinceBuild(failingSinceRun.number);
+            if (failingSinceBuild != null && previousResult == Result.FAILURE) {
+                factsBuilder.addFailingSinceBuild(failingSinceBuild.getNumber());
             }
         }
         factsBuilder.addStatus(calculateStatus(lastResult, previousResult, isRepeatedFailure));
@@ -120,12 +120,12 @@ public class CardBuilder {
     }
 
     private boolean isRepeatedFailure(Result previousResult, Run lastNotFailedBuild) {
-        Run failingSinceRun = getFailingSince(lastNotFailedBuild);
+        Run failingSinceRun = getFailingSinceBuild(lastNotFailedBuild);
 
         return failingSinceRun != null && previousResult == Result.FAILURE;
     }
 
-    private Run getFailingSince(Run lastNotFailedBuild) {
+    private Run getFailingSinceBuild(Run lastNotFailedBuild) {
         return lastNotFailedBuild != null
                 ? lastNotFailedBuild.getNextBuild() : run.getParent().getFirstBuild();
     }
@@ -211,10 +211,11 @@ public class CardBuilder {
     }
 
     /**
-     * Returns name of the job presented as display name without parent name such as folder.
+     * Returns name of the job presented as display name with parent name such as folder.
+     * Parent is needed for multi-branch pipelines and for cases when job
      */
     private String getDisplayName() {
-        return run.getParent().getDisplayName();
+        return run.getParent().getFullDisplayName();
     }
 
     private String getRunName() {

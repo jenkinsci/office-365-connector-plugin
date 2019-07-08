@@ -6,11 +6,13 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 import hudson.model.AbstractBuild;
+import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.Result;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.AbstractTest;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,14 +24,18 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public class CardBuilderTest extends AbstractTest {
 
     private static final String JOB_DISPLAY_NAME = "myJobDisplayName";
-    private static final int BUILD_NUMBER = 007;
+    private static final int BUILD_NUMBER = 7;
 
     private CardBuilder cardBuilder;
 
     @Before
     public void setUp() throws Exception {
+        ItemGroup itemGroup = mock(ItemGroup.class);
+        when(itemGroup.getFullDisplayName()).thenReturn(StringUtils.EMPTY);
+
         Job job = mock(Job.class);
         when(job.getDisplayName()).thenReturn(JOB_DISPLAY_NAME);
+        when(job.getParent()).thenReturn(itemGroup);
 
         run = mock(AbstractBuild.class);
         when(run.getNumber()).thenReturn(BUILD_NUMBER);
@@ -68,7 +74,7 @@ public class CardBuilderTest extends AbstractTest {
         // given
         String status = "Aborted";
         Result result = Result.fromString(status);
-        mockResult(result);
+        when(run.getResult()).thenReturn(result);
 
         // when
         Card card = cardBuilder.createCompletedCard();
