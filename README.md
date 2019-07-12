@@ -24,11 +24,12 @@ Plugin is used to send actionable messages in [Outlook](http://outlook.com), [Of
 
 ## Jenkins Instructions
 
-  1. Install this plugin on your Jenkins server
-  1. Configure it in your Jenkins job and add webhook URL obtained from office 365 connector.
+1. Install this plugin on your Jenkins server
+1. Configure it in your Jenkins job and add webhook URL obtained from office 365 connector.
   
 ### DSL Example
-```
+
+```groovy
 job('Example Job Name') {
     description 'Example description'
     configure { project ->
@@ -54,17 +55,10 @@ job('Example Job Name') {
 }
 ```
 
-## Developer instructions
-Install Maven and JDK. This was last build with Maven 3.2.5 and OpenJDK 1.7.0_75 on KUbuntu 14.04.
-
-Run unit tests
-
-`mvn test`
-
-Create an HPI file to install in Jenkins (HPI file will be in target/slack.hpi).
-
-`mvn package`
-
 ## Documentation
+
 You may find useful below link if you like to contribute and add new feature:
-  - [actionable messages](https://docs.microsoft.com/en-us/outlook/actionable-messages/)
+- [Office 365 Connectors for Microsoft Teams](https://docs.microsoft.com/pl-pl/microsoftteams/platform/concepts/connectors/connectors)
+- [Actionable messages](https://docs.microsoft.com/en-us/outlook/actionable-messages/)
+- [Adding connector to Microsoft Teams](https://docs.microsoft.com/pl-pl/microsoftteams/platform/concepts/connectors/connectors-using)
+- [Office365 test dev account](https://developer.microsoft.com/office/dev-program)
