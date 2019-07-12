@@ -29,7 +29,7 @@ Plugin is used to send actionable messages in [Outlook](http://outlook.com), [Of
 ## Jenkins Instructions
 
 1. Install this plugin on your Jenkins server
-1. Configure it in your Jenkins job and add webhook URL obtained from office 365 connector.
+2. Configure it in your Jenkins job and add webhook URL obtained from office 365 connector.
   
 ## Examples
 

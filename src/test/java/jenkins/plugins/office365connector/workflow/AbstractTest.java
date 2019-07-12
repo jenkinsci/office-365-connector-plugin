@@ -8,10 +8,12 @@ import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Arrays;
 
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
+import hudson.model.Cause;
 import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.Result;
@@ -33,11 +35,12 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 @PrepareForTest({DisplayURLProvider.class})
 public abstract class AbstractTest {
 
+    private static final String PARENT_JOB_NAME = "Parent project";
+
     protected AbstractBuild run;
     protected HttpWorkerAnswer workerAnswer;
 
-    protected void mockFailedResult() {
-        Result lastResult = Result.FAILURE;
+    protected void mockResult(Result lastResult) {
         when(run.getResult()).thenReturn(lastResult);
 
         AbstractBuild previousBuild = mock(AbstractBuild.class);
@@ -74,17 +77,27 @@ public abstract class AbstractTest {
         } catch (IOException | InterruptedException e) {
             throw new IllegalArgumentException(e);
         }
-        when(envVars.expand(ClassicDisplayURLProviderBuilder.URL_TEMPLATE)).thenReturn(ClassicDisplayURLProviderBuilder.URL_TEMPLATE);
+        when(envVars.expand(ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE)).thenReturn(ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE);
     }
 
     protected Job mockJob(String jobName) {
+        return mockJob(jobName, PARENT_JOB_NAME);
+    }
+
+    protected Job mockJob(String jobName, String parentJobName) {
         Job job = mock(Job.class);
         ItemGroup itemGroup = mock(ItemGroup.class);
-        when(itemGroup.getFullDisplayName()).thenReturn("Parent project");
+        when(itemGroup.getFullDisplayName()).thenReturn(parentJobName);
         when(job.getParent()).thenReturn(itemGroup);
         when(job.getFullDisplayName()).thenReturn(jobName);
 
         return job;
+    }
+
+    protected void mockCause(String causeMessage) {
+        Cause cause = mock(Cause.class);
+        when(cause.getShortDescription()).thenReturn(causeMessage);
+        when(run.getCauses()).thenReturn(Arrays.asList(cause));
     }
 
     protected void mockTokenMacro(String evaluatedValue) {
