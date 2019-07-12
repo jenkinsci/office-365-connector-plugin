@@ -56,6 +56,7 @@ public class ActionableBuilder {
         potentialActions.add(new PotentialAction(viewHeader, urlString));
     }
 
+    // support for https://wiki.jenkins.io/display/JENKINS/GitHub+Branch+Source+Plugin
     private void pullRequestActionable() {
         Job job = run.getParent();
         SCMHead head = SCMHead.HeadByItem.findHead(job);

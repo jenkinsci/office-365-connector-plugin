@@ -1,8 +1,4 @@
 <?jelly escape-by-default='true'?>
 <div>
-    This plugin from
-    <a href="http://www.microsoft.com">Microsoft Corp.</a>
-    allows sending running Jobs status notifications.
-    <br/>
-    <b>Now with compact message that collects only the most interesting facts!</b>
+    Sends jobs status notifications to Microsoft Teams or Outlook.
 </div>
