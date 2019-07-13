@@ -17,7 +17,11 @@ Plugin is used to send actionable messages in [Outlook](http://outlook.com), [Of
 ![Configuration](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/config.png)
 
 ### Microsoft Teams
+#### With Jenkins plugin
 ![Teams](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/teams.png)
+
+#### With generic webhook connection
+![Webhook](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/webhook.png)
 
 ### Microsoft Outlook
 ![Outlook](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/outlook.png)
@@ -27,8 +31,9 @@ Plugin is used to send actionable messages in [Outlook](http://outlook.com), [Of
 1. Install this plugin on your Jenkins server
 1. Configure it in your Jenkins job and add webhook URL obtained from office 365 connector.
   
-### DSL Example
+## Examples
 
+### DSL
 ```groovy
 job('Example Job Name') {
     description 'Example description'
@@ -55,10 +60,69 @@ job('Example Job Name') {
 }
 ```
 
+### Pipeline properties
+```groovy
+pipeline {
+
+    agent any
+
+    options {
+        office365ConnectorWebhooks([[
+                    startNotification: true,
+                        url: 'https://outlook.office.com/webhook/123456...'
+            ]]
+        )
+    }
+
+    stages {
+        stage('Init') {
+            steps {
+                echo 'Starting!'
+            }
+        }
+    }
+}
+```
+
+### Pipeline step
+```groovy
+stage('Upload') {
+    steps {
+        // some instructions here
+        office365ConnectorSend webhookUrl: 'https://outlook.office.com/webhook/123456...',
+            message: 'Application has been [deployed](https://uat.green.biz)',
+            status: 'Success'            
+    }
+}
+```
+
+### Pipeline post section
+```groovy
+pipeline {
+
+    agent any
+
+    stages {
+        stage('Init') {
+            steps {
+                echo 'Hello!'
+            }
+        }
+    }
+
+    post {
+        failure {
+            office365ConnectorSend webhookUrl: "https://outlook.office.com/webhook/123456..."
+        }
+    }
+}
+```
+
 ## Documentation
 
 You may find useful below link if you like to contribute and add new feature:
 - [Office 365 Connectors for Microsoft Teams](https://docs.microsoft.com/pl-pl/microsoftteams/platform/concepts/connectors/connectors)
 - [Actionable messages](https://docs.microsoft.com/en-us/outlook/actionable-messages/)
+- [Support for Markdown](https://docs.microsoft.com/en-us/flow/approvals-markdown-support)
 - [Adding connector to Microsoft Teams](https://docs.microsoft.com/pl-pl/microsoftteams/platform/concepts/connectors/connectors-using)
 - [Office365 test dev account](https://developer.microsoft.com/office/dev-program)
