@@ -99,6 +99,7 @@ public final class Office365ConnectorWebhookNotifier {
 
     public void sendBuildNotification(StepParameters stepParameters) {
         Card card;
+        // TODO: improve this logic as the user may send any data via pipeline step
         if (StringUtils.isNotBlank(stepParameters.getMessage())) {
             card = cardBuilder.createBuildMessageCard(stepParameters);
         } else if (StringUtils.equalsIgnoreCase(stepParameters.getStatus(), "started")) {
