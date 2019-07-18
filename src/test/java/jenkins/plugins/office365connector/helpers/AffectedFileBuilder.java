@@ -18,11 +18,9 @@ import org.mockito.stubbing.Answer;
  */
 public class AffectedFileBuilder {
 
-    public static final String singleAuthor = "Mike";
-
     public static final String[] sampleAuthors = {"Peter", "George Great", "Ann, the Queen"};
 
-    public List<ChangeLogSet> singleChangeLog(AbstractBuild run) {
+    public List<ChangeLogSet> singleChangeLog(AbstractBuild run, String singleAuthor) {
         ChangeLogSet.Entry entryMike = mockEntry(singleAuthor);
 
         when(entryMike.getAffectedFiles()).thenAnswer(createAnswer(Arrays.asList(new File(), new File())));
@@ -52,7 +50,7 @@ public class AffectedFileBuilder {
         return entry;
     }
 
-    private User mockUser(String userName) {
+    public static User mockUser(String userName) {
         User user = mock(User.class);
         when(user.toString()).thenReturn(userName);
         return user;

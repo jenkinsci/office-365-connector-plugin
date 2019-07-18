@@ -73,6 +73,7 @@ public class FactsBuilder {
         List<Cause> causes = run.getCauses();
 
         String joinedCauses = causes.stream()
+                // TODO: for single cause skip this dot as the separator
                 .map(cause -> cause.getShortDescription().concat("."))
                 .collect(Collectors.joining(" "));
         addFact(NAME_REMARKS, joinedCauses);

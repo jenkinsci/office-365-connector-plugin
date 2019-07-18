@@ -4,11 +4,9 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import java.util.Arrays;
 import java.util.List;
 
 import hudson.model.AbstractBuild;
-import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -38,6 +36,7 @@ public class SampleIT extends AbstractTest {
     private static final int BUILD_NUMBER = 167;
     private static final long START_TIME = 1508617305000L;
     private static final long DURATION = 1000 * 60 * 60;
+    private static final String DEVELOPER = "Mike";
 
     private static final String FORMATTED_START_TIME;
     private static final String FORMATTED_COMPLETED_TIME;
@@ -53,6 +52,7 @@ public class SampleIT extends AbstractTest {
         mockListener();
 
         run = mockRun();
+        mockCause(CAUSE_DESCRIPTION);
 
         mockDisplayURLProvider(JOB_NAME, BUILD_NUMBER);
         mockEnvironment();
@@ -75,16 +75,11 @@ public class SampleIT extends AbstractTest {
         WebhookJobProperty property = new WebhookJobProperty(WebhookBuilder.sampleWebhookWithAllStatuses());
         when(job.getProperty(WebhookJobProperty.class)).thenReturn(property);
 
-        // remarks
-        Cause cause = mock(Cause.class);
-        when(cause.getShortDescription()).thenReturn(CAUSE_DESCRIPTION);
-        when(run.getCauses()).thenReturn(Arrays.asList(cause));
-
         return run;
     }
 
     private void mockGetChangeSets() {
-        List<ChangeLogSet> files = new AffectedFileBuilder().singleChangeLog(run);
+        List<ChangeLogSet> files = new AffectedFileBuilder().singleChangeLog(run, DEVELOPER);
         when(run.getChangeSets()).thenReturn(files);
     }
 
@@ -140,7 +135,7 @@ public class SampleIT extends AbstractTest {
     public void validateCompletedRequest_OnRepeatedFailure() {
 
         // given
-        mockFailedResult();
+        mockResult(Result.FAILURE);
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
 
         // when

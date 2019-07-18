@@ -13,7 +13,7 @@ import jenkins.plugins.office365connector.model.Macro;
 public class WebhookBuilder {
 
     public static List<Webhook> sampleWebhookWithAllStatuses() {
-        Webhook webhook = new Webhook(ClassicDisplayURLProviderBuilder.URL_TEMPLATE);
+        Webhook webhook = new Webhook(ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE);
 
         enableAllStatuses(webhook);
         return Arrays.asList(webhook);
@@ -28,7 +28,7 @@ public class WebhookBuilder {
     }
 
     private static Webhook createWebhook(String template, String value) {
-        Webhook webhook = new Webhook(ClassicDisplayURLProviderBuilder.URL_TEMPLATE);
+        Webhook webhook = new Webhook(ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE);
 
         enableAllStatuses(webhook);
 

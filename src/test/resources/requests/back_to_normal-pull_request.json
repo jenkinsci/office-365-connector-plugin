@@ -1,0 +1,55 @@
+{
+    "summary": "Damian Szczepanik » hook » PR-1: Build #3 Back to Normal",
+    "themeColor": "#729FCF",
+    "sections": [
+        {
+            "markdown": true,
+            "facts": [
+                {
+                    "name": "Status",
+                    "value": "Back to Normal"
+                },
+                {
+                    "name": "Remarks",
+                    "value": "Branch indexing."
+                },
+                {
+                    "name": "Culprits",
+                    "value": "damian"
+                },
+                {
+                    "name": "Developers",
+                    "value": "damian"
+                },
+                {
+                    "name": "Pull Request Title",
+                    "value": "test pull request"
+                },
+                {
+                    "name": "Pull Request Author",
+                    "value": "damianszczepanik (Damian Szczepanik)"
+                }
+            ],
+            "activityTitle": "Update from Damian Szczepanik » hook » PR-1.",
+            "activitySubtitle": "Latest status of build #3"
+        }
+    ],
+    "potentialAction": [
+        {
+            "@context": "http://schema.org",
+            "@type": "ViewAction",
+            "name": "View Pull Request",
+            "target": [
+                "https://github.com/damianszczepanik/hook/pull/1"
+            ]
+        },
+        {
+            "@context": "http://schema.org",
+            "@type": "ViewAction",
+            "name": "View Build",
+            "target": [
+                "http://localhost:8080/job/GitHub%20Branch%20Source/job/hook/job/PR-1/3/display/redirect"
+            ]
+        }
+    ]
+}

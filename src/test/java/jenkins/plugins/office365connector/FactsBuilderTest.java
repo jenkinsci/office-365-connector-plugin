@@ -16,11 +16,9 @@ import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.CauseBuilder;
 import jenkins.plugins.office365connector.model.Fact;
-import jenkins.scm.RunWithSCM;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 @PrepareForTest(Run.class)
@@ -172,7 +170,7 @@ public class FactsBuilderTest {
     public void addDevelopers_AddsFactWithSortedAuthors() {
 
         // given
-        AbstractBuild run = mock(AbstractBuild.class, Mockito.withSettings().extraInterfaces(RunWithSCM.class));
+        AbstractBuild run = mock(AbstractBuild.class);
         List<ChangeLogSet> files = new AffectedFileBuilder().sampleChangeLogs(run);
         when(run.getChangeSets()).thenReturn(files);
 
