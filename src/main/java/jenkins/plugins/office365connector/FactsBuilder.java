@@ -44,6 +44,7 @@ public class FactsBuilder {
     final static String NAME_FAILING_SINCE_BUILD = "Failing since";
 
     final static String VALUE_STATUS_STARTED = "Started";
+    // TODO: Running is not needed as it means same as Started
     final static String VALUE_STATUS_RUNNING = "Running";
 
     private final List<Fact> facts = new ArrayList<>();

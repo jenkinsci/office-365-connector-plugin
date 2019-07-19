@@ -167,6 +167,7 @@ public class CardBuilder {
             factsBuilder.addStatusRunning();
         }
 
+        // TODO: activityTitle and summary should be normalized over card creation
         String activityTitle = "Message from " + jobName + ", Build " + getRunName();
         Section section = new Section(activityTitle, stepParameters.getMessage(), factsBuilder.collect());
 

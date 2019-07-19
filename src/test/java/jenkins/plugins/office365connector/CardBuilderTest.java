@@ -3,24 +3,23 @@ package jenkins.plugins.office365connector;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 import hudson.model.AbstractBuild;
 import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.Result;
+import hudson.model.Run;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.AbstractTest;
+import jenkins.plugins.office365connector.workflow.StepParameters;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(CardBuilder.class)
 public class CardBuilderTest extends AbstractTest {
 
     private static final String JOB_DISPLAY_NAME = "myJobDisplayName";
@@ -42,11 +41,6 @@ public class CardBuilderTest extends AbstractTest {
         when(run.getParent()).thenReturn(job);
 
         mockDisplayURLProvider(JOB_DISPLAY_NAME, BUILD_NUMBER);
-
-        ActionableBuilder mockActionableBuilder = mock(ActionableBuilder.class);
-        whenNew(ActionableBuilder.class).withAnyArguments().thenReturn(mockActionableBuilder);
-        FactsBuilder mockFactsBuilder = mock(FactsBuilder.class);
-        whenNew(FactsBuilder.class).withAnyArguments().thenReturn(mockFactsBuilder);
         cardBuilder = new CardBuilder(run);
     }
 
@@ -86,6 +80,85 @@ public class CardBuilderTest extends AbstractTest {
         Section section = card.getSections().get(0);
         assertThat(section.getActivityTitle()).isEqualTo("Update from " + JOB_DISPLAY_NAME + ".");
     }
+
+    @Test
+    public void createCompletedCard_OnFirstFailure_ReturnsCard() {
+
+        // given
+        Result result = Result.FAILURE;
+        when(run.getResult()).thenReturn(result);
+
+        // when
+        Card card = cardBuilder.createCompletedCard();
+
+        // then
+        assertThat(card.getSections()).hasSize(1);
+        assertThat(card.getThemeColor()).isEqualTo(result.color.getHtmlBaseColor());
+        Section section = card.getSections().get(0);
+        assertThat(section.getActivityTitle()).isEqualTo("Update from " + JOB_DISPLAY_NAME + ".");
+    }
+
+    @Test
+    public void createCompletedCard_OnSecondFailure_AddsFailingSinceFact() {
+
+        // given
+        Result result = Result.FAILURE;
+        when(run.getResult()).thenReturn(result);
+
+        AbstractBuild previousBuild = mock(AbstractBuild.class);
+        when(previousBuild.getResult()).thenReturn(Result.FAILURE);
+        when(run.getPreviousBuild()).thenReturn(previousBuild);
+
+        Run previousNotFailedBuild = mock(Run.class);
+        int previousNotFailedBuildNumber = BUILD_NUMBER - 3;
+        when(previousNotFailedBuild.getNumber()).thenReturn(previousNotFailedBuildNumber);
+        when(previousNotFailedBuild.getNextBuild()).thenReturn(previousNotFailedBuild);
+        when(run.getPreviousNotFailedBuild()).thenReturn(previousNotFailedBuild);
+
+        // when
+        Card card = cardBuilder.createCompletedCard();
+
+        // then
+        assertThat(card.getSections()).hasSize(1);
+        assertThat(card.getThemeColor()).isEqualTo(result.color.getHtmlBaseColor());
+        Section section = card.getSections().get(0);
+        assertThat(section.getActivityTitle()).isEqualTo("Update from " + JOB_DISPLAY_NAME + ".");
+        FactAssertion.assertThatLast(section.getFacts(), 2)
+                .hasName(FactsBuilder.NAME_FAILING_SINCE_BUILD)
+                .hasValue("build #" + previousNotFailedBuildNumber);
+    }
+
+    @Test
+    public void createCompletedCard_OnFirstFailure_SkipsFailingSinceFact() {
+
+        // given
+        Result result = Result.FAILURE;
+        when(run.getResult()).thenReturn(result);
+
+        AbstractBuild previousBuild = mock(AbstractBuild.class);
+        when(previousBuild.getResult()).thenReturn(Result.ABORTED);
+        when(run.getPreviousBuild()).thenReturn(previousBuild);
+
+        Run previousNotFailedBuild = mock(Run.class);
+        int previousNotFailedBuildNumber = BUILD_NUMBER - 3;
+        when(previousNotFailedBuild.getNumber()).thenReturn(previousNotFailedBuildNumber);
+        when(previousNotFailedBuild.getNextBuild()).thenReturn(previousNotFailedBuild);
+        when(run.getPreviousNotFailedBuild()).thenReturn(previousNotFailedBuild);
+
+        // when
+        Card card = cardBuilder.createCompletedCard();
+
+        // then
+        assertThat(card.getSections()).hasSize(1);
+        assertThat(card.getThemeColor()).isEqualTo(result.color.getHtmlBaseColor());
+        Section section = card.getSections().get(0);
+        assertThat(section.getActivityTitle()).isEqualTo("Update from " + JOB_DISPLAY_NAME + ".");
+        FactAssertion.assertThatLast(section.getFacts(), 1);
+        FactAssertion.assertThat(section.getFacts())
+                .hasName(FactsBuilder.NAME_STATUS)
+                .hasValue("Build Failed");
+    }
+
 
     @Test
     public void calculateStatus_OnSuccess_ReturnsBackToNormal() {
@@ -261,7 +334,6 @@ public class CardBuilderTest extends AbstractTest {
         assertThat(status).isEqualTo("Repeated Failure");
     }
 
-
     @Test
     public void calculateSummary_OnAborted_ReturnsAborted() {
 
@@ -305,5 +377,72 @@ public class CardBuilderTest extends AbstractTest {
 
         // then
         assertThat(status).isEqualTo(lastResult.toString());
+    }
+
+
+    @Test
+    public void createBuildMessageCard_ReturnsCard() {
+
+        // given
+        String message = "myMessage";
+        String webhookUrl = "myHookUrl";
+        String status = Result.SUCCESS.toString();
+        String color = "blue";
+
+        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, color);
+
+        // then
+        Card card = cardBuilder.createBuildMessageCard(stepParameters);
+
+        // then
+        assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER + " Status");
+        assertThat(card.getSections()).hasSize(1);
+        assertThat(card.getThemeColor()).isEqualTo(color);
+        FactAssertion.assertThat(card.getSections().get(0).getFacts())
+                .hasName(FactsBuilder.NAME_STATUS).hasValue(status);
+    }
+
+    @Test
+    public void createBuildMessageCard_OnMissingStatus_ReturnsCard() {
+
+        // given
+        String message = "myMessage";
+        String webhookUrl = "myHookUrl";
+        String status = null;
+        String color = "blue";
+
+        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, color);
+
+        // then
+        Card card = cardBuilder.createBuildMessageCard(stepParameters);
+
+        // then
+        assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER + " Status");
+        assertThat(card.getSections()).hasSize(1);
+        assertThat(card.getThemeColor()).isEqualTo(color);
+        FactAssertion.assertThat(card.getSections().get(0).getFacts())
+                .hasName(FactsBuilder.NAME_STATUS).hasValue("Running");
+    }
+
+    @Test
+    public void createBuildMessageCard_OnMissingColor_ReturnsCard() {
+
+        // given
+        String message = "myMessage";
+        String webhookUrl = "myHookUrl";
+        String status = Result.ABORTED.toString();
+        String color = null;
+
+        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, color);
+
+        // then
+        Card card = cardBuilder.createBuildMessageCard(stepParameters);
+
+        // then
+        assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER + " Status");
+        assertThat(card.getSections()).hasSize(1);
+        assertThat(card.getThemeColor()).isEqualTo("3479BF");
+        FactAssertion.assertThat(card.getSections().get(0).getFacts())
+                .hasName(FactsBuilder.NAME_STATUS).hasValue(status);
     }
 }

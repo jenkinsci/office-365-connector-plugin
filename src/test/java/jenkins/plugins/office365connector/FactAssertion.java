@@ -21,6 +21,11 @@ public class FactAssertion {
         return new FactAssertion(facts.get(0));
     }
 
+    public static FactAssertion assertThatLast(List<Fact> facts, int size) {
+        Assertions.assertThat(facts).hasSize(size);
+        return new FactAssertion(facts.get(size - 1));
+    }
+
     public FactAssertion hasName(String name) {
         Assertions.assertThat(fact.getName()).isEqualTo(name);
         return this;
