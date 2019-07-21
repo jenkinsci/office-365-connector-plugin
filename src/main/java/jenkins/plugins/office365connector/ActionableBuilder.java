@@ -49,14 +49,14 @@ public class ActionableBuilder {
     }
 
     private void buildViewBuild() {
-        String urlString = DisplayURLProvider.get().getRunURL(run);
+        String urlToJob = DisplayURLProvider.get().getRunURL(run);
         String build = Messages.Office365ConnectorWebhookNotifier_BuildPronoun();
         String viewHeader = Messages.Office365ConnectorWebhookNotifier_ViewHeader(build);
 
-        potentialActions.add(new PotentialAction(viewHeader, urlString));
+        potentialActions.add(new PotentialAction(viewHeader, urlToJob));
     }
 
-    // support for https://wiki.jenkins.io/display/JENKINS/GitHub+Branch+Source+Plugin
+    // support for pull requests such as https://wiki.jenkins.io/display/JENKINS/GitHub+Branch+Source+Plugin
     private void pullRequestActionable() {
         Job job = run.getParent();
         SCMHead head = SCMHead.HeadByItem.findHead(job);
@@ -80,11 +80,12 @@ public class ActionableBuilder {
             if (cma != null) {
                 String contributor = cma.getContributor();
                 String contributorDisplayName = cma.getContributorDisplayName();
-                String author = StringUtils.defaultIfBlank(cma.getContributor(), cma.getContributorDisplayName());
-                if (StringUtils.isNotBlank(contributor) && StringUtils.isNotBlank(contributorDisplayName))
-                    author = String.format("%s (%s)", cma.getContributor(), cma.getContributorDisplayName());
 
-                factsBuilder.addFact(authorHeader, author);
+                if (StringUtils.isNotBlank(contributor) && StringUtils.isNotBlank(contributorDisplayName)) {
+                    factsBuilder.addFact(authorHeader, String.format("%s (%s)", contributor, contributorDisplayName));
+                } else {
+                    factsBuilder.addFact(authorHeader, StringUtils.defaultIfBlank(contributor, contributorDisplayName));
+                }
             }
         }
     }
