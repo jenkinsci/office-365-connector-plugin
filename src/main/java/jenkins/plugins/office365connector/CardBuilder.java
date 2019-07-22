@@ -57,7 +57,8 @@ public class CardBuilder {
 
     public Card createCompletedCard() {
         String jobName = getDisplayName();
-        // result might be null only for ongoing job - check documentation of Result.getCompletedResult()
+        // result might be null only for ongoing job - check documentation of Run.getCompletedResult()
+        // but based on issue #133 it may happen that result for completed job is null
         Result lastResult = getCompletedResult(run);
 
         Run previousBuild = run.getPreviousBuild();
@@ -67,6 +68,7 @@ public class CardBuilder {
         boolean isRepeatedFailure = isRepeatedFailure(previousResult, lastNotFailedBuild);
         String summary = String.format("%s: Build %s %s", jobName, getRunName(),
                 calculateSummary(lastResult, previousResult, isRepeatedFailure));
+        String status = calculateStatus(lastResult, previousResult, isRepeatedFailure);
 
         if (lastResult == Result.FAILURE) {
             Run failingSinceBuild = getFailingSinceBuild(lastNotFailedBuild);
@@ -75,7 +77,7 @@ public class CardBuilder {
                 factsBuilder.addFailingSinceBuild(failingSinceBuild.getNumber());
             }
         }
-        factsBuilder.addStatus(calculateStatus(lastResult, previousResult, isRepeatedFailure));
+        factsBuilder.addStatus(status);
         factsBuilder.addRemarks();
         factsBuilder.addCulprits();
         factsBuilder.addDevelopers();
@@ -156,7 +158,7 @@ public class CardBuilder {
     // this is tricky way to avoid findBugs NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE
     // which is not true in that case
     private Result getCompletedResult(Run run) {
-        return run.getResult();
+        return run.getResult() == null ? Result.SUCCESS : run.getResult();
     }
 
     public Card createBuildMessageCard(StepParameters stepParameters) {
