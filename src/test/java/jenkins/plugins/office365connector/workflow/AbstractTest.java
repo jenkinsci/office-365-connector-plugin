@@ -55,7 +55,7 @@ public abstract class AbstractTest {
         when(run.getPreviousNotFailedBuild()).thenReturn(lastNotFailedBuild);
     }
 
-    protected TaskListener mockListener() {
+    public static TaskListener mockListener() {
         TaskListener listener = mock(TaskListener.class);
 
         PrintStream stream = mock(PrintStream.class);
@@ -100,7 +100,7 @@ public abstract class AbstractTest {
         when(run.getCauses()).thenReturn(Arrays.asList(cause));
     }
 
-    protected void mockTokenMacro(String evaluatedValue) {
+    public static void mockTokenMacro(String evaluatedValue) {
         mockStatic(FilePath.class);
         mockStatic(TokenMacro.class);
         try {

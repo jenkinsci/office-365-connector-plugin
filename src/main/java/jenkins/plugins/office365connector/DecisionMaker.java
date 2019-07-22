@@ -32,13 +32,13 @@ import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 public class DecisionMaker {
 
     private final Run run;
-    private final Result previousResult;
+    private final TaskListener taskListener;
 
-    private final TaskListener listener;
+    private final Result previousResult;
 
     public DecisionMaker(Run run, TaskListener listener) {
         this.run = run;
-        this.listener = listener;
+        this.taskListener = listener;
 
         Run previousBuild = run.getPreviousBuild();
         previousResult = previousBuild != null ? previousBuild.getResult() : Result.SUCCESS;
@@ -74,7 +74,8 @@ public class DecisionMaker {
     public boolean isStatusMatched(Webhook webhook) {
         Result result = run.getResult();
 
-        boolean statusMatched = isNotifyAborted(result, webhook)
+        boolean statusMatched
+                = isNotifyAborted(result, webhook)
                 || isNotifyFailure(result, webhook)
                 || isNotifyRepeatedFailure(result, webhook)
                 || isNotifyNotBuilt(result, webhook)
@@ -89,48 +90,64 @@ public class DecisionMaker {
     }
 
     private boolean isNotifyAborted(Result result, Webhook webhook) {
-        return result == Result.ABORTED
-                && webhook.isNotifyAborted();
+        return webhook.isNotifyAborted()
+                && result == Result.ABORTED;
     }
 
     private boolean isNotifyFailure(Result result, Webhook webhook) {
-        return result == Result.FAILURE && previousResult != Result.FAILURE
-                && webhook.isNotifyFailure();
+        return webhook.isNotifyFailure()
+                && result == Result.FAILURE
+                && previousResult != Result.FAILURE;
     }
 
     private boolean isNotifyRepeatedFailure(Result result, Webhook webhook) {
-        return result == Result.FAILURE && previousResult == Result.FAILURE
-                && webhook.isNotifyRepeatedFailure();
+        return webhook.isNotifyRepeatedFailure()
+                && result == Result.FAILURE
+                && previousResult == Result.FAILURE;
     }
 
     private boolean isNotifyNotBuilt(Result result, Webhook webhook) {
-        return result == Result.NOT_BUILT
-                && webhook.isNotifyNotBuilt();
+        return webhook.isNotifyNotBuilt()
+                && result == Result.NOT_BUILT;
     }
 
     private boolean isNotifyBackToNormal(Result result, Webhook webhook) {
+
+        if (!webhook.isNotifyBackToNormal() || result != Result.SUCCESS) {
+            return false;
+        }
+
+        Run previousBuild = findLastCompletedBuild();
+        if (previousBuild == null) {
+            return false;
+        } else {
+            Result previousResult = previousBuild.getResult();
+            return (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE);
+        }
+    }
+
+    private Run findLastCompletedBuild() {
         Run previousBuild = run.getPreviousBuild();
-        while (null != previousBuild && previousBuild.getResult() == Result.ABORTED) {
+        while (previousBuild != null && previousBuild.getResult() == Result.ABORTED) {
             previousBuild = previousBuild.getPreviousCompletedBuild();
         }
-        return result == Result.SUCCESS && previousBuild != null && (previousBuild.getResult() == Result.FAILURE || previousBuild.getResult() == Result.UNSTABLE)
-                && webhook.isNotifyBackToNormal();
+        return previousBuild;
     }
 
     private boolean isNotifySuccess(Result result, Webhook webhook) {
-        return result == Result.SUCCESS
-                && webhook.isNotifySuccess();
+        return webhook.isNotifySuccess()
+                && result == Result.SUCCESS;
     }
 
     private boolean isNotifyUnstable(Result result, Webhook webhook) {
-        return result == Result.UNSTABLE
-                && webhook.isNotifyUnstable();
+        return webhook.isNotifyUnstable()
+                && result == Result.UNSTABLE;
     }
 
     private String evaluateMacro(String template) {
         try {
             File workspace = run.getRootDir();
-            return TokenMacro.expandAll(run, new FilePath(workspace), listener, template);
+            return TokenMacro.expandAll(run, new FilePath(workspace), taskListener, template);
         } catch (InterruptedException | IOException | MacroEvaluationException e) {
             throw new IllegalArgumentException(e);
         }
@@ -140,6 +157,6 @@ public class DecisionMaker {
      * Helper method for logging.
      */
     private void log(String format, Object... args) {
-        this.listener.getLogger().println("[Office365connector] " + String.format(format, args));
+        this.taskListener.getLogger().println("[Office365connector] " + String.format(format, args));
     }
 }
