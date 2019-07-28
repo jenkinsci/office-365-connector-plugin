@@ -20,8 +20,11 @@ import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.HttpWorker;
+import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.HttpWorkerAnswer;
+import jenkins.plugins.office365connector.helpers.Office365ConnectorWebhookNotifierAnswer;
+import jenkins.plugins.office365connector.utils.TimeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
@@ -32,13 +35,14 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-@PrepareForTest({DisplayURLProvider.class})
+@PrepareForTest({DisplayURLProvider.class, Run.class, TimeUtils.class})
 public abstract class AbstractTest {
 
     private static final String PARENT_JOB_NAME = "Parent project";
 
     protected AbstractBuild run;
     protected HttpWorkerAnswer workerAnswer;
+    protected Office365ConnectorWebhookNotifierAnswer notifierAnswer;
 
     protected void mockResult(Result lastResult) {
         when(run.getResult()).thenReturn(lastResult);
@@ -114,6 +118,15 @@ public abstract class AbstractTest {
         workerAnswer = new HttpWorkerAnswer();
         try {
             whenNew(HttpWorker.class).withAnyArguments().thenAnswer(workerAnswer);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    protected void mockOffice365ConnectorWebhookNotifier() {
+        notifierAnswer = new Office365ConnectorWebhookNotifierAnswer();
+        try {
+            whenNew(Office365ConnectorWebhookNotifier.class).withAnyArguments().thenAnswer(notifierAnswer);
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }

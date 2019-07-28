@@ -2,14 +2,13 @@ package jenkins.plugins.office365connector.workflow;
 
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-
 import com.google.common.collect.ImmutableSet;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
+import javax.annotation.Nonnull;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.utils.FormUtils;
 import org.jenkinsci.Symbol;
@@ -117,7 +116,7 @@ public class Office365ConnectorSendStep extends Step {
                     getContext().get(Run.class),
                     getContext().get(TaskListener.class)
             );
-            notifier.sendBuildNotification(stepParameters);
+            notifier.sendBuildStepNotification(stepParameters);
             return null;
         }
     }

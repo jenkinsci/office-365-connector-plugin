@@ -1,15 +1,16 @@
-package jenkins.plugins.office365connector;
+package jenkins.plugins.office365connector.workflow;
 
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import javax.annotation.Nonnull;
+import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 
 /**
  * Office365ConnectorBuildListener {@link RunListener}.
  * <p>
- * <p>When a build starts, the {@link #onStarted(Run, TaskListener)} method will be invoked. And
+ * When a build starts, the {@link #onStarted(Run, TaskListener)} method will be invoked. And
  * when a build finishes, the {@link #onCompleted(Run, TaskListener)} method will be invoked.
  *
  * @author Srivardhan Hebbar
@@ -26,7 +27,7 @@ public class Office365ConnectorBuildListener extends RunListener<Run> {
      *                 operation.
      */
     @Override
-    public void onStarted(Run run, final TaskListener listener) {
+    public void onStarted(Run run, TaskListener listener) {
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, listener);
         notifier.sendBuildStartedNotification(false);
     }
@@ -39,7 +40,7 @@ public class Office365ConnectorBuildListener extends RunListener<Run> {
      *                 operation.
      */
     @Override
-    public void onCompleted(final Run run, @Nonnull final TaskListener listener) {
+    public void onCompleted(Run run, @Nonnull TaskListener listener) {
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, listener);
         notifier.sendBuildCompletedNotification();
     }

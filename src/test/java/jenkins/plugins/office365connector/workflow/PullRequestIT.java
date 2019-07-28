@@ -11,7 +11,6 @@ import java.util.List;
 import hudson.model.AbstractBuild;
 import hudson.model.Job;
 import hudson.model.Result;
-import hudson.model.Run;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.FileUtils;
@@ -37,7 +36,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @author Damian Szczepanik (damianszczepanik@github)
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Office365ConnectorWebhookNotifier.class, Run.class, TimeUtils.class, SCMHead.HeadByItem.class})
+@PrepareForTest({Office365ConnectorWebhookNotifier.class, SCMHead.HeadByItem.class})
 public class PullRequestIT extends AbstractTest {
 
     private static final String PARENT_JOB_NAME = "Damian Szczepanik";
