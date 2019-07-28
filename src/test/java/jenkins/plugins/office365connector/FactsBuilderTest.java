@@ -112,7 +112,7 @@ public class FactsBuilderTest {
     }
 
     @Test
-    public void addCulprits_AddsFact() {
+    public void addCommitters_AddsFact() {
 
         // given
         FactsBuilder factBuilder = new FactsBuilder(run);
@@ -124,14 +124,14 @@ public class FactsBuilderTest {
         when(run.getCulprits()).thenReturn(users);
 
         // when
-        factBuilder.addCulprits();
+        factBuilder.addCommitters();
 
         // then
         List<Fact> facts = factBuilder.collect();
         assertThat(facts).hasSize(1);
 
         Fact fact = facts.get(0);
-        assertThat(fact.getName()).isEqualTo(FactsBuilder.CULPRITS);
+        assertThat(fact.getName()).isEqualTo(FactsBuilder.COMMITTERS);
         assertThat(fact.getValue())
                 .hasSize(one.getFullName().length() + two.getFullName().length() + 2)
                 // depends on JVM implementation 'one' could be listed on the first or last position
@@ -140,27 +140,27 @@ public class FactsBuilderTest {
     }
 
     @Test
-    public void addCulprits_WithoutUser_AddsNoFact() {
+    public void addCommitters_WithoutUser_AddsNoFact() {
 
         // given
         FactsBuilder factBuilder = new FactsBuilder(run);
 
         // when
-        factBuilder.addCulprits();
+        factBuilder.addCommitters();
 
         // then
         assertThat(factBuilder.collect()).isEmpty();
     }
 
     @Test
-    public void addCulprits_OnNoSCMRun_SkipsAdding() {
+    public void addCommitters_OnNoSCMRun_SkipsAdding() {
 
         // given
         Run run = mock(Run.class);
         FactsBuilder factsBuilder = new FactsBuilder(run);
 
         // when
-        factsBuilder.addCulprits();
+        factsBuilder.addCommitters();
 
         // then
         assertThat(factsBuilder.collect()).isEmpty();

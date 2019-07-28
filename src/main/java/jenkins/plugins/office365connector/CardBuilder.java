@@ -39,7 +39,7 @@ public class CardBuilder {
     public Card createStartedCard() {
         factsBuilder.addStatusStarted();
         factsBuilder.addRemarks();
-        factsBuilder.addCulprits();
+        factsBuilder.addCommitters();
         factsBuilder.addDevelopers();
 
         String jobName = getDisplayName();
@@ -79,7 +79,7 @@ public class CardBuilder {
         }
         factsBuilder.addStatus(status);
         factsBuilder.addRemarks();
-        factsBuilder.addCulprits();
+        factsBuilder.addCommitters();
         factsBuilder.addDevelopers();
 
         String activityTitle = "Update from " + jobName + ".";

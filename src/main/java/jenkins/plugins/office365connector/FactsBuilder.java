@@ -38,7 +38,7 @@ public class FactsBuilder {
 
     public final static String NAME_STATUS = "Status";
     public final static String NAME_REMARKS = "Remarks";
-    final static String CULPRITS = "Culprits";
+    final static String COMMITTERS = "Committers";
     public final static String NAME_DEVELOPERS = "Developers";
 
     final static String NAME_FAILING_SINCE_BUILD = "Failing since";
@@ -80,17 +80,17 @@ public class FactsBuilder {
         addFact(NAME_REMARKS, joinedCauses);
     }
 
-    public void addCulprits() {
+    public void addCommitters() {
         if (!(run instanceof RunWithSCM)) {
             return;
         }
         RunWithSCM runWithSCM = (RunWithSCM) run;
         Set<User> authors = runWithSCM.getCulprits();
 
-        String joinedCulprits = authors.stream()
+        String joinedCommitters = authors.stream()
                 .map(User::getFullName)
                 .collect(Collectors.joining(", "));
-        addFact(CULPRITS, joinedCulprits);
+        addFact(COMMITTERS, joinedCommitters);
     }
 
     public void addDevelopers() {

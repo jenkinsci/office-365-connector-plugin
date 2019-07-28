@@ -59,7 +59,7 @@ public class PullRequestIT extends AbstractTest {
 
         run = mockRun();
         mockCause("Branch indexing");
-        mockCulprits();
+        mockCommitters();
 
         mockDisplayURLProvider();
         mockEnvironment();
@@ -86,7 +86,7 @@ public class PullRequestIT extends AbstractTest {
         return run;
     }
 
-    private void mockCulprits() {
+    private void mockCommitters() {
         User user = AffectedFileBuilder.mockUser(USER_NAME);
         when(user.getFullName()).thenReturn(USER_NAME);
 
