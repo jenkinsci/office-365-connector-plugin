@@ -13,6 +13,7 @@ import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.AbstractTest;
 import jenkins.plugins.office365connector.workflow.StepParameters;
+import mockit.Deencapsulation;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -377,6 +378,34 @@ public class CardBuilderTest extends AbstractTest {
 
         // then
         assertThat(status).isEqualTo(lastResult.toString());
+    }
+
+    @Test
+    public void getCompletedResult_ReturnsSuccess() {
+
+        // given
+        final Result result = Result.UNSTABLE;
+        Run run = mock(Run.class);
+        when(run.getResult()).thenReturn(result);
+
+        // when
+        Result completedResult = Deencapsulation.invoke(cardBuilder, "getCompletedResult", run);
+
+        // then
+        assertThat(completedResult).isEqualTo(result);
+    }
+
+    @Test
+    public void getCompletedResult_OnNullRun_ReturnsSuccess() {
+
+        // given
+        Run run = mock(Run.class);
+
+        // when
+        Result completedResult = Deencapsulation.invoke(cardBuilder, "getCompletedResult", run);
+
+        // then
+        assertThat(completedResult).isEqualTo(Result.SUCCESS);
     }
 
 
