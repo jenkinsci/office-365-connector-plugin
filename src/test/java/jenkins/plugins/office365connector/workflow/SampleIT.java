@@ -1,5 +1,6 @@
 package jenkins.plugins.office365connector.workflow;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -101,6 +102,7 @@ public class SampleIT extends AbstractTest {
 
         // then
         assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("started.json"));
+        assertThat(workerAnswer.getTimes()).isOne();
     }
 
     @Test
@@ -115,6 +117,7 @@ public class SampleIT extends AbstractTest {
 
         // then
         assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("completed-success.json"));
+        assertThat(workerAnswer.getTimes()).isOne();
     }
 
     @Test
@@ -129,6 +132,7 @@ public class SampleIT extends AbstractTest {
 
         // then
         assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("completed-failed.json"));
+        assertThat(workerAnswer.getTimes()).isOne();
     }
 
     @Test
@@ -143,5 +147,6 @@ public class SampleIT extends AbstractTest {
 
         // then
         assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("completed-repeated_failure.json"));
+        assertThat(workerAnswer.getTimes()).isOne();
     }
 }

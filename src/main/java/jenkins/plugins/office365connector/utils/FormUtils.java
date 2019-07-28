@@ -9,7 +9,10 @@ import org.apache.commons.validator.routines.UrlValidator;
  *
  * @author Joseph Petersen (casz@github)
  */
-public class FormUtils {
+public final class FormUtils {
+
+    private FormUtils() {
+    }
 
     /**
      * Validates data is in expected format either URL or variable reference.
