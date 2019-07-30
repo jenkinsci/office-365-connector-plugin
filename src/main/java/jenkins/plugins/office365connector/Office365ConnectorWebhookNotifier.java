@@ -34,7 +34,7 @@ import org.apache.commons.lang.StringUtils;
 /**
  * @author srhebbar
  */
-public final class Office365ConnectorWebhookNotifier {
+public class Office365ConnectorWebhookNotifier {
 
     private static final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
             .setPrettyPrinting().create();
@@ -51,7 +51,7 @@ public final class Office365ConnectorWebhookNotifier {
         this.listener = listener;
         this.cardBuilder = new CardBuilder(run);
         this.decisionMaker = new DecisionMaker(run, listener);
-        this.job = this.run.getParent();
+        this.job = run.getParent();
     }
 
     public void sendBuildStartedNotification(boolean isFromPreBuild) {
@@ -97,7 +97,7 @@ public final class Office365ConnectorWebhookNotifier {
         return Collections.emptyList();
     }
 
-    public void sendBuildNotification(StepParameters stepParameters) {
+    public void sendBuildStepNotification(StepParameters stepParameters) {
         Card card;
         // TODO: improve this logic as the user may send any data via pipeline step
         if (StringUtils.isNotBlank(stepParameters.getMessage())) {
