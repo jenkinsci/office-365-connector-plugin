@@ -60,7 +60,7 @@ public class CardBuilderTest extends AbstractTest {
         assertThat(card.getSections()).hasSize(1);
         assertThat(card.getThemeColor()).isEqualTo("3479BF");
         Section section = card.getSections().get(0);
-        assertThat(section.getActivityTitle()).isEqualTo("Update from " + JOB_DISPLAY_NAME + ".");
+        assertThat(section.getActivityTitle()).isEqualTo("Update from " + JOB_DISPLAY_NAME);
     }
 
     @Test
@@ -79,7 +79,7 @@ public class CardBuilderTest extends AbstractTest {
         assertThat(card.getSections()).hasSize(1);
         assertThat(card.getThemeColor()).isEqualTo(result.color.getHtmlBaseColor());
         Section section = card.getSections().get(0);
-        assertThat(section.getActivityTitle()).isEqualTo("Update from " + JOB_DISPLAY_NAME + ".");
+        assertThat(section.getActivityTitle()).isEqualTo("Update from " + JOB_DISPLAY_NAME);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class CardBuilderTest extends AbstractTest {
         assertThat(card.getSections()).hasSize(1);
         assertThat(card.getThemeColor()).isEqualTo(result.color.getHtmlBaseColor());
         Section section = card.getSections().get(0);
-        assertThat(section.getActivityTitle()).isEqualTo("Update from " + JOB_DISPLAY_NAME + ".");
+        assertThat(section.getActivityTitle()).isEqualTo("Update from " + JOB_DISPLAY_NAME);
     }
 
     @Test
@@ -123,7 +123,7 @@ public class CardBuilderTest extends AbstractTest {
         assertThat(card.getSections()).hasSize(1);
         assertThat(card.getThemeColor()).isEqualTo(result.color.getHtmlBaseColor());
         Section section = card.getSections().get(0);
-        assertThat(section.getActivityTitle()).isEqualTo("Update from " + JOB_DISPLAY_NAME + ".");
+        assertThat(section.getActivityTitle()).isEqualTo("Update from " + JOB_DISPLAY_NAME);
         FactAssertion.assertThatLast(section.getFacts(), 2)
                 .hasName(FactsBuilder.NAME_FAILING_SINCE_BUILD)
                 .hasValue("build #" + previousNotFailedBuildNumber);
@@ -153,7 +153,7 @@ public class CardBuilderTest extends AbstractTest {
         assertThat(card.getSections()).hasSize(1);
         assertThat(card.getThemeColor()).isEqualTo(result.color.getHtmlBaseColor());
         Section section = card.getSections().get(0);
-        assertThat(section.getActivityTitle()).isEqualTo("Update from " + JOB_DISPLAY_NAME + ".");
+        assertThat(section.getActivityTitle()).isEqualTo("Update from " + JOB_DISPLAY_NAME);
         FactAssertion.assertThatLast(section.getFacts(), 1);
         FactAssertion.assertThat(section.getFacts())
                 .hasName(FactsBuilder.NAME_STATUS)
@@ -473,5 +473,30 @@ public class CardBuilderTest extends AbstractTest {
         assertThat(card.getThemeColor()).isEqualTo("3479BF");
         FactAssertion.assertThat(card.getSections().get(0).getFacts())
                 .hasName(FactsBuilder.NAME_STATUS).hasValue(status);
+    }
+
+    @Test
+    public void getProjectName_OnNameWithSpecialCharacters_EscapesSpecialCharacters() {
+
+        // given
+        final String specialDisplayName = "this_is_my-very#special *job*";
+        ItemGroup itemGroup = mock(ItemGroup.class);
+        when(itemGroup.getFullDisplayName()).thenReturn(StringUtils.EMPTY);
+
+        Job job = mock(Job.class);
+        when(job.getDisplayName()).thenReturn(specialDisplayName);
+        when(job.getParent()).thenReturn(itemGroup);
+
+        run = mock(AbstractBuild.class);
+        when(run.getParent()).thenReturn(job);
+
+        mockDisplayURLProvider(JOB_DISPLAY_NAME, BUILD_NUMBER);
+        cardBuilder = new CardBuilder(run);
+
+        // when
+        String displayName = Deencapsulation.invoke(cardBuilder, "getDisplayName");
+
+        // then
+        assertThat(displayName).isEqualTo("this\\_is\\_my\\-very\\#special \\*job\\*");
     }
 }

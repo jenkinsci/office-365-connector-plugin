@@ -44,7 +44,7 @@ public class CardBuilder {
 
         String jobName = getDisplayName();
         // TODO: dot in the message with single sentence should be removed
-        String activityTitle = "Update from " + jobName + ".";
+        String activityTitle = "Update from " + jobName;
         String activitySubtitle = "Latest status of build " + getRunName();
         Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
 
@@ -82,7 +82,7 @@ public class CardBuilder {
         factsBuilder.addCommitters();
         factsBuilder.addDevelopers();
 
-        String activityTitle = "Update from " + jobName + ".";
+        String activityTitle = "Update from " + jobName;
         String activitySubtitle = "Latest status of build " + getRunName();
         Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
 
@@ -190,9 +190,14 @@ public class CardBuilder {
      * Parent is needed for multi-branch pipelines and for cases when job
      */
     private String getDisplayName() {
-        return run.getParent().getFullDisplayName();
+        String displayName = run.getParent().getFullDisplayName();
+        // escape special characters so the summary is not formatted
+        // when the build name contains special characters
+        // https://www.markdownguide.org/basic-syntax#characters-you-can-escape
+        return displayName.replaceAll("([*_#-])", "\\\\$1");
     }
 
+    // TODO: this should return only build number escaped with \\#
     private String getRunName() {
         // TODO: This is probably not needed as mostly/always getNumber() is called
         return run.hasCustomDisplayName() ? run.getDisplayName() : "#" + run.getNumber();
