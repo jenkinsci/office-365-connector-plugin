@@ -13,6 +13,7 @@ import java.util.Arrays;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
 import hudson.model.Cause;
 import hudson.model.ItemGroup;
 import hudson.model.Job;
@@ -59,8 +60,8 @@ public abstract class AbstractTest {
         when(run.getPreviousNotFailedBuild()).thenReturn(lastNotFailedBuild);
     }
 
-    public static TaskListener mockListener() {
-        TaskListener listener = mock(TaskListener.class);
+    public static BuildListener mockListener() {
+        BuildListener listener = mock(BuildListener.class);
 
         PrintStream stream = mock(PrintStream.class);
         when(listener.getLogger()).thenReturn(stream);

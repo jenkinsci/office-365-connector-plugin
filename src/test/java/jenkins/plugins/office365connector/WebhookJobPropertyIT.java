@@ -15,12 +15,18 @@ public class WebhookJobPropertyIT {
 
     @Test
     public void testDataCompatibility() throws Exception {
+
+        // given
         FreeStyleProject foo = (FreeStyleProject) rule.jenkins.createProjectFromXML(
                 "bar",
                 getClass().getResourceAsStream("WebhookJobProperty/freestyleold1.xml")
         );
+
+        // when
         WebhookJobProperty webhookJobProperty = foo.getProperty(WebhookJobProperty.class);
         assertThat(webhookJobProperty.getWebhooks()).isNotEmpty();
+
+        // then
         rule.assertBuildStatusSuccess(foo.scheduleBuild2(0, new Cause.UserIdCause()).get());
     }
 }
