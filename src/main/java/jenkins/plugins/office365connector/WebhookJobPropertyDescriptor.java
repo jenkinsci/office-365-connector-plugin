@@ -40,16 +40,13 @@ public final class WebhookJobPropertyDescriptor extends JobPropertyDescriptor {
         return !webhooks.isEmpty();
     }
 
-    public List<Webhook> getTargets() {
-        return webhooks;
-    }
-
     public void setWebhooks(List<Webhook> webhooks) {
         this.webhooks = new ArrayList<>(webhooks);
     }
 
     @Override
     public boolean isApplicable(Class<? extends Job> jobType) {
+        // applicable to all types of jobs
         return true;
     }
 
@@ -59,7 +56,7 @@ public final class WebhookJobPropertyDescriptor extends JobPropertyDescriptor {
     }
 
     @Override
-    public WebhookJobProperty newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+    public WebhookJobProperty newInstance(StaplerRequest req, JSONObject formData) {
 
         List<Webhook> webhooks = new ArrayList<>();
         if (formData != null && !formData.isNullObject()) {
@@ -76,7 +73,6 @@ public final class WebhookJobPropertyDescriptor extends JobPropertyDescriptor {
         }
         return new WebhookJobProperty(webhooks);
     }
-
 
     @Override
     public boolean configure(StaplerRequest req, JSONObject formData) {
