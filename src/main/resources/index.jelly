@@ -1,4 +1,4 @@
 <?jelly escape-by-default='true'?>
 <div>
-    Sends jobs status notifications to Microsoft Teams or Outlook.
+    Sends jobs status notifications to Microsoft Teams and Outlook (Office 365).
 </div>

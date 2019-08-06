@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -24,6 +23,7 @@ import jenkins.plugins.office365connector.HttpWorker;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.HttpWorkerAnswer;
+import jenkins.plugins.office365connector.helpers.MockHelper;
 import jenkins.plugins.office365connector.helpers.Office365ConnectorWebhookNotifierAnswer;
 import jenkins.plugins.office365connector.utils.TimeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -117,20 +117,12 @@ public abstract class AbstractTest {
 
     protected void mockHttpWorker() {
         workerAnswer = new HttpWorkerAnswer();
-        try {
-            whenNew(HttpWorker.class).withAnyArguments().thenAnswer(workerAnswer);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+        MockHelper.mockNew(HttpWorker.class, workerAnswer);
     }
 
     protected void mockOffice365ConnectorWebhookNotifier() {
         notifierAnswer = new Office365ConnectorWebhookNotifierAnswer();
-        try {
-            whenNew(Office365ConnectorWebhookNotifier.class).withAnyArguments().thenAnswer(notifierAnswer);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+        MockHelper.mockNew(Office365ConnectorWebhookNotifier.class, notifierAnswer);
     }
 
     // compares files without worrying about EOL
