@@ -34,6 +34,7 @@ public class Office365ConnectorBuildListenerTest extends AbstractTest {
         // when
         listener.onStarted(run, mockListener());
 
+        // then
         assertThat(notifierAnswer.getTimes()).isOne();
     }
 
@@ -46,6 +47,7 @@ public class Office365ConnectorBuildListenerTest extends AbstractTest {
         // when
         listener.onCompleted(run, mockListener());
 
+        // then
         assertThat(notifierAnswer.getTimes()).isOne();
     }
 }
