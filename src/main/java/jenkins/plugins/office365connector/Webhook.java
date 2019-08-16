@@ -23,6 +23,7 @@ import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import javax.annotation.Nonnull;
+import jenkins.plugins.office365connector.model.FactDefinition;
 import jenkins.plugins.office365connector.model.Macro;
 import jenkins.plugins.office365connector.utils.FormUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -48,6 +49,8 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     private int timeout;
 
     private List<Macro> macros = Collections.emptyList();
+
+    private List<FactDefinition> factDefinitions = Collections.emptyList();
 
     @DataBoundConstructor
     public Webhook(String url) {
@@ -156,6 +159,15 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     @DataBoundSetter
     public void setMacros(List<Macro> macros) {
         this.macros = Util.fixNull(macros);
+    }
+
+    public List<FactDefinition> getFactDefinitions() {
+        return Util.fixNull(factDefinitions);
+    }
+
+    @DataBoundSetter
+    public void setFactDefinitions(List<FactDefinition> factDefinitions) {
+        this.factDefinitions = Util.fixNull(factDefinitions);
     }
 
     @Extension

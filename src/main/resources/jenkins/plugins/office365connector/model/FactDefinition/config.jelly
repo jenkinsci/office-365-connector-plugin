@@ -1,9 +1,9 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
-    <f:entry title="Template" field="template">
+    <f:entry title="Name" field="name">
         <f:textbox/>
     </f:entry>
-    <f:entry title="Value" field="value">
+    <f:entry title="Template" field="template">
         <f:textbox/>
     </f:entry>
     <f:entry>

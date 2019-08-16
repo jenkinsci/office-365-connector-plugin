@@ -1,10 +1,11 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core"
+         xmlns:f="/lib/form">
     <f:entry title="URL" field="url">
-        <f:textbox />
+        <f:textbox/>
     </f:entry>
     <f:entry title="Name" field="name">
-        <f:textbox />
+        <f:textbox/>
     </f:entry>
 
     <f:advanced>
@@ -14,43 +15,49 @@
             </f:description>
 
             <f:entry title="Notify Build Start" field="startNotification">
-                <f:checkbox />
+                <f:checkbox/>
             </f:entry>
 
             <f:entry title="Notify Aborted" field="notifyAborted">
-                <f:checkbox />
+                <f:checkbox/>
             </f:entry>
 
             <f:entry title="Notify Failure" field="notifyFailure">
-                <f:checkbox default="true" />
+                <f:checkbox default="true"/>
             </f:entry>
 
             <f:entry title="Notify Not Built" field="notifyNotBuilt">
-                <f:checkbox />
+                <f:checkbox/>
             </f:entry>
 
             <f:entry title="Notify Success" field="notifySuccess">
-                <f:checkbox default="true" />
+                <f:checkbox default="true"/>
             </f:entry>
 
             <f:entry title="Notify Unstable" field="notifyUnstable">
-                <f:checkbox default="true" />
+                <f:checkbox default="true"/>
             </f:entry>
 
             <f:entry title="Notify Back To Normal" field="notifyBackToNormal">
-                <f:checkbox default="true" />
+                <f:checkbox default="true"/>
             </f:entry>
 
             <f:entry title="Notify Repeated Failure" field="notifyRepeatedFailure">
-                <f:checkbox />
+                <f:checkbox/>
             </f:entry>
         </f:section>
 
         <f:section title="Advanced configuration">
             <f:entry title="Macros" field="macros">
-                <f:repeatableProperty minimum="0" field="macros" add="${%Add Macro}">
+                <f:repeatableProperty minimum="0" field="macros" add="Add Macro">
                 </f:repeatableProperty>
             </f:entry>
+
+            <f:entry title="Fact Definitions" field="factDefinitions">
+                <f:repeatableProperty minimum="0" field="factDefinitions" add="Add Fact">
+                </f:repeatableProperty>
+            </f:entry>
+
             <f:entry title="Timeout" description="Timeout (in ms)" field="timeout">
                 <f:number default="${descriptor.defaultTimeout}"/>
             </f:entry>
@@ -59,7 +66,7 @@
     </f:advanced>
     <f:entry>
         <div align="right">
-            <f:repeatableDeleteButton />
+            <f:repeatableDeleteButton/>
         </div>
     </f:entry>
 </j:jelly>

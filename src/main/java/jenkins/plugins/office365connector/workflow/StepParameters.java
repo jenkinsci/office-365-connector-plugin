@@ -15,6 +15,10 @@
  */
 package jenkins.plugins.office365connector.workflow;
 
+import java.util.List;
+
+import jenkins.plugins.office365connector.model.FactDefinition;
+
 /**
  * @author srhebbar
  */
@@ -24,11 +28,13 @@ public class StepParameters {
     private final String webhookUrl;
     private final String status;
     private final String color;
+    private List<FactDefinition> factDefinitions;
 
-    public StepParameters(String message, String webhookUrl, String status, String color) {
+    public StepParameters(String message, String webhookUrl, String status, List<FactDefinition> factDefinitions, String color) {
         this.message = message;
         this.webhookUrl = webhookUrl;
         this.status = status;
+        this.factDefinitions = factDefinitions;
         this.color = color;
     }
 
@@ -42,6 +48,10 @@ public class StepParameters {
 
     public String getStatus() {
         return status;
+    }
+
+    public List<FactDefinition> getFactDefinitions() {
+        return factDefinitions;
     }
 
     public String getColor() {
