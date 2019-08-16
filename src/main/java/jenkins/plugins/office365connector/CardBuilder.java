@@ -13,9 +13,13 @@
  */
 package jenkins.plugins.office365connector;
 
+import java.util.List;
+
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.model.Card;
+import jenkins.plugins.office365connector.model.FactDefinition;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.StepParameters;
 
@@ -29,18 +33,19 @@ public class CardBuilder {
     private final FactsBuilder factsBuilder;
     private final ActionableBuilder potentialActionBuilder;
 
-    public CardBuilder(Run run) {
+    public CardBuilder(Run run, TaskListener taskListener) {
         this.run = run;
 
-        factsBuilder = new FactsBuilder(run);
+        factsBuilder = new FactsBuilder(run, taskListener);
         potentialActionBuilder = new ActionableBuilder(run, factsBuilder);
     }
 
-    public Card createStartedCard() {
+    public Card createStartedCard(List<FactDefinition> factDefinitions) {
         factsBuilder.addStatusStarted();
         factsBuilder.addRemarks();
         factsBuilder.addCommitters();
         factsBuilder.addDevelopers();
+        factsBuilder.addUserFacts(factDefinitions);
 
         String jobName = getDisplayName();
         // TODO: dot in the message with single sentence should be removed
@@ -55,7 +60,7 @@ public class CardBuilder {
         return card;
     }
 
-    public Card createCompletedCard() {
+    public Card createCompletedCard(List<FactDefinition> factDefinitions) {
         String jobName = getDisplayName();
         // result might be null only for ongoing job - check documentation of Run.getCompletedResult()
         // but based on issue #133 it may happen that result for completed job is null
@@ -81,6 +86,7 @@ public class CardBuilder {
         factsBuilder.addRemarks();
         factsBuilder.addCommitters();
         factsBuilder.addDevelopers();
+        factsBuilder.addUserFacts(factDefinitions);
 
         String activityTitle = "Update from " + jobName;
         String activitySubtitle = "Latest status of build " + getRunName();
@@ -168,6 +174,8 @@ public class CardBuilder {
         } else {
             factsBuilder.addStatusRunning();
         }
+        factsBuilder.addUserFacts(stepParameters.getFactDefinitions());
+
 
         // TODO: activityTitle and summary should be normalized over card creation
         String activityTitle = "Message from " + jobName + ", Build " + getRunName();

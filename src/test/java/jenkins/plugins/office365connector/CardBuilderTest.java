@@ -4,11 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import java.util.Collections;
+
 import hudson.model.AbstractBuild;
 import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.AbstractTest;
@@ -42,7 +45,8 @@ public class CardBuilderTest extends AbstractTest {
         when(run.getParent()).thenReturn(job);
 
         mockDisplayURLProvider(JOB_DISPLAY_NAME, BUILD_NUMBER);
-        cardBuilder = new CardBuilder(run);
+        TaskListener taskListener = mock(TaskListener.class);
+        cardBuilder = new CardBuilder(run, taskListener);
     }
 
 
@@ -53,7 +57,7 @@ public class CardBuilderTest extends AbstractTest {
         // from @Before
 
         // when
-        Card card = cardBuilder.createStartedCard();
+        Card card = cardBuilder.createStartedCard(Collections.emptyList());
 
         // then
         assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER + " Started");
@@ -72,7 +76,7 @@ public class CardBuilderTest extends AbstractTest {
         when(run.getResult()).thenReturn(result);
 
         // when
-        Card card = cardBuilder.createCompletedCard();
+        Card card = cardBuilder.createCompletedCard(Collections.emptyList());
 
         // then
         assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER + " " + status);
@@ -90,7 +94,7 @@ public class CardBuilderTest extends AbstractTest {
         when(run.getResult()).thenReturn(result);
 
         // when
-        Card card = cardBuilder.createCompletedCard();
+        Card card = cardBuilder.createCompletedCard(Collections.emptyList());
 
         // then
         assertThat(card.getSections()).hasSize(1);
@@ -117,7 +121,7 @@ public class CardBuilderTest extends AbstractTest {
         when(run.getPreviousNotFailedBuild()).thenReturn(previousNotFailedBuild);
 
         // when
-        Card card = cardBuilder.createCompletedCard();
+        Card card = cardBuilder.createCompletedCard(Collections.emptyList());
 
         // then
         assertThat(card.getSections()).hasSize(1);
@@ -147,7 +151,7 @@ public class CardBuilderTest extends AbstractTest {
         when(run.getPreviousNotFailedBuild()).thenReturn(previousNotFailedBuild);
 
         // when
-        Card card = cardBuilder.createCompletedCard();
+        Card card = cardBuilder.createCompletedCard(Collections.emptyList());
 
         // then
         assertThat(card.getSections()).hasSize(1);
@@ -418,7 +422,7 @@ public class CardBuilderTest extends AbstractTest {
         String status = Result.SUCCESS.toString();
         String color = "blue";
 
-        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, color);
+        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, Collections.emptyList(), color);
 
         // then
         Card card = cardBuilder.createBuildMessageCard(stepParameters);
@@ -440,7 +444,7 @@ public class CardBuilderTest extends AbstractTest {
         String status = null;
         String color = "blue";
 
-        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, color);
+        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, Collections.emptyList(), color);
 
         // then
         Card card = cardBuilder.createBuildMessageCard(stepParameters);
@@ -462,7 +466,7 @@ public class CardBuilderTest extends AbstractTest {
         String status = Result.ABORTED.toString();
         String color = null;
 
-        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, color);
+        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, Collections.emptyList(), color);
 
         // then
         Card card = cardBuilder.createBuildMessageCard(stepParameters);
@@ -489,9 +493,10 @@ public class CardBuilderTest extends AbstractTest {
 
         run = mock(AbstractBuild.class);
         when(run.getParent()).thenReturn(job);
+        TaskListener taskListener = mock(TaskListener.class);
 
         mockDisplayURLProvider(JOB_DISPLAY_NAME, BUILD_NUMBER);
-        cardBuilder = new CardBuilder(run);
+        cardBuilder = new CardBuilder(run, taskListener);
 
         // when
         String displayName = Deencapsulation.invoke(cardBuilder, "getDisplayName");

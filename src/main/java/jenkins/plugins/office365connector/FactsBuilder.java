@@ -13,6 +13,8 @@
  */
 package jenkins.plugins.office365connector;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -21,13 +23,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import hudson.FilePath;
 import hudson.model.Cause;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.model.Fact;
+import jenkins.plugins.office365connector.model.FactDefinition;
 import jenkins.scm.RunWithSCM;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
+import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
 /**
  * Collects helper methods that create instance of {@link jenkins.plugins.office365connector.model.Fact Fact} class.
@@ -48,10 +55,13 @@ public class FactsBuilder {
     final static String VALUE_STATUS_RUNNING = "Running";
 
     private final List<Fact> facts = new ArrayList<>();
-    private final Run run;
 
-    public FactsBuilder(Run run) {
+    private final Run run;
+    private final TaskListener taskListener;
+
+    public FactsBuilder(Run run, TaskListener listener) {
         this.run = run;
+        this.taskListener = listener;
     }
 
     public void addStatus(String status) {
@@ -118,6 +128,22 @@ public class FactsBuilder {
         return authors.stream()
                 .sorted(Comparator.comparing(User::getFullName))
                 .collect(Collectors.toList());
+    }
+
+    public void addUserFacts(List<FactDefinition> factDefinitions) {
+        for (FactDefinition factDefinition : factDefinitions) {
+            addFact(factDefinition.getName(), evaluateMacro(factDefinition.getTemplate()));
+        }
+    }
+
+    // ToDo: this code is redundant and should be merged with DecisionMaker#evaluateMacro
+    private String evaluateMacro(String template) {
+        try {
+            File workspace = run.getRootDir();
+            return TokenMacro.expandAll(run, new FilePath(workspace), taskListener, template);
+        } catch (InterruptedException | IOException | MacroEvaluationException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     public void addFact(String name, String value) {

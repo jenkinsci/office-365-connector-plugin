@@ -1,5 +1,6 @@
 package jenkins.plugins.office365connector.workflow;
 
+import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
@@ -9,6 +10,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import javax.annotation.Nonnull;
+import jenkins.plugins.office365connector.model.FactDefinition;
 import jenkins.plugins.office365connector.utils.FormUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.workflow.steps.Step;
@@ -27,6 +29,7 @@ public class Office365ConnectorSendStep extends Step {
     private final String webhookUrl;
     private String message;
     private String status;
+    private List<FactDefinition> factDefinitions;
     private String color;
 
     @DataBoundConstructor
@@ -59,6 +62,15 @@ public class Office365ConnectorSendStep extends Step {
 
     public String getColor() {
         return color;
+    }
+
+    @DataBoundSetter
+    public void setFactDefinitions(List<FactDefinition> factDefinitions) {
+        this.factDefinitions = factDefinitions;
+    }
+
+    public List<FactDefinition> getFactDefinitions() {
+        return factDefinitions;
     }
 
     @DataBoundSetter

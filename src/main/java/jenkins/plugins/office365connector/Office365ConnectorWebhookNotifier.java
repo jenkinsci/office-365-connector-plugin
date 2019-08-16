@@ -44,13 +44,13 @@ public class Office365ConnectorWebhookNotifier {
 
     private final Run run;
     private final Job job;
-    private final TaskListener listener;
+    private final TaskListener taskListener;
 
-    public Office365ConnectorWebhookNotifier(Run run, TaskListener listener) {
+    public Office365ConnectorWebhookNotifier(Run run, TaskListener taskListener) {
         this.run = run;
-        this.listener = listener;
-        this.cardBuilder = new CardBuilder(run);
-        this.decisionMaker = new DecisionMaker(run, listener);
+        this.taskListener = taskListener;
+        this.cardBuilder = new CardBuilder(run, taskListener);
+        this.decisionMaker = new DecisionMaker(run, taskListener);
         this.job = run.getParent();
     }
 
@@ -62,9 +62,9 @@ public class Office365ConnectorWebhookNotifier {
 
         boolean isBuild = run instanceof AbstractBuild;
         if ((isBuild && isFromPreBuild) || (!isBuild && !isFromPreBuild)) {
-            Card card = cardBuilder.createStartedCard();
 
             for (Webhook webhook : webhooks) {
+                Card card = cardBuilder.createStartedCard(webhook.getFactDefinitions());
                 if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                     if (webhook.isStartNotification()) {
                         executeWorker(webhook, card);
@@ -80,9 +80,9 @@ public class Office365ConnectorWebhookNotifier {
             return;
         }
 
-        Card card = cardBuilder.createCompletedCard();
 
         for (Webhook webhook : webhooks) {
+            Card card = cardBuilder.createCompletedCard(webhook.getFactDefinitions());
             if (decisionMaker.isStatusMatched(webhook) && decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                 executeWorker(webhook, card);
             }
@@ -103,9 +103,9 @@ public class Office365ConnectorWebhookNotifier {
         if (StringUtils.isNotBlank(stepParameters.getMessage())) {
             card = cardBuilder.createBuildMessageCard(stepParameters);
         } else if (StringUtils.equalsIgnoreCase(stepParameters.getStatus(), "started")) {
-            card = cardBuilder.createStartedCard();
+            card = cardBuilder.createStartedCard(stepParameters.getFactDefinitions());
         } else {
-            card = cardBuilder.createCompletedCard();
+            card = cardBuilder.createCompletedCard(stepParameters.getFactDefinitions());
         }
 
         WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
@@ -122,12 +122,12 @@ public class Office365ConnectorWebhookNotifier {
 
     private void executeWorker(Webhook webhook, Card card) {
         try {
-            HttpWorker worker = new HttpWorker(run.getEnvironment(listener).expand(webhook.getUrl()), gson.toJson(card),
-                    webhook.getTimeout(), listener.getLogger());
+            HttpWorker worker = new HttpWorker(run.getEnvironment(taskListener).expand(webhook.getUrl()), gson.toJson(card),
+                    webhook.getTimeout(), taskListener.getLogger());
             worker.submit();
         } catch (IOException | InterruptedException | RejectedExecutionException e) {
             log(String.format("Failed to notify webhook: %s", webhook.getName()));
-            e.printStackTrace(listener.getLogger());
+            e.printStackTrace(taskListener.getLogger());
         }
     }
 
@@ -135,6 +135,6 @@ public class Office365ConnectorWebhookNotifier {
      * Helper method for logging.
      */
     private void log(String message) {
-        listener.getLogger().println("[Office365connector] " + message);
+        taskListener.getLogger().println("[Office365connector] " + message);
     }
 }

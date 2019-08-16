@@ -9,6 +9,7 @@ import java.util.List;
 
 import hudson.model.Job;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.helpers.SCMHeadBuilder;
 import jenkins.plugins.office365connector.model.PotentialAction;
 import jenkins.scm.api.SCMHead;
@@ -30,6 +31,8 @@ public class ActionableBuilderTest {
     private static final String JOB_URL = "http://localhost/job/myFirstJob/167/display/redirect";
 
     private Run run;
+    private TaskListener taskListener;
+
     private ActionableBuilder actionableBuilder;
 
     private FactsBuilder factsBuilder;
@@ -37,8 +40,9 @@ public class ActionableBuilderTest {
     @Before
     public void setUp() {
         run = mock(Run.class);
+        taskListener = mock(TaskListener.class);
 
-        factsBuilder = new FactsBuilder(run);
+        factsBuilder = new FactsBuilder(run, taskListener);
         actionableBuilder = new ActionableBuilder(run, factsBuilder);
 
         DisplayURLProvider displayURLProvider = mock(DisplayURLProvider.class);

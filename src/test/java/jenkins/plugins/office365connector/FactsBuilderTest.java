@@ -11,6 +11,7 @@ import java.util.Set;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
@@ -25,17 +26,20 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 public class FactsBuilderTest {
 
     private AbstractBuild run;
+    private TaskListener taskListener;
+
 
     @Before
     public void setUp() {
         run = mock(AbstractBuild.class);
+        taskListener = mock(TaskListener.class);
     }
 
     @Test
     public void addStatus_AddsFact() {
 
         // given
-        FactsBuilder factBuilder = new FactsBuilder(run);
+        FactsBuilder factBuilder = new FactsBuilder(run, taskListener);
         String status = "funnyStatus";
 
         // when
@@ -51,7 +55,7 @@ public class FactsBuilderTest {
     public void addStatusStarted_AddsFact() {
 
         // given
-        FactsBuilder factBuilder = new FactsBuilder(run);
+        FactsBuilder factBuilder = new FactsBuilder(run, taskListener);
 
         // when
         factBuilder.addStatusStarted();
@@ -66,7 +70,7 @@ public class FactsBuilderTest {
     public void addStatusRunning_AddsFact() {
 
         // given
-        FactsBuilder factBuilder = new FactsBuilder(run);
+        FactsBuilder factBuilder = new FactsBuilder(run, taskListener);
 
         // when
         factBuilder.addStatusRunning();
@@ -81,7 +85,7 @@ public class FactsBuilderTest {
     public void addFailingSinceBuild_AddsFact() {
 
         // given
-        FactsBuilder factBuilder = new FactsBuilder(run);
+        FactsBuilder factBuilder = new FactsBuilder(run, taskListener);
         int buildNumber = 123;
 
         // when
@@ -98,7 +102,7 @@ public class FactsBuilderTest {
 
         // given
         Run run = mock(Run.class);
-        FactsBuilder factBuilder = new FactsBuilder(run);
+        FactsBuilder factBuilder = new FactsBuilder(run, taskListener);
         List<Cause> causes = CauseBuilder.sampleCauses();
         when(run.getCauses()).thenReturn(causes);
 
@@ -115,7 +119,7 @@ public class FactsBuilderTest {
     public void addCommitters_AddsFact() {
 
         // given
-        FactsBuilder factBuilder = new FactsBuilder(run);
+        FactsBuilder factBuilder = new FactsBuilder(run, taskListener);
         User one = createUser("damian");
         User two = createUser("365");
         Set<User> users = new HashSet<>();
@@ -143,7 +147,7 @@ public class FactsBuilderTest {
     public void addCommitters_WithoutUser_AddsNoFact() {
 
         // given
-        FactsBuilder factBuilder = new FactsBuilder(run);
+        FactsBuilder factBuilder = new FactsBuilder(run, taskListener);
 
         // when
         factBuilder.addCommitters();
@@ -157,7 +161,7 @@ public class FactsBuilderTest {
 
         // given
         Run run = mock(Run.class);
-        FactsBuilder factsBuilder = new FactsBuilder(run);
+        FactsBuilder factsBuilder = new FactsBuilder(run, taskListener);
 
         // when
         factsBuilder.addCommitters();
@@ -174,7 +178,7 @@ public class FactsBuilderTest {
         List<ChangeLogSet> files = new AffectedFileBuilder().sampleChangeLogs(run);
         when(run.getChangeSets()).thenReturn(files);
 
-        FactsBuilder factBuilder = new FactsBuilder(run);
+        FactsBuilder factBuilder = new FactsBuilder(run, taskListener);
 
         // when
         factBuilder.addDevelopers();
@@ -191,7 +195,7 @@ public class FactsBuilderTest {
 
         // given
         Run run = mock(Run.class);
-        FactsBuilder factsBuilder = new FactsBuilder(run);
+        FactsBuilder factsBuilder = new FactsBuilder(run, taskListener);
 
         // when
         factsBuilder.addDevelopers();
@@ -204,7 +208,7 @@ public class FactsBuilderTest {
     public void addFact_OnEmptyName_SkipsAdding() {
 
         // given
-        FactsBuilder factBuilder = new FactsBuilder(run);
+        FactsBuilder factBuilder = new FactsBuilder(run, taskListener);
 
         // when
         factBuilder.addFact("someName", StringUtils.EMPTY);
@@ -217,7 +221,7 @@ public class FactsBuilderTest {
     public void addFact_OnEmptyValue_SkipsAdding() {
 
         // given
-        FactsBuilder factBuilder = new FactsBuilder(run);
+        FactsBuilder factBuilder = new FactsBuilder(run, taskListener);
 
         // when
         factBuilder.addFact(StringUtils.EMPTY, "someValue");
@@ -230,7 +234,7 @@ public class FactsBuilderTest {
     public void addFact_AddStatusAtTheFirstPosition() {
 
         // given
-        FactsBuilder factBuilder = new FactsBuilder(run);
+        FactsBuilder factBuilder = new FactsBuilder(run, taskListener);
         factBuilder.addFact("some name", "some value");
 
         // when

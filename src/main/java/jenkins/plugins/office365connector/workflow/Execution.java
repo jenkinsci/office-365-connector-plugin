@@ -15,7 +15,8 @@ public class Execution extends SynchronousNonBlockingStepExecution<Void> {
 
     public Execution(Office365ConnectorSendStep step, StepContext context) {
         super(context);
-        stepParameters = new StepParameters(step.getMessage(), step.getWebhookUrl(), step.getStatus(), step.getColor());
+        stepParameters = new StepParameters(
+                step.getMessage(), step.getWebhookUrl(), step.getStatus(), step.getFactDefinitions(), step.getColor());
     }
 
     @Override
