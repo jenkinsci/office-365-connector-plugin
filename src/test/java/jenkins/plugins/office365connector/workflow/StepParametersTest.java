@@ -3,6 +3,7 @@ package jenkins.plugins.office365connector.workflow;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
+import java.util.List;
 
 import jenkins.plugins.office365connector.model.FactDefinition;
 import org.junit.Before;
@@ -61,6 +62,18 @@ public class StepParametersTest {
 
         // then
         assertThat(status).isEqualTo(STATUS);
+    }
+
+    @Test
+    public void getFactDefinitions_ReturnsFactDefinitions() {
+
+        // given from @Before
+
+        // when
+        List<FactDefinition> factDefinitions = stepParameters.getFactDefinitions();
+
+        // then
+        assertThat(factDefinitions).containsOnly(FACT_DEFINITION);
     }
 
     @Test

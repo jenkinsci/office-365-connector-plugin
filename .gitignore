@@ -212,18 +212,9 @@ pip-log.txt
 
 #Translations
 *.mo
-
-#Mr Developer
-.mr.developer.cfg
-
-#################
-## Maven
-#################
-
-work/
-
 #################
 ## IntelliJ
 #################
 .idea
 *.iml
+/jenkins.plugins.office365connector.WebhookJobProperty.xml

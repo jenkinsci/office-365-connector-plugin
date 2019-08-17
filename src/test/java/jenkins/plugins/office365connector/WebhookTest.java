@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Arrays;
 import java.util.List;
 
+import jenkins.plugins.office365connector.model.FactDefinition;
 import jenkins.plugins.office365connector.model.Macro;
 import org.junit.Test;
 
@@ -208,5 +209,35 @@ public class WebhookTest {
 
         // then
         assertThat(macros).isEmpty();
+    }
+
+    @Test
+    public void getFactDefinitions_ReturnsFactDefinitions() {
+
+        // given
+        Webhook webhook = new Webhook("someUrl");
+        FactDefinition factDefinition = new FactDefinition("name", "myTemplate");
+        webhook.setFactDefinitions(Arrays.asList(factDefinition));
+
+        // when
+        List<FactDefinition> returnedFactDefinitions = webhook.getFactDefinitions();
+
+        // then
+        assertThat(returnedFactDefinitions).containsOnly(factDefinition);
+    }
+
+    @Test
+    public void getFactDefinitions_OnNullValue_ReturnsEmptyFactDefinitions() {
+
+        // given
+        Webhook webhook = new Webhook("someUrl");
+        List<FactDefinition> factDefinition = null;
+        webhook.setFactDefinitions(factDefinition);
+
+        // when
+        List<FactDefinition> returnedFactDefinitions = webhook.getFactDefinitions();
+
+        // then
+        assertThat(returnedFactDefinitions).isEmpty();
     }
 }
