@@ -21,10 +21,12 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.HttpWorker;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
+import jenkins.plugins.office365connector.WebhookJobProperty;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.HttpWorkerAnswer;
 import jenkins.plugins.office365connector.helpers.MockHelper;
 import jenkins.plugins.office365connector.helpers.Office365ConnectorWebhookNotifierAnswer;
+import jenkins.plugins.office365connector.helpers.WebhookBuilder;
 import jenkins.plugins.office365connector.utils.TimeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
@@ -103,6 +105,11 @@ public abstract class AbstractTest {
         Cause cause = mock(Cause.class);
         when(cause.getShortDescription()).thenReturn(causeMessage);
         when(run.getCauses()).thenReturn(Arrays.asList(cause));
+    }
+
+    protected void mockProperty(Job job) {
+        WebhookJobProperty property = new WebhookJobProperty(WebhookBuilder.sampleWebhookWithAllStatuses());
+        when(job.getProperty(WebhookJobProperty.class)).thenReturn(property);
     }
 
     public static void mockTokenMacro(String evaluatedValue) {

@@ -36,7 +36,8 @@ import org.apache.commons.lang.StringUtils;
  */
 public class Office365ConnectorWebhookNotifier {
 
-    private static final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
+    private static final Gson gson = new GsonBuilder()
+            .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
             .setPrettyPrinting().create();
 
     private final CardBuilder cardBuilder;
@@ -55,14 +56,10 @@ public class Office365ConnectorWebhookNotifier {
     }
 
     public void sendBuildStartedNotification(boolean isFromPreBuild) {
-        List<Webhook> webhooks = extractWebhooks(job);
-        if (webhooks.isEmpty()) {
-            return;
-        }
-
         boolean isBuild = run instanceof AbstractBuild;
         if ((isBuild && isFromPreBuild) || (!isBuild && !isFromPreBuild)) {
 
+            List<Webhook> webhooks = extractWebhooks(job);
             for (Webhook webhook : webhooks) {
                 Card card = cardBuilder.createStartedCard(webhook.getFactDefinitions());
                 if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
@@ -76,10 +73,6 @@ public class Office365ConnectorWebhookNotifier {
 
     public void sendBuildCompletedNotification() {
         List<Webhook> webhooks = extractWebhooks(job);
-        if (webhooks.isEmpty()) {
-            return;
-        }
-
 
         for (Webhook webhook : webhooks) {
             Card card = cardBuilder.createCompletedCard(webhook.getFactDefinitions());
