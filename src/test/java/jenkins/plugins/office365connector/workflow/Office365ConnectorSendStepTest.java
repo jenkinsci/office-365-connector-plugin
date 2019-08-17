@@ -3,9 +3,12 @@ package jenkins.plugins.office365connector.workflow;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mock;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import hudson.util.FormValidation;
+import jenkins.plugins.office365connector.model.FactDefinition;
 import mockit.Deencapsulation;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -120,6 +123,21 @@ public class Office365ConnectorSendStepTest {
 
         // then
         assertThat(returnedColor).isEqualTo(color);
+    }
+
+    @Test
+    public void getFactDefinitions_ReturnsFactDefinitions() {
+
+        // given
+        Office365ConnectorSendStep step = new Office365ConnectorSendStep(null);
+        FactDefinition factDefinition = new FactDefinition("name", "theTemplate");
+        step.setFactDefinitions(Arrays.asList(factDefinition));
+
+        // when
+        List<FactDefinition> returnedFactDefinitions = step.getFactDefinitions();
+
+        // then
+        assertThat(returnedFactDefinitions).containsOnly(factDefinition);
     }
 
     @Test
