@@ -57,13 +57,13 @@ public class Office365ConnectorWebhookNotifier {
 
     public void sendBuildStartedNotification(boolean isFromPreBuild) {
         boolean isBuild = run instanceof AbstractBuild;
-        if ((isBuild && isFromPreBuild) || (!isBuild && !isFromPreBuild)) {
+        if (isBuild == isFromPreBuild) {
 
             List<Webhook> webhooks = extractWebhooks(job);
             for (Webhook webhook : webhooks) {
-                Card card = cardBuilder.createStartedCard(webhook.getFactDefinitions());
                 if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                     if (webhook.isStartNotification()) {
+                        Card card = cardBuilder.createStartedCard(webhook.getFactDefinitions());
                         executeWorker(webhook, card);
                     }
                 }
@@ -75,9 +75,11 @@ public class Office365ConnectorWebhookNotifier {
         List<Webhook> webhooks = extractWebhooks(job);
 
         for (Webhook webhook : webhooks) {
-            Card card = cardBuilder.createCompletedCard(webhook.getFactDefinitions());
-            if (decisionMaker.isStatusMatched(webhook) && decisionMaker.isAtLeastOneRuleMatched(webhook)) {
-                executeWorker(webhook, card);
+            if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
+                if (decisionMaker.isStatusMatched(webhook)) {
+                    Card card = cardBuilder.createCompletedCard(webhook.getFactDefinitions());
+                    executeWorker(webhook, card);
+                }
             }
         }
     }
@@ -92,7 +94,7 @@ public class Office365ConnectorWebhookNotifier {
 
     public void sendBuildStepNotification(StepParameters stepParameters) {
         Card card;
-        // TODO: improve this logic as the user may send any data via pipeline step
+        // TODO: improve this logic as the user may send any 'status' via pipeline step
         if (StringUtils.isNotBlank(stepParameters.getMessage())) {
             card = cardBuilder.createBuildMessageCard(stepParameters);
         } else if (StringUtils.equalsIgnoreCase(stepParameters.getStatus(), "started")) {
@@ -101,22 +103,26 @@ public class Office365ConnectorWebhookNotifier {
             card = cardBuilder.createCompletedCard(stepParameters.getFactDefinitions());
         }
 
-        WebhookJobProperty property = (WebhookJobProperty) job.getProperty(WebhookJobProperty.class);
-        if (property == null) {
-            Webhook webhook = new Webhook(stepParameters.getWebhookUrl());
-            executeWorker(webhook, card);
-            return;
-        }
+        List<Webhook> webhooks = extractWebhooks(job);
 
-        for (Webhook webhook : property.getWebhooks()) {
+        // ToDo: should the notifications be sent to defined webhook
+        // if step office365ConnectorSend has already provided url for the webhook
+        // and there is no flag 'send by step during any build moment' ?
+        if (!webhooks.isEmpty()) {
+            for (Webhook webhook : webhooks) {
+                executeWorker(webhook, card);
+            }
+        } else {
+            Webhook webhook = new Webhook(stepParameters.getWebhookUrl());
             executeWorker(webhook, card);
         }
     }
 
     private void executeWorker(Webhook webhook, Card card) {
         try {
-            HttpWorker worker = new HttpWorker(run.getEnvironment(taskListener).expand(webhook.getUrl()), gson.toJson(card),
-                    webhook.getTimeout(), taskListener.getLogger());
+            String url = run.getEnvironment(taskListener).expand(webhook.getUrl());
+            String data = gson.toJson(card);
+            HttpWorker worker = new HttpWorker(url, data, webhook.getTimeout(), taskListener.getLogger());
             worker.submit();
         } catch (IOException | InterruptedException | RejectedExecutionException e) {
             log(String.format("Failed to notify webhook: %s", webhook.getName()));

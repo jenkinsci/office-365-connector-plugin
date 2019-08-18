@@ -24,7 +24,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @author Damian Szczepanik (damianszczepanik@github)
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Office365ConnectorWebhookNotifier.class})
+@PrepareForTest(Office365ConnectorWebhookNotifier.class)
 public class DevelopersIT extends AbstractTest {
 
     private static final String JOB_NAME = "simple job";

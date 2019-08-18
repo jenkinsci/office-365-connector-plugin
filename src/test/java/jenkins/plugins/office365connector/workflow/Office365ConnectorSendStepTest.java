@@ -24,7 +24,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class Office365ConnectorSendStepTest {
 
-
     @Test
     public void Office365ConnectorSendStep_SavesWebhook() {
 
@@ -36,7 +35,6 @@ public class Office365ConnectorSendStepTest {
 
         assertThat(step.getWebhookUrl()).isEqualTo(webhook);
     }
-
 
     @Test
     public void Office365ConnectorSendStep_TrimsWebhook() {
