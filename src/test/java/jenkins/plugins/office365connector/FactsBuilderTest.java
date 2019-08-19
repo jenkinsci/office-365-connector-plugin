@@ -52,21 +52,6 @@ public class FactsBuilderTest {
     }
 
     @Test
-    public void addStatusStarted_AddsFact() {
-
-        // given
-        FactsBuilder factBuilder = new FactsBuilder(run, taskListener);
-
-        // when
-        factBuilder.addStatusStarted();
-
-        // then
-        FactAssertion.assertThat(factBuilder.collect())
-                .hasName(FactsBuilder.NAME_STATUS)
-                .hasValue(FactsBuilder.VALUE_STATUS_STARTED);
-    }
-
-    @Test
     public void addStatusRunning_AddsFact() {
 
         // given

@@ -68,10 +68,6 @@ public class FactsBuilder {
         addFact(NAME_STATUS, status);
     }
 
-    public void addStatusStarted() {
-        addFact(NAME_STATUS, VALUE_STATUS_STARTED);
-    }
-
     public void addStatusRunning() {
         addFact(NAME_STATUS, VALUE_STATUS_RUNNING);
     }

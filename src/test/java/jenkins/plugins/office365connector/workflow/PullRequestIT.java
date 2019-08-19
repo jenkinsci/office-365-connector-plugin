@@ -15,11 +15,9 @@ import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.FileUtils;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
-import jenkins.plugins.office365connector.WebhookJobProperty;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.SCMHeadBuilder;
-import jenkins.plugins.office365connector.helpers.WebhookBuilder;
 import jenkins.plugins.office365connector.utils.TimeUtils;
 import jenkins.plugins.office365connector.utils.TimeUtilsTest;
 import jenkins.scm.api.SCMHead;
@@ -79,9 +77,7 @@ public class PullRequestIT extends AbstractTest {
         Job job = mockJob(JOB_NAME, PARENT_JOB_NAME);
         when(run.getParent()).thenReturn(job);
 
-        // getProperty
-        WebhookJobProperty property = new WebhookJobProperty(WebhookBuilder.sampleWebhookWithAllStatuses());
-        when(job.getProperty(WebhookJobProperty.class)).thenReturn(property);
+        mockProperty(job);
 
         return run;
     }

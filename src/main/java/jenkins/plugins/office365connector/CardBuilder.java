@@ -41,19 +41,16 @@ public class CardBuilder {
     }
 
     public Card createStartedCard(List<FactDefinition> factDefinitions) {
-        factsBuilder.addStatusStarted();
+        final String statusName = "Started";
+        factsBuilder.addStatus(statusName);
         factsBuilder.addRemarks();
         factsBuilder.addCommitters();
         factsBuilder.addDevelopers();
         factsBuilder.addUserFacts(factDefinitions);
 
-        String jobName = getDisplayName();
-        // TODO: dot in the message with single sentence should be removed
-        String activityTitle = "Update from " + jobName;
-        String activitySubtitle = "Latest status of build " + getRunName();
-        Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
+        Section section = buildSection();
 
-        String summary = jobName + ": Build " + getRunName() + " Started";
+        String summary = getDisplayName() + ": Build " + getRunName();
         Card card = new Card(summary, section);
         card.setPotentialAction(potentialActionBuilder.buildActionable());
 
@@ -61,7 +58,6 @@ public class CardBuilder {
     }
 
     public Card createCompletedCard(List<FactDefinition> factDefinitions) {
-        String jobName = getDisplayName();
         // result might be null only for ongoing job - check documentation of Run.getCompletedResult()
         // but based on issue #133 it may happen that result for completed job is null
         Result lastResult = getCompletedResult(run);
@@ -71,7 +67,7 @@ public class CardBuilder {
         Run lastNotFailedBuild = run.getPreviousNotFailedBuild();
 
         boolean isRepeatedFailure = isRepeatedFailure(previousResult, lastNotFailedBuild);
-        String summary = String.format("%s: Build %s %s", jobName, getRunName(),
+        String summary = String.format("%s: Build %s %s", getDisplayName(), getRunName(),
                 calculateSummary(lastResult, previousResult, isRepeatedFailure));
         String status = calculateStatus(lastResult, previousResult, isRepeatedFailure);
 
@@ -88,15 +84,19 @@ public class CardBuilder {
         factsBuilder.addDevelopers();
         factsBuilder.addUserFacts(factDefinitions);
 
-        String activityTitle = "Update from " + jobName;
-        String activitySubtitle = "Latest status of build " + getRunName();
-        Section section = new Section(activityTitle, activitySubtitle, factsBuilder.collect());
+        Section section = buildSection();
 
         Card card = new Card(summary, section);
         card.setThemeColor(lastResult.color.getHtmlBaseColor());
         card.setPotentialAction(potentialActionBuilder.buildActionable());
 
         return card;
+    }
+
+    private Section buildSection() {
+        String activityTitle = "Notification from " + getDisplayName();
+        String activitySubtitle = "Latest status of build " + getRunName();
+        return new Section(activityTitle, activitySubtitle, factsBuilder.collect());
     }
 
     private boolean isRepeatedFailure(Result previousResult, Run lastNotFailedBuild) {
@@ -176,9 +176,8 @@ public class CardBuilder {
         }
         factsBuilder.addUserFacts(stepParameters.getFactDefinitions());
 
-
         // TODO: activityTitle and summary should be normalized over card creation
-        String activityTitle = "Message from " + jobName + ", Build " + getRunName();
+        String activityTitle = "Notification from " + jobName + ", Build " + getRunName();
         Section section = new Section(activityTitle, stepParameters.getMessage(), factsBuilder.collect());
 
         String summary = jobName + ": Build " + getRunName() + " Status";
@@ -207,7 +206,7 @@ public class CardBuilder {
 
     // TODO: this should return only build number escaped with \\#
     private String getRunName() {
-        // TODO: This is probably not needed as mostly/always getNumber() is called
+        // TODO: test case when the build number is changed to custom name
         return run.hasCustomDisplayName() ? run.getDisplayName() : "#" + run.getNumber();
     }
 }
