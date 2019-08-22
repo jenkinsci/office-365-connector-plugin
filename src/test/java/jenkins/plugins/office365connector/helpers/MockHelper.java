@@ -10,9 +10,8 @@ import org.mockito.stubbing.Answer;
 public class MockHelper {
 
     public static void mockNew(Class classToMock, Answer answer) {
-        Answer mock = answer;
         try {
-            whenNew(classToMock).withAnyArguments().thenAnswer(mock);
+            whenNew(classToMock).withAnyArguments().thenAnswer(answer);
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
