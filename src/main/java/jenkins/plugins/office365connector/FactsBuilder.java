@@ -32,6 +32,7 @@ import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.model.FactDefinition;
 import jenkins.scm.RunWithSCM;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
@@ -50,7 +51,6 @@ public class FactsBuilder {
 
     final static String NAME_FAILING_SINCE_BUILD = "Failing since";
 
-    final static String VALUE_STATUS_STARTED = "Started";
     // TODO: Running is not needed as it means same as Started
     final static String VALUE_STATUS_RUNNING = "Running";
 
@@ -127,8 +127,10 @@ public class FactsBuilder {
     }
 
     public void addUserFacts(List<FactDefinition> factDefinitions) {
-        for (FactDefinition factDefinition : factDefinitions) {
-            addFact(factDefinition.getName(), evaluateMacro(factDefinition.getTemplate()));
+        if (CollectionUtils.isNotEmpty(factDefinitions)) {
+            for (FactDefinition factDefinition : factDefinitions) {
+                addFact(factDefinition.getName(), evaluateMacro(factDefinition.getTemplate()));
+            }
         }
     }
 

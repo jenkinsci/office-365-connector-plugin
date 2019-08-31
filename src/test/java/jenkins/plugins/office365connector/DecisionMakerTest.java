@@ -34,7 +34,7 @@ public class DecisionMakerTest extends AbstractTest {
 
         // given
         Run run = mock(Run.class);
-        TaskListener taskListener = AbstractTest.mockListener();
+        TaskListener taskListener = mockListener();
 
         // when
         DecisionMaker decisionMaker = new DecisionMaker(run, taskListener);
@@ -91,7 +91,7 @@ public class DecisionMakerTest extends AbstractTest {
         Macro macro = new Macro(template, value);
         webhook.setMacros(Arrays.asList(macro));
 
-        AbstractTest.mockTokenMacro(value);
+        mockTokenMacro(value);
 
         // when
         boolean matched = decisionMaker.isAtLeastOneRuleMatched(webhook);
@@ -112,7 +112,7 @@ public class DecisionMakerTest extends AbstractTest {
         Macro macro = new Macro(template, value);
         webhook.setMacros(Arrays.asList(macro));
 
-        AbstractTest.mockTokenMacro(template);
+        mockTokenMacro(template);
 
         // when
         boolean matched = decisionMaker.isAtLeastOneRuleMatched(webhook);

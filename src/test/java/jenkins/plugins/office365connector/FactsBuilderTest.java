@@ -4,35 +4,46 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
-import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.CauseBuilder;
 import jenkins.plugins.office365connector.model.Fact;
+import jenkins.plugins.office365connector.model.FactDefinition;
+import jenkins.plugins.office365connector.workflow.AbstractTest;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-@PrepareForTest(Run.class)
-public class FactsBuilderTest {
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({TokenMacro.class, FilePath.class})
+public class FactsBuilderTest extends AbstractTest {
 
     private AbstractBuild run;
     private TaskListener taskListener;
 
-
     @Before
     public void setUp() {
         run = mock(AbstractBuild.class);
-        taskListener = mock(TaskListener.class);
+
+        File workspace = mock(File.class);
+        when(run.getRootDir()).thenReturn(workspace);
+
+        taskListener = mockListener();
     }
 
     @Test
@@ -86,7 +97,6 @@ public class FactsBuilderTest {
     public void addRemarks_AddsFact() {
 
         // given
-        Run run = mock(Run.class);
         FactsBuilder factBuilder = new FactsBuilder(run, taskListener);
         List<Cause> causes = CauseBuilder.sampleCauses();
         when(run.getCauses()).thenReturn(causes);
@@ -145,7 +155,6 @@ public class FactsBuilderTest {
     public void addCommitters_OnNoSCMRun_SkipsAdding() {
 
         // given
-        Run run = mock(Run.class);
         FactsBuilder factsBuilder = new FactsBuilder(run, taskListener);
 
         // when
@@ -159,7 +168,6 @@ public class FactsBuilderTest {
     public void addDevelopers_AddsFactWithSortedAuthors() {
 
         // given
-        AbstractBuild run = mock(AbstractBuild.class);
         List<ChangeLogSet> files = new AffectedFileBuilder().sampleChangeLogs(run);
         when(run.getChangeSets()).thenReturn(files);
 
@@ -179,7 +187,6 @@ public class FactsBuilderTest {
     public void addDevelopers_OnNoSCMRun_SkipsAdding() {
 
         // given
-        Run run = mock(Run.class);
         FactsBuilder factsBuilder = new FactsBuilder(run, taskListener);
 
         // when
@@ -187,6 +194,24 @@ public class FactsBuilderTest {
 
         // then
         assertThat(factsBuilder.collect()).isEmpty();
+    }
+
+    @Test
+    public void addUserFacts_AddUserFacts() {
+
+        // given
+        mockTokenMacro("anything");
+        FactsBuilder factsBuilder = new FactsBuilder(run, taskListener);
+
+        FactDefinition[] factDefinitions = {
+                new FactDefinition("name", "template"),
+                new FactDefinition("someName", "anotherTemplate")};
+
+        // when
+        factsBuilder.addUserFacts(Arrays.asList(factDefinitions));
+
+        // then
+        assertThat(factsBuilder.collect()).hasSize(factDefinitions.length);
     }
 
     @Test
