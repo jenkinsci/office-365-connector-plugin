@@ -1,5 +1,5 @@
 {
-    "summary": "Parent project » myFirstJob: Build #167 Repeated Failure",
+    "summary": "Parent project » myFirst_Job_: Build #167 Repeated Failure",
     "themeColor": "#EF2929",
     "sections": [
         {
@@ -22,7 +22,7 @@
                     "value": "Mike"
                 }
             ],
-            "activityTitle": "Notification from Parent project » myFirstJob",
+            "activityTitle": "Notification from Parent project » myFirst\\_Job\\_",
             "activitySubtitle": "Latest status of build #167"
         }
     ],
@@ -32,7 +32,7 @@
             "@type": "ViewAction",
             "name": "View Build",
             "target": [
-                "http://localhost/job/myFirstJob/167/display/redirect"
+                "http://localhost/job/myFirst_Job_/167/display/redirect"
             ]
         }
     ]

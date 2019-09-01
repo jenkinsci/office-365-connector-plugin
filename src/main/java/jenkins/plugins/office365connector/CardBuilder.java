@@ -94,7 +94,7 @@ public class CardBuilder {
     }
 
     private Section buildSection() {
-        String activityTitle = "Notification from " + getDisplayName();
+        String activityTitle = "Notification from " + getEscapedDisplayName();
         String activitySubtitle = "Latest status of build " + getRunName();
         return new Section(activityTitle, activitySubtitle, factsBuilder.collect());
     }
@@ -168,7 +168,6 @@ public class CardBuilder {
     }
 
     public Card createBuildMessageCard(StepParameters stepParameters) {
-        String jobName = getDisplayName();
         if (stepParameters.getStatus() != null) {
             factsBuilder.addStatus(stepParameters.getStatus());
         } else {
@@ -176,11 +175,10 @@ public class CardBuilder {
         }
         factsBuilder.addUserFacts(stepParameters.getFactDefinitions());
 
-        // TODO: activityTitle and summary should be normalized over card creation
-        String activityTitle = "Notification from " + jobName + ", Build " + getRunName();
+        String activityTitle = "Notification from " + getEscapedDisplayName();
         Section section = new Section(activityTitle, stepParameters.getMessage(), factsBuilder.collect());
 
-        String summary = jobName + ": Build " + getRunName() + " Status";
+        String summary = getDisplayName() + ": Build " + getRunName() + " Status";
         Card card = new Card(summary, section);
 
         if (stepParameters.getColor() != null) {
@@ -193,18 +191,24 @@ public class CardBuilder {
     }
 
     /**
-     * Returns name of the job presented as display name with parent name such as folder.
+     * Returns escaped name of the job presented as display name with parent name such as folder.
      * Parent is needed for multi-branch pipelines and for cases when job
      */
-    private String getDisplayName() {
-        String displayName = run.getParent().getFullDisplayName();
+    private String getEscapedDisplayName() {
+        String displayName = getDisplayName();
         // escape special characters so the summary is not formatted
         // when the build name contains special characters
         // https://www.markdownguide.org/basic-syntax#characters-you-can-escape
         return displayName.replaceAll("([*_#-])", "\\\\$1");
     }
 
-    // TODO: this should return only build number escaped with \\#
+    /**
+     * Returns name of the project.
+     */
+    private String getDisplayName() {
+        return run.getParent().getFullDisplayName();
+    }
+
     private String getRunName() {
         // TODO: test case when the build number is changed to custom name
         return run.hasCustomDisplayName() ? run.getDisplayName() : "#" + run.getNumber();

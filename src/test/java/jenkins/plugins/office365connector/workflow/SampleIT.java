@@ -29,7 +29,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest(Office365ConnectorWebhookNotifier.class)
 public class SampleIT extends AbstractTest {
 
-    private static final String JOB_NAME = "myFirstJob";
+    private static final String JOB_NAME = "myFirst_Job_";
     private static final String CAUSE_DESCRIPTION = "Started by John";
     private static final int BUILD_NUMBER = 167;
     private static final long START_TIME = 1508617305000L;
