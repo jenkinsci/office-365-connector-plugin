@@ -384,6 +384,7 @@ public class CardBuilderTest extends AbstractTest {
         assertThat(status).isEqualTo(lastResult.toString());
     }
 
+
     @Test
     public void getCompletedResult_ReturnsSuccess() {
 
@@ -480,7 +481,7 @@ public class CardBuilderTest extends AbstractTest {
     }
 
     @Test
-    public void getProjectName_OnNameWithSpecialCharacters_EscapesSpecialCharacters() {
+    public void getEscapedDisplayName_OnNameWithSpecialCharacters_EscapesSpecialCharacters() {
 
         // given
         final String specialDisplayName = "this_is_my-very#special *job*";
@@ -499,7 +500,7 @@ public class CardBuilderTest extends AbstractTest {
         cardBuilder = new CardBuilder(run, taskListener);
 
         // when
-        String displayName = Deencapsulation.invoke(cardBuilder, "getDisplayName");
+        String displayName = Deencapsulation.invoke(cardBuilder, "getEscapedDisplayName");
 
         // then
         assertThat(displayName).isEqualTo("this\\_is\\_my\\-very\\#special \\*job\\*");
