@@ -2,7 +2,6 @@ package jenkins.plugins.office365connector.workflow;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.List;
@@ -14,8 +13,6 @@ import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.FileUtils;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
-import jenkins.plugins.office365connector.utils.TimeUtils;
-import jenkins.plugins.office365connector.utils.TimeUtilsTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,18 +29,7 @@ public class SampleIT extends AbstractTest {
     private static final String JOB_NAME = "myFirst_Job_";
     private static final String CAUSE_DESCRIPTION = "Started by John";
     private static final int BUILD_NUMBER = 167;
-    private static final long START_TIME = 1508617305000L;
-    private static final long DURATION = 1000 * 60 * 60;
     private static final String DEVELOPER = "Mike";
-
-    private static final String FORMATTED_START_TIME;
-    private static final String FORMATTED_COMPLETED_TIME;
-
-    static {
-        TimeUtilsTest.setupTimeZoneAndLocale();
-        FORMATTED_START_TIME = TimeUtils.dateToString(START_TIME);
-        FORMATTED_COMPLETED_TIME = TimeUtils.dateToString(START_TIME + DURATION);
-    }
 
     @Before
     public void setUp() {
@@ -56,15 +42,12 @@ public class SampleIT extends AbstractTest {
         mockEnvironment();
         mockHttpWorker();
         mockGetChangeSets();
-        mockTimeUtils();
     }
 
     private AbstractBuild mockRun() {
         AbstractBuild run = mock(AbstractBuild.class);
 
         when(run.getNumber()).thenReturn(BUILD_NUMBER);
-        when(run.getStartTimeInMillis()).thenReturn(START_TIME);
-        when(run.getDuration()).thenReturn(DURATION);
 
         Job job = mockJob(JOB_NAME);
         when(run.getParent()).thenReturn(job);
@@ -77,12 +60,6 @@ public class SampleIT extends AbstractTest {
     private void mockGetChangeSets() {
         List<ChangeLogSet> files = new AffectedFileBuilder().singleChangeLog(run, DEVELOPER);
         when(run.getChangeSets()).thenReturn(files);
-    }
-
-    private void mockTimeUtils() {
-        mockStatic(TimeUtils.class);
-        when(TimeUtils.dateToString(START_TIME)).thenReturn(FORMATTED_START_TIME);
-        when(TimeUtils.dateToString(START_TIME + DURATION)).thenReturn(FORMATTED_COMPLETED_TIME);
     }
 
 
