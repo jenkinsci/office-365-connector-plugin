@@ -27,7 +27,6 @@ import jenkins.plugins.office365connector.helpers.HttpWorkerAnswer;
 import jenkins.plugins.office365connector.helpers.MockHelper;
 import jenkins.plugins.office365connector.helpers.Office365ConnectorWebhookNotifierAnswer;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
-import jenkins.plugins.office365connector.utils.TimeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
@@ -38,7 +37,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-@PrepareForTest({DisplayURLProvider.class, Run.class, TimeUtils.class})
+@PrepareForTest({DisplayURLProvider.class, Run.class})
 public abstract class AbstractTest {
 
     private static final String PARENT_JOB_NAME = "Parent project";

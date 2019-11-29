@@ -18,8 +18,6 @@ import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.SCMHeadBuilder;
-import jenkins.plugins.office365connector.utils.TimeUtils;
-import jenkins.plugins.office365connector.utils.TimeUtilsTest;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.metadata.ContributorMetadataAction;
 import jenkins.scm.api.metadata.ObjectMetadataAction;
@@ -41,15 +39,7 @@ public class PullRequestIT extends AbstractTest {
     private static final String JOB_NAME = "hook » PR-1";
     private static final int BUILD_NUMBER = 3;
     private static final String URL_TEMPLATE = "http://localhost:8080/job/GitHub%%20Branch%%20Source/job/hook/job/%s/%s/display/redirect";
-    private static final long START_TIME = 1508617305000L;
     private static final String USER_NAME = "damian";
-
-    private static final String FORMATTED_START_TIME;
-
-    static {
-        TimeUtilsTest.setupTimeZoneAndLocale();
-        FORMATTED_START_TIME = TimeUtils.dateToString(START_TIME);
-    }
 
     @Before
     public void setUp() {
@@ -63,7 +53,6 @@ public class PullRequestIT extends AbstractTest {
         mockEnvironment();
         mockHttpWorker();
         mockGetChangeSets();
-        mockTimeUtils();
 
         mockPullRequest();
     }
@@ -72,7 +61,6 @@ public class PullRequestIT extends AbstractTest {
         AbstractBuild run = mock(AbstractBuild.class);
 
         when(run.getNumber()).thenReturn(BUILD_NUMBER);
-        when(run.getStartTimeInMillis()).thenReturn(START_TIME);
 
         Job job = mockJob(JOB_NAME, PARENT_JOB_NAME);
         when(run.getParent()).thenReturn(job);
@@ -94,15 +82,10 @@ public class PullRequestIT extends AbstractTest {
         when(run.getChangeSets()).thenReturn(files);
     }
 
-    protected void mockDisplayURLProvider() {
+    private void mockDisplayURLProvider() {
         mockStatic(DisplayURLProvider.class);
         when(DisplayURLProvider.get()).thenReturn(
                 new ClassicDisplayURLProviderBuilder(JOB_NAME, BUILD_NUMBER, URL_TEMPLATE));
-    }
-
-    private void mockTimeUtils() {
-        mockStatic(TimeUtils.class);
-        when(TimeUtils.dateToString(START_TIME)).thenReturn(FORMATTED_START_TIME);
     }
 
     private void mockPullRequest() {
