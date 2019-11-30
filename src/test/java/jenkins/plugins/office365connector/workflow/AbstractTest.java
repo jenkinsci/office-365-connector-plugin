@@ -8,6 +8,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.List;
 
 import hudson.EnvVars;
 import hudson.FilePath;
@@ -21,6 +22,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.HttpWorker;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
+import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.WebhookJobProperty;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.HttpWorkerAnswer;
@@ -107,7 +109,11 @@ public abstract class AbstractTest {
     }
 
     protected void mockProperty(Job job) {
-        WebhookJobProperty property = new WebhookJobProperty(WebhookBuilder.sampleWebhookWithAllStatuses());
+        mockProperty(job, WebhookBuilder.sampleWebhookWithAllStatuses());
+    }
+
+    protected void mockProperty(Job job, List<Webhook> webhooks) {
+        WebhookJobProperty property = new WebhookJobProperty(webhooks);
         when(job.getProperty(WebhookJobProperty.class)).thenReturn(property);
     }
 

@@ -19,6 +19,15 @@ public class WebhookBuilder {
         return Arrays.asList(webhook);
     }
 
+    public static List<Webhook> sampleMultiplyWebhookWithAllStatuses() {
+        Webhook webhook1 = new Webhook(ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE);
+        Webhook webhook2 = new Webhook(ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE);
+
+        enableAllStatuses(webhook1);
+        enableAllStatuses(webhook2);
+        return Arrays.asList(webhook1, webhook2);
+    }
+
     public static List<Webhook> sampleWebhookWithMacro(String template, String value, int repeated) {
         List<Webhook> webhooks = new ArrayList<>();
         for (int i = 0; i < repeated; i++) {
