@@ -40,7 +40,6 @@ public class Office365ConnectorWebhookNotifier {
             .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
             .setPrettyPrinting().create();
 
-    private final CardBuilder cardBuilder;
     private final DecisionMaker decisionMaker;
 
     private final Run run;
@@ -50,7 +49,6 @@ public class Office365ConnectorWebhookNotifier {
     public Office365ConnectorWebhookNotifier(Run run, TaskListener taskListener) {
         this.run = run;
         this.taskListener = taskListener;
-        this.cardBuilder = new CardBuilder(run, taskListener);
         this.decisionMaker = new DecisionMaker(run, taskListener);
         this.job = run.getParent();
     }
@@ -63,6 +61,7 @@ public class Office365ConnectorWebhookNotifier {
             for (Webhook webhook : webhooks) {
                 if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                     if (webhook.isStartNotification()) {
+                        CardBuilder cardBuilder = new CardBuilder(run, taskListener);
                         Card card = cardBuilder.createStartedCard(webhook.getFactDefinitions());
                         executeWorker(webhook, card);
                     }
@@ -77,6 +76,7 @@ public class Office365ConnectorWebhookNotifier {
         for (Webhook webhook : webhooks) {
             if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                 if (decisionMaker.isStatusMatched(webhook)) {
+                    CardBuilder cardBuilder = new CardBuilder(run, taskListener);
                     Card card = cardBuilder.createCompletedCard(webhook.getFactDefinitions());
                     executeWorker(webhook, card);
                 }
@@ -93,6 +93,7 @@ public class Office365ConnectorWebhookNotifier {
     }
 
     public void sendBuildStepNotification(StepParameters stepParameters) {
+        CardBuilder cardBuilder = new CardBuilder(run, taskListener);
         Card card;
         // TODO: improve this logic as the user may send any 'status' via pipeline step
         if (StringUtils.isNotBlank(stepParameters.getMessage())) {
