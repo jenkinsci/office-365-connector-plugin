@@ -116,6 +116,8 @@ public class HttpWorker implements Runnable {
             }
         }
         client.getParams().setConnectionManagerTimeout(timeout);
+        client.getHttpConnectionManager().getParams().setSoTimeout(timeout);
+        client.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
         return client;
     }
 
