@@ -198,7 +198,7 @@ public class Office365ConnectorSendStepTest {
     }
 
     @Test
-    public void getDisplayName_ReturnsFunctionName() {
+    public void getDisplayName_DoesNotReturnFunctionName() {
 
         // given
         StepDescriptor descriptor = new Office365ConnectorSendStep.DescriptorImpl();
@@ -207,7 +207,7 @@ public class Office365ConnectorSendStepTest {
         String displayName = descriptor.getDisplayName();
 
         // then
-        assertThat(displayName).isEqualTo("office365ConnectorSend");
+        assertThat(displayName).isNotEqualTo("office365ConnectorSend");
     }
 
     @Test
