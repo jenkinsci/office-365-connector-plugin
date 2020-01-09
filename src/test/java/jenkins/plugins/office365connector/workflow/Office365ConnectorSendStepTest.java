@@ -205,9 +205,11 @@ public class Office365ConnectorSendStepTest {
 
         // when
         String displayName = descriptor.getDisplayName();
+        String functionName = descriptor.getFunctionName();
 
         // then
-        assertThat(displayName).isNotEqualTo("office365ConnectorSend");
+        assertThat(displayName).isNotBlank();
+        assertThat(displayName).isNotEqualTo(functionName);
     }
 
     @Test
