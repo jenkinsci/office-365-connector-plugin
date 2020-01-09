@@ -100,7 +100,7 @@ public class Office365ConnectorSendStep extends Step {
         @Override
         @Nonnull
         public String getDisplayName() {
-            return "Send build notifications to Microsoft Teams or Outlook";
+            return "Send job status notifications to Office 365 (e.g. Microsoft Teams or Outlook)";
         }
 
         public FormValidation doCheckWebhookUrl(@QueryParameter String value) {
