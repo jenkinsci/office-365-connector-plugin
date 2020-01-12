@@ -65,7 +65,6 @@ public class HttpWorker implements Runnable {
         int tried = 0;
         boolean success = false;
         HttpClient client = getHttpClient();
-        client.getParams().setConnectionManagerTimeout(timeout);
         do {
             tried++;
             RequestEntity requestEntity;
@@ -116,6 +115,9 @@ public class HttpWorker implements Runnable {
                 }
             }
         }
+        client.getParams().setConnectionManagerTimeout(timeout);
+        client.getHttpConnectionManager().getParams().setSoTimeout(timeout);
+        client.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
         return client;
     }
 
