@@ -113,6 +113,8 @@ pipeline {
     post {
         failure {
             office365ConnectorSend webhookUrl: "https://outlook.office.com/webhook/123456..."
+                factDefinitions: [[name: "fact1", template: "content of fact1"],
+                                  [name: "fact2", template: "content of fact2"]]
         }
     }
 }
@@ -126,3 +128,4 @@ You may find useful below link if you like to contribute and add new feature:
 - [Support for Markdown](https://docs.microsoft.com/en-us/flow/approvals-markdown-support)
 - [Adding connector to Microsoft Teams](https://docs.microsoft.com/pl-pl/microsoftteams/platform/concepts/connectors/connectors-using)
 - [Office365 test dev account](https://developer.microsoft.com/office/dev-program)
+- [Office365ConnectorSend parameters](https://jenkins.io/doc/pipeline/steps/Office-365-Connector/)
