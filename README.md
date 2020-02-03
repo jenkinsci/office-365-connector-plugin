@@ -112,7 +112,7 @@ pipeline {
 
     post {
         failure {
-            office365ConnectorSend webhookUrl: "https://outlook.office.com/webhook/123456..."
+            office365ConnectorSend webhookUrl: "https://outlook.office.com/webhook/123456...",
                 factDefinitions: [[name: "fact1", template: "content of fact1"],
                                   [name: "fact2", template: "content of fact2"]]
         }
