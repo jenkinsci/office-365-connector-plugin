@@ -1,0 +1,27 @@
+{
+  "summary": "Parent project » myFirst_Job_: Build #167",
+  "themeColor": "#FF00FF",
+  "sections": [
+    {
+      "markdown": true,
+      "facts": [
+        {
+          "name": "Status",
+          "value": "funnyStatus"
+        }
+      ],
+      "activityTitle": "Notification from Parent project » myFirst\\_Job\\_",
+      "activitySubtitle": "helloMessage"
+    }
+  ],
+  "potentialAction": [
+    {
+      "@context": "http://schema.org",
+      "@type": "ViewAction",
+      "name": "View Build",
+      "target": [
+        "http://localhost/job/myFirst_Job_/167/display/redirect"
+      ]
+    }
+  ]
+}

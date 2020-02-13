@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import java.util.Collections;
 import java.util.List;
 
 import hudson.model.AbstractBuild;
@@ -13,6 +14,7 @@ import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.FileUtils;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
+import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -121,6 +123,25 @@ public class SampleIT extends AbstractTest {
 
         // then
         assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("completed-failed.json"));
+        assertThat(workerAnswer.getTimes()).isOne();
+    }
+
+    @Test
+    public void sendBuildStepNotification_SendsProperData() {
+
+        // given
+        StepParameters stepParameters = new StepParameters(
+                "helloMessage", ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE,
+                "funnyStatus", Collections.emptyList(), "#FF00FF");
+
+        when(run.getResult()).thenReturn(Result.FAILURE);
+        Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
+
+        // when
+        notifier.sendBuildStepNotification(stepParameters);
+
+        // then
+        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("sendstep.json"));
         assertThat(workerAnswer.getTimes()).isOne();
     }
 

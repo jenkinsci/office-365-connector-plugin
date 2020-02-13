@@ -178,7 +178,7 @@ public class CardBuilder {
         String activityTitle = "Notification from " + getEscapedDisplayName();
         Section section = new Section(activityTitle, stepParameters.getMessage(), factsBuilder.collect());
 
-        String summary = getDisplayName() + ": Build " + getRunName() + " Status";
+        String summary = getDisplayName() + ": Build " + getRunName();
         Card card = new Card(summary, section);
 
         if (stepParameters.getColor() != null) {

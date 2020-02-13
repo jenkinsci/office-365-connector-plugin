@@ -429,7 +429,7 @@ public class CardBuilderTest extends AbstractTest {
         Card card = cardBuilder.createBuildMessageCard(stepParameters);
 
         // then
-        assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER + " Status");
+        assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER);
         assertThat(card.getSections()).hasSize(1);
         assertThat(card.getThemeColor()).isEqualTo(color);
         FactAssertion.assertThat(card.getSections().get(0).getFacts())
@@ -451,7 +451,7 @@ public class CardBuilderTest extends AbstractTest {
         Card card = cardBuilder.createBuildMessageCard(stepParameters);
 
         // then
-        assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER + " Status");
+        assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER);
         assertThat(card.getSections()).hasSize(1);
         assertThat(card.getThemeColor()).isEqualTo(color);
         FactAssertion.assertThat(card.getSections().get(0).getFacts())
@@ -473,7 +473,7 @@ public class CardBuilderTest extends AbstractTest {
         Card card = cardBuilder.createBuildMessageCard(stepParameters);
 
         // then
-        assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER + " Status");
+        assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER);
         assertThat(card.getSections()).hasSize(1);
         assertThat(card.getThemeColor()).isEqualTo("3479BF");
         FactAssertion.assertThat(card.getSections().get(0).getFacts())
