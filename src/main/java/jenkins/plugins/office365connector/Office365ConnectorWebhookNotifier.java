@@ -104,19 +104,8 @@ public class Office365ConnectorWebhookNotifier {
             card = cardBuilder.createCompletedCard(stepParameters.getFactDefinitions());
         }
 
-        List<Webhook> webhooks = extractWebhooks(job);
-
-        // ToDo: should the notifications be sent to defined webhook
-        // if step office365ConnectorSend has already provided url for the webhook
-        // and there is no flag 'send by step during any build moment' ?
-        if (!webhooks.isEmpty()) {
-            for (Webhook webhook : webhooks) {
-                executeWorker(webhook, card);
-            }
-        } else {
-            Webhook webhook = new Webhook(stepParameters.getWebhookUrl());
-            executeWorker(webhook, card);
-        }
+        Webhook webhook = new Webhook(stepParameters.getWebhookUrl());
+        executeWorker(webhook, card);
     }
 
     private void executeWorker(Webhook webhook, Card card) {
