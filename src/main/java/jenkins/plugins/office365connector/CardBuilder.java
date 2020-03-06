@@ -14,6 +14,7 @@
 package jenkins.plugins.office365connector;
 
 import java.util.List;
+import java.awt.*;
 
 import hudson.model.Result;
 import hudson.model.Run;
@@ -87,10 +88,18 @@ public class CardBuilder {
         Section section = buildSection();
 
         Card card = new Card(summary, section);
-        card.setThemeColor(lastResult.color.getHtmlBaseColor());
+        card.setThemeColor(getCardThemeColor(lastResult));
         card.setPotentialAction(potentialActionBuilder.buildActionable());
 
         return card;
+    }
+
+    private String getCardThemeColor(Result result) {
+        if (result == Result.SUCCESS) {
+            return String.format("#%06X", Color.GREEN.getRGB() & 0xFFFFFF);
+        } else {
+            return result.color.getHtmlBaseColor();
+        }
     }
 
     private Section buildSection() {
