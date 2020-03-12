@@ -510,7 +510,7 @@ public class CardBuilderTest extends AbstractTest {
     public void getCardThemeColor_OnSuccessResult_ReturnsGreen() {
         // given
         Result successResult = Result.SUCCESS;
-        String greenColorString = "0x00FF00";
+        String greenColorString = "#00FF00";
 
         // when
         String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", successResult);
