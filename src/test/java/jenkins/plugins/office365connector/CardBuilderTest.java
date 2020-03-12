@@ -509,51 +509,66 @@ public class CardBuilderTest extends AbstractTest {
 
     @Test
     public void getCardThemeColor_OnSuccessResult_ReturnsGreen() {
+        // given
         Result successResult = Result.SUCCESS;
+        String greenColorString = "0x00FF00";
+
+        // when
         String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", successResult);
         
-        String greenColorString = String.format("#%06X", Color.GREEN.getRGB() & 0xFFFFFF);
-
+        // then
         assertThat(themeColor).isEqualToIgnoringCase(greenColorString);
     }
 
     @Test
     public void getCardThemeColor_OnAbortedResult_ReturnsBallColor() {
+        // given
         Result abortedResult = Result.ABORTED;
-        String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", abortedResult);
-        
         String ballColorString = Result.ABORTED.color.getHtmlBaseColor();
 
+        // when
+        String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", abortedResult);
+        
+        // then
         assertThat(themeColor).isEqualToIgnoringCase(ballColorString);
     }
 
     @Test
     public void getCardThemeColor_OnFailureResult_ReturnsBallColor() {
+        // given
         Result failureResult = Result.FAILURE;
-        String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", failureResult);
-        
         String ballColorString = Result.FAILURE.color.getHtmlBaseColor();
 
+        // when
+        String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", failureResult);
+        
+        // then
         assertThat(themeColor).isEqualToIgnoringCase(ballColorString);
     }
 
     @Test
     public void getCardThemeColor_OnNotBuiltResult_ReturnsBallColor() {
+        // given
         Result notBuiltResult = Result.NOT_BUILT;
-        String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", notBuiltResult);
-        
         String ballColorString = Result.NOT_BUILT.color.getHtmlBaseColor();
 
+        // when
+        String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", notBuiltResult);
+
+        // then
         assertThat(themeColor).isEqualToIgnoringCase(ballColorString);
     }
 
     @Test
     public void getCardThemeColor_OnUnstableResult_ReturnsBallColor() {
+        // given
         Result unstableResult = Result.UNSTABLE;
-        String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", unstableResult);
-        
         String ballColorString = Result.UNSTABLE.color.getHtmlBaseColor();
 
+        // when
+        String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", unstableResult);
+        
+        // then
         assertThat(themeColor).isEqualToIgnoringCase(ballColorString);
     }
 }

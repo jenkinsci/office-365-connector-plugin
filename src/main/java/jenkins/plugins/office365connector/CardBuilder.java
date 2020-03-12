@@ -95,8 +95,9 @@ public class CardBuilder {
     }
 
     private static String getCardThemeColor(Result result) {
-        if (result != null && result == Result.SUCCESS) {
-            return String.format("#%06X", Color.GREEN.getRGB() & 0xFFFFFF);
+        if (result == Result.SUCCESS) {
+            // Return green for success
+            return "0x00FF00";
         } else {
             return result.color.getHtmlBaseColor();
         }
