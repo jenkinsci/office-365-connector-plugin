@@ -14,7 +14,6 @@
 package jenkins.plugins.office365connector;
 
 import java.util.List;
-import java.awt.*;
 
 import hudson.model.Result;
 import hudson.model.Run;

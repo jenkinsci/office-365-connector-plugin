@@ -5,7 +5,6 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.Collections;
-import java.awt.*;
 
 import hudson.model.AbstractBuild;
 import hudson.model.ItemGroup;
