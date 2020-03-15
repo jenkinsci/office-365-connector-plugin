@@ -87,10 +87,19 @@ public class CardBuilder {
         Section section = buildSection();
 
         Card card = new Card(summary, section);
-        card.setThemeColor(lastResult.color.getHtmlBaseColor());
+        card.setThemeColor(getCardThemeColor(lastResult));
         card.setPotentialAction(potentialActionBuilder.buildActionable());
 
         return card;
+    }
+
+    private static String getCardThemeColor(Result result) {
+        if (result == Result.SUCCESS) {
+            // Return green for success
+            return "#00FF00";
+        } else {
+            return result.color.getHtmlBaseColor();
+        }
     }
 
     private Section buildSection() {
