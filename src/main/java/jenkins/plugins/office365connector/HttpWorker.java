@@ -110,6 +110,7 @@ public class HttpWorker implements Runnable {
                 String password = proxy.getPassword();
                 // Consider it to be passed if username specified. Sufficient?
                 if (StringUtils.isNotBlank(username)) {
+                    client.getParams().setAuthenticationPreemptive(true);
                     client.getState().setProxyCredentials(AuthScope.ANY,
                             new UsernamePasswordCredentials(username, password));
                 }
