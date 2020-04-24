@@ -37,10 +37,10 @@ Plugin is used to send actionable messages in [Outlook](http://outlook.com), [Of
 ```groovy
 job('Example Job Name') {
     description 'Example description'
-    configure { project ->
-        project / 'properties' << 'jenkins.plugins.office365connector.WebhookJobProperty' {
+    properties {
+        office365ConnectorWebhooks {
             webhooks {
-                'jenkins.plugins.office365connector.Webhook' {
+                webhook {
                     name('Example Webhook Name')
                     url('https://outlook.office.com/webhook/123456...')
                     startNotification(false)
@@ -52,7 +52,6 @@ job('Example Job Name') {
                     notifyBackToNormal(true)
                     notifyRepeatedFailure(false)
                     timeout(30000)
-                    macros(class: 'empty-list')
                 }
             }
         }
