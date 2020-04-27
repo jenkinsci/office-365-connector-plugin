@@ -51,9 +51,6 @@ public class FactsBuilder {
 
     final static String NAME_FAILING_SINCE_BUILD = "Failing since";
 
-    // TODO: Running is not needed as it means same as Started
-    final static String VALUE_STATUS_RUNNING = "Running";
-
     private final List<Fact> facts = new ArrayList<>();
 
     private final Run run;
@@ -66,10 +63,6 @@ public class FactsBuilder {
 
     public void addStatus(String status) {
         addFact(NAME_STATUS, status);
-    }
-
-    public void addStatusRunning() {
-        addFact(NAME_STATUS, VALUE_STATUS_RUNNING);
     }
 
     public void addFailingSinceBuild(int buildNumber) {
