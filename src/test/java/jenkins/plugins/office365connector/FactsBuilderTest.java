@@ -63,21 +63,6 @@ public class FactsBuilderTest extends AbstractTest {
     }
 
     @Test
-    public void addStatusRunning_AddsFact() {
-
-        // given
-        FactsBuilder factBuilder = new FactsBuilder(run, taskListener);
-
-        // when
-        factBuilder.addStatusRunning();
-
-        // then
-        FactAssertion.assertThat(factBuilder.collect())
-                .hasName(FactsBuilder.NAME_STATUS)
-                .hasValue(FactsBuilder.VALUE_STATUS_RUNNING);
-    }
-
-    @Test
     public void addFailingSinceBuild_AddsFact() {
 
         // given

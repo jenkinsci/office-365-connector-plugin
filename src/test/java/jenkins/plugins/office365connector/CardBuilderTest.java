@@ -454,8 +454,7 @@ public class CardBuilderTest extends AbstractTest {
         assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER);
         assertThat(card.getSections()).hasSize(1);
         assertThat(card.getThemeColor()).isEqualTo(color);
-        FactAssertion.assertThat(card.getSections().get(0).getFacts())
-                .hasName(FactsBuilder.NAME_STATUS).hasValue("Running");
+        assertThat(card.getSections().get(0).getFacts()).isEmpty();
     }
 
     @Test

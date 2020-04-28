@@ -179,8 +179,6 @@ public class CardBuilder {
     public Card createBuildMessageCard(StepParameters stepParameters) {
         if (stepParameters.getStatus() != null) {
             factsBuilder.addStatus(stepParameters.getStatus());
-        } else {
-            factsBuilder.addStatusRunning();
         }
         factsBuilder.addUserFacts(stepParameters.getFactDefinitions());
 
