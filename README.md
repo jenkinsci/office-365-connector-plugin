@@ -56,6 +56,16 @@ job('Example Job Name') {
             }
         }
     }
+
+    // Webhook Macro Configuration
+    configure {
+        // Example: Conditioning webhook trigger on build parameter 'version' being equal to 'latest'
+        // Templates are defined as token macros https://wiki.jenkins.io/display/JENKINS/Token+Macro+Plugin
+        it / 'properties' / 'jenkins.plugins.office365connector.WebhookJobProperty' / 'webhooks' / 'jenkins.plugins.office365connector.Webhook' / 'macros' << 'jenkins.plugins.office365connector.model.Macro' {
+          template('${ENV, var="version"}')
+          value('latest')
+        }
+    }
 }
 ```
 
