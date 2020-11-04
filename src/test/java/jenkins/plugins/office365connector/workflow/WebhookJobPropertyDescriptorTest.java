@@ -1,15 +1,9 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.WebhookJobProperty;
@@ -21,9 +15,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kohsuke.stapler.StaplerRequest;
 import org.mockito.Matchers;
+import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.anyObject;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
@@ -36,12 +37,18 @@ public class WebhookJobPropertyDescriptorTest {
     private static final String KEY = "webhooks";
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         File rootDir = new File(".");
         when(jenkins.getRootDir()).thenReturn(rootDir);
         when(Jenkins.get()).thenReturn(jenkins);
+
+        Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
+        when(mockDescriptor.getName()).thenReturn("testName");
+        when(mockDescriptor.getId()).thenReturn("testId");
+
+        Mockito.when(jenkins.getDescriptorOrDie(anyObject())).thenReturn(mockDescriptor);
     }
 
     @Test

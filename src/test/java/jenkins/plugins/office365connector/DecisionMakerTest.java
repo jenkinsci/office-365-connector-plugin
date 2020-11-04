@@ -1,35 +1,49 @@
 package jenkins.plugins.office365connector;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-
 import hudson.FilePath;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.model.Macro;
 import jenkins.plugins.office365connector.workflow.AbstractTest;
 import mockit.Deencapsulation;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.mockito.Matchers;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Matchers.anyObject;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 @PowerMockIgnore("jdk.internal.reflect.*")
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({TokenMacro.class, FilePath.class})
+@PrepareForTest({TokenMacro.class, FilePath.class, Jenkins.class})
 public class DecisionMakerTest extends AbstractTest {
+
+    @Before
+    public void setup() throws Exception {
+        Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
+        when(mockDescriptor.getName()).thenReturn("test");
+
+        Jenkins mockJenkins = mock(Jenkins.class);
+        mockStatic(Jenkins.class);
+        Mockito.when(Jenkins.getInstance()).thenReturn(mockJenkins);
+        Mockito.when(mockJenkins.getDescriptorOrDie(anyObject())).thenReturn(mockDescriptor);
+    }
 
     @Test
     public void DecisionMaker_OnEmptyPreviousBuild_StoresParameters() {
