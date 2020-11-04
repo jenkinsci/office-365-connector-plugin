@@ -10,6 +10,7 @@ import jenkins.plugins.office365connector.WebhookJobProperty;
 import jenkins.plugins.office365connector.WebhookJobPropertyDescriptor;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
 import net.sf.json.JSONObject;
+import net.sf.json.JsonConfig;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +30,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
  * @author Damian Szczepanik (damianszczepanik@github)
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(Jenkins.class)
+@PrepareForTest({Jenkins.class, Webhook.DescriptorImpl.class})
 public class WebhookJobPropertyDescriptorTest {
 
     private static final String KEY = "webhooks";
@@ -45,9 +46,11 @@ public class WebhookJobPropertyDescriptorTest {
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
         when(mockDescriptor.getName()).thenReturn("testName");
         when(mockDescriptor.getId()).thenReturn("testId");
+        when(mockDescriptor.getId()).thenReturn("testId");
+        when(mockDescriptor.getDescriptorFullUrl()).thenReturn("http://test.com");
 
         Mockito.when(Jenkins.getInstance()).thenReturn(jenkins);
-        Mockito.when(jenkins.getDescriptorOrDie(anyObject())).thenReturn(mockDescriptor);
+        Mockito.when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
     }
 
     @Test
