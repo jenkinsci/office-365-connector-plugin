@@ -16,19 +16,21 @@ package jenkins.plugins.office365connector;
 
 import java.util.Collections;
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
-import javax.annotation.Nonnull;
 import jenkins.plugins.office365connector.model.FactDefinition;
 import jenkins.plugins.office365connector.model.Macro;
 import jenkins.plugins.office365connector.utils.FormUtils;
+import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
 
 public class Webhook extends AbstractDescribableImpl<Webhook> {
 
@@ -52,18 +54,24 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     private List<FactDefinition> factDefinitions = Collections.emptyList();
 
+    @Override
+    public DescriptorImpl getDescriptor() {
+            return (DescriptorImpl)super.getDescriptor();
+    }
+
     @DataBoundConstructor
     public Webhook(String url) {
         this.url = url;
     }
 
     public String getUrl() {
-        return url;
+        return Util.fixEmptyAndTrim(
+            !StringUtils.isEmpty(url) ? url : getDescriptor().getUrl());
     }
 
     public String getName() {
-        // when the job is created and the name is not provided, then getName() returns null
-        return Util.fixEmptyAndTrim(name);
+        return Util.fixEmptyAndTrim(
+            !StringUtils.isEmpty(name) ? name : getDescriptor().getName());
     }
 
     @DataBoundSetter
@@ -172,6 +180,8 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     @Extension
     public static class DescriptorImpl extends Descriptor<Webhook> {
+        private String url;
+        private String name;
 
         @Nonnull
         @Override
@@ -185,6 +195,29 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
         public FormValidation doCheckUrl(@QueryParameter String value) {
             return FormUtils.formValidateUrl(value);
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public boolean configure(StaplerRequest req, JSONObject formData) {
+            req.bindJSON(this, formData);
+            save();
+            return true;
         }
     }
 }

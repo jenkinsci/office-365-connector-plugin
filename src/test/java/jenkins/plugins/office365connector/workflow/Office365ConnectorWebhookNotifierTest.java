@@ -1,16 +1,12 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 import java.util.Collections;
 import java.util.List;
-
 import hudson.model.AbstractBuild;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.TaskListener;
+import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.CardBuilder;
 import jenkins.plugins.office365connector.DecisionMaker;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
@@ -24,21 +20,28 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
+import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.anyObject;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(Office365ConnectorWebhookNotifier.class)
+@PrepareForTest({Office365ConnectorWebhookNotifier.class, Jenkins.class})
 public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
 
     private TaskListener taskListener;
     private Job job;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         taskListener = mockListener();
 
         run = mock(AbstractBuild.class);
@@ -49,6 +52,14 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
 
         mockEnvironment();
         mockHttpWorker();
+
+        Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
+        when(mockDescriptor.getName()).thenReturn("test");
+
+        Jenkins mockJenkins = mock(Jenkins.class);
+        mockStatic(Jenkins.class);
+        Mockito.when(Jenkins.getInstance()).thenReturn(mockJenkins);
+        Mockito.when(mockJenkins.getDescriptorOrDie(anyObject())).thenReturn(mockDescriptor);
     }
 
     @Test
