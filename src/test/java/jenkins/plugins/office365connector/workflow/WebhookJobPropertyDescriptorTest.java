@@ -31,7 +31,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
  */
 @PowerMockIgnore("jdk.internal.reflect.*")
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(Jenkins.class)
+@PrepareForTest({Jenkins.class, Webhook.DescriptorImpl.class})
 public class WebhookJobPropertyDescriptorTest {
 
     private static final String KEY = "webhooks";
@@ -47,6 +47,7 @@ public class WebhookJobPropertyDescriptorTest {
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
         when(mockDescriptor.getName()).thenReturn("testName");
         when(mockDescriptor.getId()).thenReturn("testId");
+        when(mockDescriptor.getDescriptorFullUrl()).thenReturn("http://test.com");
 
         Mockito.when(jenkins.getDescriptorOrDie(anyObject())).thenReturn(mockDescriptor);
     }
