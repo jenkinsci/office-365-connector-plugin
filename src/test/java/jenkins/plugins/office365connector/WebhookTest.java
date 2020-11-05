@@ -1,17 +1,25 @@
 package jenkins.plugins.office365connector;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.Arrays;
 import java.util.List;
-
+import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.model.FactDefinition;
 import jenkins.plugins.office365connector.model.Macro;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(Jenkins.class)
 public class WebhookTest {
 
     @Test
@@ -29,6 +37,51 @@ public class WebhookTest {
     }
 
     @Test
+    public void getEmptyLocalUrl_ReturnsGlobalUrl() {
+
+        // given
+        String globalUrl = "globalUrl";
+        Webhook webhook = new Webhook("");
+
+        mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
+        Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
+
+
+        // when
+        when(Jenkins.getInstance()).thenReturn(jenkins);
+        when(mockDescriptor.getUrl()).thenReturn(globalUrl);
+        when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
+        String actualUrl = webhook.getUrl();
+
+        // then
+        assertThat(actualUrl).isEqualTo(globalUrl);
+    }
+
+    @Test
+    public void getLocalUrl_ReturnsLocalUrlAndNotGlobal() {
+
+        // given
+        String globalUrl = "globalUrl";
+        String localUrl = "localUrl";
+        Webhook webhook = new Webhook(localUrl);
+
+        mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
+        Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
+
+
+        // when
+        when(Jenkins.getInstance()).thenReturn(jenkins);
+        when(mockDescriptor.getUrl()).thenReturn(globalUrl);
+        when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
+        String actualUrl = webhook.getUrl();
+
+        // then
+        assertThat(actualUrl).isEqualTo(localUrl);
+    }
+
+    @Test
     public void getName_ReturnsName() {
 
         // given
@@ -37,6 +90,51 @@ public class WebhookTest {
         webhook.setName(name);
 
         // when
+        String actualName = webhook.getName();
+
+        // then
+        assertThat(actualName).isEqualTo(name);
+    }
+
+    @Test
+    public void getEmptyLocalName_ReturnsGlobalName() {
+
+        // given
+        String globalName = "globalName";
+        Webhook webhook = new Webhook("someUrl");
+
+        mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
+        Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
+
+
+        // when
+        when(Jenkins.getInstance()).thenReturn(jenkins);
+        when(mockDescriptor.getName()).thenReturn(globalName);
+        when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
+        String actualName = webhook.getName();
+
+        // then
+        assertThat(actualName).isEqualTo(globalName);
+    }
+
+    @Test
+    public void getLocalName_ReturnsLocalNameAndNotGlobal() {
+
+        // given
+        String name = "myName";
+        Webhook webhook = new Webhook("someUrl");
+        webhook.setName(name);
+
+        mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
+        Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
+
+
+        // when
+        when(Jenkins.getInstance()).thenReturn(jenkins);
+        when(mockDescriptor.getName()).thenReturn("globalName");
+        when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
         String actualName = webhook.getName();
 
         // then
