@@ -2,6 +2,7 @@ package jenkins.plugins.office365connector.workflow;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.Collections;
@@ -11,8 +12,10 @@ import hudson.model.AbstractBuild;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.scm.ChangeLogSet;
+import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.FileUtils;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
+import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
@@ -28,7 +31,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  */
 @PowerMockIgnore("jdk.internal.reflect.*")
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(Office365ConnectorWebhookNotifier.class)
+@PrepareForTest({Office365ConnectorWebhookNotifier.class, Jenkins.class})
 public class SampleIT extends AbstractTest {
 
     private static final String JOB_NAME = "myFirst_Job_";
@@ -38,6 +41,8 @@ public class SampleIT extends AbstractTest {
 
     @Before
     public void setUp() {
+        mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
         mockListener();
 
         run = mockRun();
@@ -47,6 +52,13 @@ public class SampleIT extends AbstractTest {
         mockEnvironment();
         mockHttpWorker();
         mockGetChangeSets();
+
+        when(Jenkins.getInstance()).thenReturn(jenkins);
+
+        Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
+        when(mockDescriptor.getName()).thenReturn("testName");
+
+        when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
     }
 
     private AbstractBuild mockRun() {
