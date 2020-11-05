@@ -18,7 +18,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kohsuke.stapler.StaplerRequest;
 import org.mockito.Matchers;
-import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -37,7 +36,7 @@ public class WebhookJobPropertyDescriptorTest {
     private static final String KEY = "webhooks";
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         File rootDir = new File(".");
@@ -47,8 +46,8 @@ public class WebhookJobPropertyDescriptorTest {
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
         when(mockDescriptor.getName()).thenReturn("testName");
 
-        Mockito.when(Jenkins.getInstance()).thenReturn(jenkins);
-        Mockito.when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
+        when(Jenkins.getInstance()).thenReturn(jenkins);
+        when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
     }
 
     @Test
