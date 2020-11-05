@@ -46,7 +46,6 @@ public class WebhookJobPropertyDescriptorTest {
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
         when(mockDescriptor.getName()).thenReturn("testName");
 
-        when(Jenkins.getInstance()).thenReturn(jenkins);
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
     }
 
