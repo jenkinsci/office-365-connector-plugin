@@ -13,8 +13,10 @@ import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
+import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.FileUtils;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
+import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.SCMHeadBuilder;
@@ -32,7 +34,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @author Damian Szczepanik (damianszczepanik@github)
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Office365ConnectorWebhookNotifier.class, SCMHead.HeadByItem.class})
+@PrepareForTest({Office365ConnectorWebhookNotifier.class, SCMHead.HeadByItem.class, Jenkins.class})
 public class PullRequestIT extends AbstractTest {
 
     private static final String PARENT_JOB_NAME = "Damian Szczepanik";
@@ -43,6 +45,8 @@ public class PullRequestIT extends AbstractTest {
 
     @Before
     public void setUp() {
+        mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
         mockListener();
 
         run = mockRun();
@@ -55,6 +59,13 @@ public class PullRequestIT extends AbstractTest {
         mockGetChangeSets();
 
         mockPullRequest();
+
+        when(Jenkins.getInstance()).thenReturn(jenkins);
+
+        Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
+        when(mockDescriptor.getName()).thenReturn("testName");
+
+        when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
     }
 
     private AbstractBuild mockRun() {

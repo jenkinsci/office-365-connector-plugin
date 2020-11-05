@@ -2,6 +2,7 @@ package jenkins.plugins.office365connector.workflow;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.io.File;
@@ -11,6 +12,7 @@ import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Job;
 import hudson.scm.ChangeLogSet;
+import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.WebhookJobProperty;
@@ -27,7 +29,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @author Damian Szczepanik (damianszczepanik@github)
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Office365ConnectorWebhookNotifier.class, TokenMacro.class, FilePath.class})
+@PrepareForTest({Office365ConnectorWebhookNotifier.class, TokenMacro.class, FilePath.class, Jenkins.class})
 public class MacroIT extends AbstractTest {
 
     private static final String JOB_NAME = "simple job";
@@ -35,6 +37,9 @@ public class MacroIT extends AbstractTest {
 
     @Before
     public void setUp() {
+        mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
+
         mockListener();
 
         run = mockRun();
@@ -44,6 +49,13 @@ public class MacroIT extends AbstractTest {
         mockHttpWorker();
         mockGetChangeSets();
         mockTokenMacro(String.valueOf(BUILD_NUMBER));
+
+        when(Jenkins.getInstance()).thenReturn(jenkins);
+
+        Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
+        when(mockDescriptor.getName()).thenReturn("testName");
+
+        when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
     }
 
     private AbstractBuild mockRun() {
