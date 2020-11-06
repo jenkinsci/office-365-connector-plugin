@@ -10,7 +10,7 @@ import org.junit.Test;
  */
 public class WebhookDescriptorImplTest {
 
-    private final Webhook.DescriptorImpl descriptor = new Webhook.DescriptorImpl();
+    private final WebhookStub.DescriptorImplStub descriptor = new WebhookStub.DescriptorImplStub();
 
     @Test
     public void getDisplayName_ReturnsName() {

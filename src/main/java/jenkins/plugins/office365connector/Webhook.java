@@ -183,6 +183,10 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
         private String url;
         private String name;
 
+        public DescriptorImpl() {
+            load();
+        }
+
         @Nonnull
         @Override
         public String getDisplayName() {
@@ -201,6 +205,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
             return url;
         }
 
+        @DataBoundSetter
         public void setUrl(String url) {
             this.url = url;
         }
@@ -209,6 +214,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
             return name;
         }
 
+        @DataBoundSetter
         public void setName(String name) {
             this.name = name;
         }
