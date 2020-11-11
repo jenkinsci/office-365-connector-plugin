@@ -20,7 +20,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
-import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -58,8 +57,8 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
 
         Jenkins jenkins = mock(Jenkins.class);
         mockStatic(Jenkins.class);
-        Mockito.when(Jenkins.getInstance()).thenReturn(jenkins);
-        Mockito.when(jenkins.getDescriptorOrDie(anyObject())).thenReturn(mockDescriptor);
+        when(Jenkins.getInstance()).thenReturn(jenkins);
+        when(jenkins.getDescriptorOrDie(anyObject())).thenReturn(mockDescriptor);
     }
 
     @Test

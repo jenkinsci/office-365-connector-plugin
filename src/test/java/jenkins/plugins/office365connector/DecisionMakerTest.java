@@ -16,7 +16,6 @@ import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -39,8 +38,8 @@ public class DecisionMakerTest extends AbstractTest {
 
         Jenkins mockJenkins = mock(Jenkins.class);
         mockStatic(Jenkins.class);
-        Mockito.when(Jenkins.getInstance()).thenReturn(mockJenkins);
-        Mockito.when(mockJenkins.getDescriptorOrDie(anyObject())).thenReturn(mockDescriptor);
+        when(Jenkins.getInstance()).thenReturn(mockJenkins);
+        when(mockJenkins.getDescriptorOrDie(anyObject())).thenReturn(mockDescriptor);
     }
 
     @Test
