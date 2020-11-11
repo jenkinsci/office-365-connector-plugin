@@ -58,10 +58,10 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
         when(mockDescriptor.getName()).thenReturn("test");
 
-        Jenkins mockJenkins = mock(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
         mockStatic(Jenkins.class);
-        Mockito.when(Jenkins.getInstance()).thenReturn(mockJenkins);
-        Mockito.when(mockJenkins.getDescriptorOrDie(anyObject())).thenReturn(mockDescriptor);
+        Mockito.when(Jenkins.getInstance()).thenReturn(jenkins);
+        Mockito.when(jenkins.getDescriptorOrDie(anyObject())).thenReturn(mockDescriptor);
     }
 
     @Test
