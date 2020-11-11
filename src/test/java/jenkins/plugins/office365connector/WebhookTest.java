@@ -41,20 +41,19 @@ public class WebhookTest {
 
         // given
         String globalUrl = "globalUrl";
-        Webhook webhook = new Webhook("");
-
         mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
-
 
         // when
         when(Jenkins.getInstance()).thenReturn(jenkins);
         when(mockDescriptor.getUrl()).thenReturn(globalUrl);
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
-        String actualUrl = webhook.getUrl();
 
         // then
+        Webhook webhook = new Webhook("");
+        String actualUrl = webhook.getUrl();
+
         assertThat(actualUrl).isEqualTo(globalUrl);
     }
 

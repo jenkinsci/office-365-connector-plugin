@@ -61,12 +61,11 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     @DataBoundConstructor
     public Webhook(String url) {
-        this.url = url;
+        this.url = StringUtils.isEmpty(url) ? getDescriptor().getUrl() : url;
     }
 
     public String getUrl() {
-        return Util.fixEmptyAndTrim(
-            !StringUtils.isEmpty(url) ? url : getDescriptor().getUrl());
+        return url;
     }
 
     public String getName() {
