@@ -177,6 +177,7 @@ public class WebhookJobPropertyDescriptorTest {
         JSONObject jsonObject = new JSONObject();
         Webhook webhook = new Webhook("myUrl");
 
+        // Excluding "descriptor" to avoid infinite loop in jsonObject.put()
         Map map = new HashMap<String, Object>();
         map.put(KEY, webhook);
         JsonConfig config = new JsonConfig();
@@ -204,6 +205,7 @@ public class WebhookJobPropertyDescriptorTest {
         Webhook webhook = new Webhook("myUrl");
         List<Object> webhooks = Arrays.asList(webhook);
 
+        // Excluding "descriptor" to avoid infinite loop in jsonObject.put()
         Map map = new HashMap<String, Object>();
         map.put(KEY, webhooks);
         JsonConfig config = new JsonConfig();
