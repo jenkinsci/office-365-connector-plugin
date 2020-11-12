@@ -17,13 +17,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.Matchers;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -41,7 +41,7 @@ public class DecisionMakerTest extends AbstractTest {
 
         Jenkins mockJenkins = mock(Jenkins.class);
         mockStatic(Jenkins.class);
-        Mockito.when(Jenkins.getInstance()).thenReturn(mockJenkins);
+        Mockito.when(Jenkins.get()).thenReturn(mockJenkins);
         Mockito.when(mockJenkins.getDescriptorOrDie(anyObject())).thenReturn(mockDescriptor);
     }
 
@@ -567,7 +567,7 @@ public class DecisionMakerTest extends AbstractTest {
         mockStatic(FilePath.class);
 
         try {
-            when(TokenMacro.expandAll(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any()))
+            when(TokenMacro.expandAll(any(), any(), any(), any()))
                     .thenThrow(new MacroEvaluationException("ups!"));
         } catch (MacroEvaluationException | IOException | InterruptedException e) {
             throw new IllegalArgumentException(e);
