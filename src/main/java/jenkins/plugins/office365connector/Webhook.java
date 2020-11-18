@@ -56,7 +56,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     @Override
     public DescriptorImpl getDescriptor() {
-            return (DescriptorImpl)super.getDescriptor();
+            return (DescriptorImpl) super.getDescriptor();
     }
 
     @DataBoundConstructor
@@ -70,7 +70,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     public String getName() {
         return Util.fixEmptyAndTrim(
-            StringUtils.isEmpty(name) ? getDescriptor().getName()  : name);
+            StringUtils.isEmpty(name) ? getDescriptor().getName() : name);
     }
 
     @DataBoundSetter

@@ -37,7 +37,7 @@ public class WebhookTest {
     }
 
     @Test
-    public void getEmptyLocalUrl_ReturnsGlobalUrl() {
+    public void getUrl_WithEmptyLocalUrlReturnsGlobalUrl() {
 
         // given
         String globalUrl = "globalUrl";
@@ -58,7 +58,7 @@ public class WebhookTest {
     }
 
     @Test
-    public void getLocalUrl_ReturnsLocalUrlAndNotGlobal() {
+    public void getUrl_ReturnsLocalUrlAndNotGlobal() {
 
         // given
         String globalUrl = "globalUrl";
@@ -95,7 +95,7 @@ public class WebhookTest {
     }
 
     @Test
-    public void getEmptyLocalName_ReturnsGlobalName() {
+    public void getName_WithEmptyLocalNameReturnsGlobalName() {
 
         // given
         String globalName = "globalName";
@@ -103,7 +103,6 @@ public class WebhookTest {
         mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
-
 
         // when
         when(Jenkins.getInstance()).thenReturn(jenkins);
@@ -117,12 +116,12 @@ public class WebhookTest {
     }
 
     @Test
-    public void getLocalName_ReturnsLocalNameAndNotGlobal() {
+    public void getName_ReturnsLocalNameAndNotGlobal() {
 
         // given
-        String name = "myName";
+        String localName = "myName";
         Webhook webhook = new Webhook("someUrl");
-        webhook.setName(name);
+        webhook.setName(localName);
         mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
@@ -135,7 +134,7 @@ public class WebhookTest {
         // then
         String actualName = webhook.getName();
 
-        assertThat(actualName).isEqualTo(name);
+        assertThat(actualName).isEqualTo(localName);
     }
 
     @Test
