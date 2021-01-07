@@ -69,8 +69,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     }
 
     public String getName() {
-        return Util.fixEmptyAndTrim(
-            StringUtils.isEmpty(name) ? getDescriptor().getName() : name);
+        return Util.fixEmptyAndTrim(StringUtils.isEmpty(name) ? getDescriptor().getName() : name);
     }
 
     @DataBoundSetter
