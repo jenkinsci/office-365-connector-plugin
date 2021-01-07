@@ -44,16 +44,15 @@ public class WebhookTest {
         mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
-
-        // when
         when(Jenkins.getInstance()).thenReturn(jenkins);
         when(mockDescriptor.getUrl()).thenReturn(globalUrl);
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
-
-        // then
         Webhook webhook = new Webhook("");
+
+        // when
         String actualUrl = webhook.getUrl();
 
+        // then
         assertThat(actualUrl).isEqualTo(globalUrl);
     }
 
@@ -66,16 +65,15 @@ public class WebhookTest {
         mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
-
-        // when
         when(Jenkins.getInstance()).thenReturn(jenkins);
         when(mockDescriptor.getUrl()).thenReturn(globalUrl);
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
-
-        // then
         Webhook webhook = new Webhook(localUrl);
+
+        // when
         String actualUrl = webhook.getUrl();
 
+        // then
         assertThat(actualUrl).isEqualTo(localUrl);
     }
 
@@ -103,15 +101,13 @@ public class WebhookTest {
         mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
-
-        // when
         when(Jenkins.getInstance()).thenReturn(jenkins);
         when(mockDescriptor.getName()).thenReturn(globalName);
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
 
-        // then
+        // when
         String actualName = webhook.getName();
-
+        // then
         assertThat(actualName).isEqualTo(globalName);
     }
 
@@ -125,15 +121,14 @@ public class WebhookTest {
         mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
-
-        // when
         when(Jenkins.getInstance()).thenReturn(jenkins);
         when(mockDescriptor.getName()).thenReturn("globalName");
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
 
-        // then
+        // when
         String actualName = webhook.getName();
 
+        // then
         assertThat(actualName).isEqualTo(localName);
     }
 
