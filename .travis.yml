@@ -1,23 +1,23 @@
 language: java
 
-dist: trusty
-
 cache:
   directories:
-  - ~/.m2
+    - ~/.m2
 
 matrix:
   include:
-    - jdk: oraclejdk8
+    - jdk: oraclejdk11
       env:
-        - DESC="verifications"
-      script: mvn verify
+        - DESC="tests by oracle"
+      script:
+        - mvn clean verify
 
-    - jdk: oraclejdk8
+    - jdk: openjdk11
       env:
-        - DESC="static analysis"
-      # skip integration tests
-      script: mvn test cobertura:cobertura
-      after_success:
-        # push report to codecov server
-        bash <(curl -s https://codecov.io/bash)
+        - DESC="tests by openjdk"
+      script:
+        - mvn clean verify
+
+after_success:
+  # push report to codecov server
+  bash <(curl -s https://codecov.io/bash)

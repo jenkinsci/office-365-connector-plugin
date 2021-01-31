@@ -8,12 +8,14 @@ import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
+@PowerMockIgnore("jdk.internal.reflect.*")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Office365ConnectorWebhookNotifier.class, Office365ConnectorBuildListener.class})
 public class Office365ConnectorBuildListenerTest extends AbstractTest {
