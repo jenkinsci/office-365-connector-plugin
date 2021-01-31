@@ -21,8 +21,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+@PowerMockIgnore("jdk.internal.reflect.*")
 @RunWith(PowerMockRunner.class)
 public class CardBuilderTest extends AbstractTest {
 
@@ -513,7 +515,7 @@ public class CardBuilderTest extends AbstractTest {
 
         // when
         String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", successResult);
-        
+
         // then
         assertThat(themeColor).isEqualToIgnoringCase(greenColorString);
     }
@@ -526,7 +528,7 @@ public class CardBuilderTest extends AbstractTest {
 
         // when
         String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", abortedResult);
-        
+
         // then
         assertThat(themeColor).isEqualToIgnoringCase(ballColorString);
     }
@@ -539,7 +541,7 @@ public class CardBuilderTest extends AbstractTest {
 
         // when
         String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", failureResult);
-        
+
         // then
         assertThat(themeColor).isEqualToIgnoringCase(ballColorString);
     }
@@ -565,7 +567,7 @@ public class CardBuilderTest extends AbstractTest {
 
         // when
         String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", unstableResult);
-        
+
         // then
         assertThat(themeColor).isEqualToIgnoringCase(ballColorString);
     }

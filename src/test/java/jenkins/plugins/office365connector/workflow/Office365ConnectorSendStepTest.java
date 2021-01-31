@@ -15,12 +15,14 @@ import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.spi.testresult.Result;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
+@PowerMockIgnore("jdk.internal.reflect.*")
 @RunWith(PowerMockRunner.class)
 public class Office365ConnectorSendStepTest {
 
