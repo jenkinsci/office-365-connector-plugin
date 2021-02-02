@@ -39,7 +39,8 @@ Plugin is used to send actionable messages in [Outlook](http://outlook.com), [Of
 
 The plugin can also be configured through global settings under Jenkins -> Manage Jenkins -> Configure System.
 The values in the global settings will be used as default when using the plugin for a job.
-These settings can then be overriden in the job. 
+These settings can then be overriden in the job. Changing the values in the global settings will however not 
+update any settings in an existing job. 
 ## Examples
 
 ### DSL
