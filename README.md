@@ -16,6 +16,12 @@ Plugin is used to send actionable messages in [Outlook](http://outlook.com), [Of
 ### Jenkins configuration
 ![Configuration](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/config.png)
 
+### Jenkins global configuration
+![GlobalConfiguration](.README/globalconfig.png?raw=true)
+
+#### Global configuration values used as default in jobs
+![GlobalConfigurationDefault](.README/globalconfigdefault.png?raw=true)
+
 ### Microsoft Teams
 #### With Jenkins plugin
 ![Teams](https://github.com/jenkinsci/office-365-connector-plugin/raw/master/.README/teams.png)
@@ -30,7 +36,11 @@ Plugin is used to send actionable messages in [Outlook](http://outlook.com), [Of
 
 1. Install this plugin on your Jenkins server
 2. Configure it in your Jenkins job and add webhook URL obtained from office 365 connector.
-  
+
+The plugin can also be configured through global settings under Jenkins -> Manage Jenkins -> Configure System.
+The values in the global settings will be used as default when using the plugin for a job.
+These settings can then be overriden in the job. Changing the values in the global settings will however not 
+update any settings in an existing job. 
 ## Examples
 
 ### DSL

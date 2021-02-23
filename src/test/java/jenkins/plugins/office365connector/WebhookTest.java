@@ -1,17 +1,27 @@
 package jenkins.plugins.office365connector;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.Arrays;
 import java.util.List;
-
+import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.model.FactDefinition;
 import jenkins.plugins.office365connector.model.Macro;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
+@PowerMockIgnore("jdk.internal.reflect.*")
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(Jenkins.class)
 public class WebhookTest {
 
     @Test
@@ -29,6 +39,47 @@ public class WebhookTest {
     }
 
     @Test
+    public void getUrl_WithEmptyLocalUrlReturnsGlobalUrl() {
+
+        // given
+        String globalUrl = "globalUrl";
+        mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
+        Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
+        when(Jenkins.get()).thenReturn(jenkins);
+        when(mockDescriptor.getUrl()).thenReturn(globalUrl);
+        when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
+        Webhook webhook = new Webhook("");
+
+        // when
+        String actualUrl = webhook.getUrl();
+
+        // then
+        assertThat(actualUrl).isEqualTo(globalUrl);
+    }
+
+    @Test
+    public void getUrl_ReturnsLocalUrlAndNotGlobal() {
+
+        // given
+        String globalUrl = "globalUrl";
+        String localUrl = "localUrl";
+        mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
+        Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
+        when(Jenkins.get()).thenReturn(jenkins);
+        when(mockDescriptor.getUrl()).thenReturn(globalUrl);
+        when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
+        Webhook webhook = new Webhook(localUrl);
+
+        // when
+        String actualUrl = webhook.getUrl();
+
+        // then
+        assertThat(actualUrl).isEqualTo(localUrl);
+    }
+
+    @Test
     public void getName_ReturnsName() {
 
         // given
@@ -41,6 +92,46 @@ public class WebhookTest {
 
         // then
         assertThat(actualName).isEqualTo(name);
+    }
+
+    @Test
+    public void getName_WithEmptyLocalNameReturnsGlobalName() {
+
+        // given
+        String globalName = "globalName";
+        Webhook webhook = new Webhook("someUrl");
+        mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
+        Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
+        when(Jenkins.get()).thenReturn(jenkins);
+        when(mockDescriptor.getName()).thenReturn(globalName);
+        when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
+
+        // when
+        String actualName = webhook.getName();
+        // then
+        assertThat(actualName).isEqualTo(globalName);
+    }
+
+    @Test
+    public void getName_ReturnsLocalNameAndNotGlobal() {
+
+        // given
+        String localName = "myName";
+        Webhook webhook = new Webhook("someUrl");
+        webhook.setName(localName);
+        mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
+        Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
+        when(Jenkins.get()).thenReturn(jenkins);
+        when(mockDescriptor.getName()).thenReturn("globalName");
+        when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
+
+        // when
+        String actualName = webhook.getName();
+
+        // then
+        assertThat(actualName).isEqualTo(localName);
     }
 
     @Test

@@ -1,21 +1,18 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.WebhookJobProperty;
 import jenkins.plugins.office365connector.WebhookJobPropertyDescriptor;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
 import net.sf.json.JSONObject;
+import net.sf.json.JsonConfig;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,12 +22,17 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
 @PowerMockIgnore("jdk.internal.reflect.*")
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(Jenkins.class)
+@PrepareForTest({Jenkins.class, Webhook.DescriptorImpl.class})
 public class WebhookJobPropertyDescriptorTest {
 
     private static final String KEY = "webhooks";
@@ -42,6 +44,13 @@ public class WebhookJobPropertyDescriptorTest {
         File rootDir = new File(".");
         when(jenkins.getRootDir()).thenReturn(rootDir);
         when(Jenkins.get()).thenReturn(jenkins);
+
+        Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
+        when(mockDescriptor.getName()).thenReturn("testName");
+        when(mockDescriptor.getId()).thenReturn("testId");
+        when(mockDescriptor.getDescriptorFullUrl()).thenReturn("http://test.com");
+
+        when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
     }
 
     @Test
@@ -167,7 +176,14 @@ public class WebhookJobPropertyDescriptorTest {
         WebhookJobPropertyDescriptor descriptor = new WebhookJobPropertyDescriptor();
         JSONObject jsonObject = new JSONObject();
         Webhook webhook = new Webhook("myUrl");
-        jsonObject.put(KEY, webhook);
+
+        // Excluding "descriptor" to avoid infinite loop in jsonObject.put()
+        Map map = new HashMap<String, Object>();
+        map.put(KEY, webhook);
+        JsonConfig config = new JsonConfig();
+        config.setExcludes(new String[]{"descriptor"});
+
+        jsonObject.putAll(map, config);
 
         StaplerRequest request = mock(StaplerRequest.class);
         when(request.bindJSON(Matchers.any(), (JSONObject) Matchers.eq(jsonObject.get(KEY)))).thenReturn(webhook);
@@ -188,7 +204,14 @@ public class WebhookJobPropertyDescriptorTest {
         JSONObject jsonObject = new JSONObject();
         Webhook webhook = new Webhook("myUrl");
         List<Object> webhooks = Arrays.asList(webhook);
-        jsonObject.put(KEY, webhooks);
+
+        // Excluding "descriptor" to avoid infinite loop in jsonObject.put()
+        Map map = new HashMap<String, Object>();
+        map.put(KEY, webhooks);
+        JsonConfig config = new JsonConfig();
+        config.setExcludes(new String[]{"descriptor"});
+
+        jsonObject.putAll(map, config);
 
         StaplerRequest request = mock(StaplerRequest.class);
         when(request.bindJSONToList(Matchers.any(), Matchers.eq(jsonObject.get(KEY)))).thenReturn(webhooks);
