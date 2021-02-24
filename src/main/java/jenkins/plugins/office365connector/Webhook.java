@@ -61,7 +61,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     @DataBoundConstructor
     public Webhook(String url) {
-        this.url = StringUtils.isEmpty(url) ? getDescriptor().getUrl() : url;
+        this.url = StringUtils.isEmpty(url) ? getDescriptor().getGlobalUrl() : url;
     }
 
     public String getUrl() {
@@ -69,7 +69,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     }
 
     public String getName() {
-        return Util.fixEmptyAndTrim(StringUtils.isEmpty(name) ? getDescriptor().getName() : name);
+        return Util.fixEmptyAndTrim(StringUtils.isEmpty(name) ? getDescriptor().getGlobalName() : name);
     }
 
     @DataBoundSetter
@@ -180,6 +180,8 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     public static class DescriptorImpl extends Descriptor<Webhook> {
         private String url;
         private String name;
+        private String globalUrl;
+        private String globalName;
 
         public DescriptorImpl() {
             load();
@@ -199,6 +201,14 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
             return FormUtils.formValidateUrl(value);
         }
 
+       public FormValidation doCheckGlobalUrl(@QueryParameter String value) {
+            if(StringUtils.isNotBlank(value)) {
+                return FormUtils.formValidateUrl(value);
+            } else {
+                return FormValidation.ok();
+            }
+        }
+
         public String getUrl() {
             return url;
         }
@@ -215,6 +225,24 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
         @DataBoundSetter
         public void setName(String name) {
             this.name = name;
+        }
+
+        public String getGlobalUrl() {
+            return globalUrl;
+        }
+
+        @DataBoundSetter
+        public void setGlobalUrl(String url) {
+            this.globalUrl = url;
+        }
+
+        public String getGlobalName() {
+            return globalName;
+        }
+
+        @DataBoundSetter
+        public void setGlobalName(String name) {
+            this.globalName = name;
         }
 
         @Override
