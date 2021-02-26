@@ -47,7 +47,7 @@ public class WebhookTest {
         Jenkins jenkins = mock(Jenkins.class);
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
         when(Jenkins.get()).thenReturn(jenkins);
-        when(mockDescriptor.getUrl()).thenReturn(globalUrl);
+        when(mockDescriptor.getGlobalUrl()).thenReturn(globalUrl);
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
         Webhook webhook = new Webhook("");
 
@@ -104,7 +104,7 @@ public class WebhookTest {
         Jenkins jenkins = mock(Jenkins.class);
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
         when(Jenkins.get()).thenReturn(jenkins);
-        when(mockDescriptor.getName()).thenReturn(globalName);
+        when(mockDescriptor.getGlobalName()).thenReturn(globalName);
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
 
         // when

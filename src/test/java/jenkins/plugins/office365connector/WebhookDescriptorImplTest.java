@@ -108,4 +108,30 @@ public class WebhookDescriptorImplTest {
         // then
         assertThat(isConfigured).isTrue();
     }
+
+    @Test
+    public void doCheckGlobalUrl_ValidatesUrl() {
+
+        // given
+        String validUrl = "http://myJenkins.abc";
+
+        // when
+        FormValidation result = descriptor.doCheckGlobalUrl(validUrl);
+
+        // then
+        assertThat(result).isEqualTo(FormValidation.ok());
+    }
+
+    @Test
+    public void doCheckGlobalUrl_ValidatesUrl_WhenBlank() {
+
+        // given
+        String validUrl = "";
+
+        // when
+        FormValidation result = descriptor.doCheckGlobalUrl(validUrl);
+
+        // then
+        assertThat(result).isEqualTo(FormValidation.ok());
+    }
 }

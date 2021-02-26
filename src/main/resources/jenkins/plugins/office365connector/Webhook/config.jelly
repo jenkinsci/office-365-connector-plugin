@@ -2,10 +2,10 @@
 <j:jelly xmlns:j="jelly:core"
          xmlns:f="/lib/form">
     <f:entry title="URL" field="url">
-        <f:textbox default="${descriptor.url}"/>
+        <f:textbox default="${descriptor.globalUrl}"/>
     </f:entry>
     <f:entry title="Name" field="name">
-        <f:textbox default="${descriptor.name}"/>
+        <f:textbox default="${descriptor.globalName}"/>
     </f:entry>
 
     <f:advanced>
