@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.15</version>
+        <version>4.16</version>
     </parent>
 
     <licenses>
@@ -11,37 +11,24 @@
             <name>The Apache Software License, Version 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             <distribution>repo</distribution>
-            <comments>A business-friendly OSS license</comments>
         </license>
     </licenses>
 
     <artifactId>Office-365-Connector</artifactId>
     <name>Office 365 Connector</name>
-    <version>4.14.1-SNAPSHOT</version>
+    <version>4.15.0-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <description>This plugin sends Job notifications to JenkinsCI Office 365 Connector.</description>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Office+365+Connector+Plugin</url>
 
     <properties>
         <powermock.version>1.6.6</powermock.version>
-        <jenkins.version>2.222.3</jenkins.version>
+        <jenkins.version>2.277.2</jenkins.version>
         <java.level>8</java.level>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.263.x</artifactId>
-                <version>20</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
-        <!-- not to have
+        <!-- fixes error:
              Failed while enforcing RequireUpperBoundDeps -->
         <dependency>
             <groupId>commons-beanutils</groupId>
@@ -114,7 +101,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>token-macro</artifactId>
-            <version>2.13</version>
+            <version>2.15</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -145,24 +132,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.7</version>
-                <configuration>
-                    <formats>
-                        <format>html</format>
-                        <format>xml</format>
-                    </formats>
-                    <instrumentation>
-                        <excludes>
-                            <!-- generated class -->
-                            <exclude>jenkins/plugins/office365connector/Messages.class</exclude>
-                        </excludes>
-                    </instrumentation>
-                    <check />
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
