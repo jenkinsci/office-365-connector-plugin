@@ -33,6 +33,7 @@ import org.apache.commons.lang.StringUtils;
 
 /**
  * Makes http post requests in a separate thread.
+ * curl -X POST -H "Content-Type: application/json" -d "@completed-success.json" "https://webhook.office.com/webhookb2..." -vs
  */
 public class HttpWorker implements Runnable {
 
