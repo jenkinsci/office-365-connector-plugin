@@ -218,3 +218,4 @@ pip-log.txt
 .idea
 *.iml
 /jenkins.plugins.office365connector.WebhookJobProperty.xml
+/jenkins.plugins.office365connector.WebhookStub.xml

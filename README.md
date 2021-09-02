@@ -1,4 +1,4 @@
-[![Travis Status](https://img.shields.io/travis/jenkinsci/office-365-connector-plugin/master.svg?label=Travis%20bulid)](https://travis-ci.org/jenkinsci/office-365-connector-plugin)
+[![Build Status](https://ci.jenkins.io/job/Plugins/job/office-365-connector-plugin/job/master/badge/icon)](https://ci.jenkins.io/job/Plugins/job/office-365-connector-plugin/job/master/)
 [![Popularity](https://img.shields.io/jenkins/plugin/i/Office-365-Connector.svg)](https://plugins.jenkins.io/Office-365-Connector)
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1fab6aea594f49928b80bfe55a81357c)](https://app.codacy.com/app/damianszczepanik/office-365-connector-plugin?utm_source=github.com&utm_medium=referral&utm_content=jenkinsci/office-365-connector-plugin&utm_campaign=Badge_Grade_Settings)
