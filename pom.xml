@@ -19,7 +19,7 @@
     <version>4.15.1-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <description>This plugin sends Job notifications to JenkinsCI Office 365 Connector.</description>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/Office+365+Connector+Plugin</url>
+    <url>https://github.com/jenkinsci/office-365-connector-plugin</url>
 
     <properties>
         <powermock.version>1.6.6</powermock.version>
