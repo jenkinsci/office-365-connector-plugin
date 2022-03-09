@@ -17,8 +17,10 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 
 import hudson.ProxyConfiguration;
 import jenkins.model.Jenkins;
@@ -106,13 +108,16 @@ public class HttpWorker implements Runnable {
         if (jenkins != null) {
             ProxyConfiguration proxy = jenkins.proxy;
             if (proxy != null) {
-                client.getHostConfiguration().setProxy(proxy.name, proxy.port);
-                String username = proxy.getUserName();
-                String password = proxy.getPassword();
-                // Consider it to be passed if username specified. Sufficient?
-                if (StringUtils.isNotBlank(username)) {
-                    client.getState().setProxyCredentials(AuthScope.ANY,
-                            new UsernamePasswordCredentials(username, password));
+                List<Pattern> noHostProxyPatterns = proxy.getNoProxyHostPatterns();
+                if (!isNoProxyHost(this.url, noHostProxyPatterns)) {
+                    client.getHostConfiguration().setProxy(proxy.name, proxy.port);
+                    String username = proxy.getUserName();
+                    String password = proxy.getPassword();
+                    // Consider it to be passed if username specified. Sufficient?
+                    if (StringUtils.isNotBlank(username)) {
+                        client.getState().setProxyCredentials(AuthScope.ANY,
+                                new UsernamePasswordCredentials(username, password));
+                    }
                 }
             }
         }
@@ -120,6 +125,17 @@ public class HttpWorker implements Runnable {
         client.getHttpConnectionManager().getParams().setSoTimeout(timeout);
         client.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
         return client;
+    }
+
+    private static boolean isNoProxyHost(String host, List<Pattern> noProxyHostPatterns) {
+        if (host != null && noProxyHostPatterns != null) {
+            for (Pattern p : noProxyHostPatterns) {
+                if (p.matcher(host).matches()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
