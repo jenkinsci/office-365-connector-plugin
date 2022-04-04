@@ -29,13 +29,15 @@ public class StepParameters {
     private final String status;
     private final String color;
     private List<FactDefinition> factDefinitions;
-
+    private final Boolean activityTitle;
+    
     public StepParameters(String message, String webhookUrl, String status, List<FactDefinition> factDefinitions, String color) {
         this.message = message;
         this.webhookUrl = webhookUrl;
         this.status = status;
         this.factDefinitions = factDefinitions;
         this.color = color;
+        this.activityTitle = activityTitle;
     }
 
     public String getMessage() {
@@ -57,5 +59,8 @@ public class StepParameters {
     public String getColor() {
         return color;
     }
-
+    
+    public Boolean getActivityTitle() {
+        return activityTitle;
+    }
 }
