@@ -181,8 +181,11 @@ public class CardBuilder {
             factsBuilder.addStatus(stepParameters.getStatus());
         }
         factsBuilder.addUserFacts(stepParameters.getFactDefinitions());
-
-        String activityTitle = "Notification from " + getEscapedDisplayName();
+        
+        if (stepParameters.getActivityTitle() == true) {
+            String activityTitle = "Notification from " + getEscapedDisplayName();
+        }
+        
         Section section = new Section(activityTitle, stepParameters.getMessage(), factsBuilder.collect());
 
         String summary = getDisplayName() + ": Build " + getRunName();
