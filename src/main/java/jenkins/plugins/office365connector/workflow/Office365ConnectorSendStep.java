@@ -63,7 +63,11 @@ public class Office365ConnectorSendStep extends Step {
     public String getColor() {
         return color;
     }
-
+    
+    public Boolean getActivityTitle() {
+        return activityTitle;
+    }
+    
     @DataBoundSetter
     public void setFactDefinitions(List<FactDefinition> factDefinitions) {
         this.factDefinitions = factDefinitions;
