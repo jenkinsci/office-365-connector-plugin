@@ -1,9 +1,6 @@
 [![Build Status](https://ci.jenkins.io/job/Plugins/job/office-365-connector-plugin/job/master/badge/icon)](https://ci.jenkins.io/job/Plugins/job/office-365-connector-plugin/job/master/)
 [![Popularity](https://img.shields.io/jenkins/plugin/i/Office-365-Connector.svg)](https://plugins.jenkins.io/Office-365-Connector)
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/1fab6aea594f49928b80bfe55a81357c)](https://app.codacy.com/app/damianszczepanik/office-365-connector-plugin?utm_source=github.com&utm_medium=referral&utm_content=jenkinsci/office-365-connector-plugin&utm_campaign=Badge_Grade_Settings)
-[![Coverage Status](https://img.shields.io/codecov/c/github/jenkinsci/office-365-connector-plugin/master.svg?label=Unit%20tests%20coverage)](https://codecov.io/github/jenkinsci/office-365-connector-plugin)
-[![Vulnerabilities](https://snyk.io/test/github/jenkinsci/office-365-connector-plugin/badge.svg)](https://app.snyk.io/org/damianszczepanik/project/c78d3196-4d6a-4a74-a217-6f6bc5b2f6ac)
 
 # Office-365-Connector
 
