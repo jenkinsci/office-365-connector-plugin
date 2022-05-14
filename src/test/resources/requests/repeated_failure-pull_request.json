@@ -1,13 +1,17 @@
 {
-    "summary": "Damian Szczepanik » hook » PR-1: Build #3 Back to Normal",
-    "themeColor": "#00FF00",
+    "summary": "Damian Szczepanik » hook » PR-1: Build #3 Repeated Failure",
+    "themeColor": "#EF2929",
     "sections": [
         {
             "markdown": true,
             "facts": [
                 {
                     "name": "Status",
-                    "value": "Back to Normal"
+                    "value": "Repeated Failure"
+                },
+                {
+                    "name": "Failing since",
+                    "value": "build #10"
                 },
                 {
                     "name": "Remarks",

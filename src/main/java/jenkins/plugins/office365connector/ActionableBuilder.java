@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hudson.model.Job;
+import hudson.model.Result;
 import hudson.model.Run;
 import jenkins.plugins.office365connector.model.PotentialAction;
 import jenkins.scm.api.SCMHead;
@@ -51,9 +52,12 @@ public class ActionableBuilder {
     private void buildViewBuild() {
         String urlToJob = DisplayURLProvider.get().getRunURL(run);
         String build = Messages.Office365ConnectorWebhookNotifier_BuildPronoun();
-        String viewHeader = Messages.Office365ConnectorWebhookNotifier_ViewHeader(build);
 
-        potentialActions.add(new PotentialAction(viewHeader, urlToJob));
+        // hide action button when the build succeed
+        if (run.getResult() != Result.SUCCESS) {
+            String viewHeader = Messages.Office365ConnectorWebhookNotifier_ViewHeader(build);
+            potentialActions.add(new PotentialAction(viewHeader, urlToJob));
+        }
     }
 
     // support for pull requests such as https://github.com/jenkinsci/github-branch-source-plugin

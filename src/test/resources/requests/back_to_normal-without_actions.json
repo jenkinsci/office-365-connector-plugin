@@ -1,0 +1,29 @@
+{
+    "summary": "Damian Szczepanik » hook » PR-1: Build #3 Back to Normal",
+    "themeColor": "#00FF00",
+    "sections": [
+        {
+            "markdown": true,
+            "facts": [
+                {
+                    "name": "Status",
+                    "value": "Back to Normal"
+                },
+                {
+                    "name": "Remarks",
+                    "value": "Branch indexing."
+                },
+                {
+                    "name": "Committers",
+                    "value": "damian"
+                },
+                {
+                    "name": "Developers",
+                    "value": "damian"
+                }
+            ],
+            "activityTitle": "Notification from Damian Szczepanik » hook » PR\\-1",
+            "activitySubtitle": "Latest status of build #3"
+        }
+    ]
+}

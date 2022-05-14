@@ -120,7 +120,21 @@ public class PullRequestIT extends AbstractTest {
     }
 
     @Test
-    public void validateBackToNormalRequest_WithPullRequest() {
+    public void validateRepeatedFailure_WithPullRequest() {
+
+        // given
+        mockResult(Result.FAILURE);
+        Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
+
+        // when
+        notifier.sendBuildCompletedNotification();
+
+        // then
+        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("repeated_failure-pull_request.json"));
+    }
+
+    @Test
+    public void validateBackToNormal_WithoutActions() {
 
         // given
         mockResult(Result.SUCCESS);
@@ -130,6 +144,6 @@ public class PullRequestIT extends AbstractTest {
         notifier.sendBuildCompletedNotification();
 
         // then
-        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("back_to_normal-pull_request.json"));
+        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("back_to_normal-without_actions.json"));
     }
 }
