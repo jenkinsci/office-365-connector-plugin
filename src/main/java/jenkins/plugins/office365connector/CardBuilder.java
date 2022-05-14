@@ -88,7 +88,9 @@ public class CardBuilder {
 
         Card card = new Card(summary, section);
         card.setThemeColor(getCardThemeColor(lastResult));
-        card.setPotentialAction(potentialActionBuilder.buildActionable());
+        if (run.getResult() != Result.SUCCESS) {
+            card.setPotentialAction(potentialActionBuilder.buildActionable());
+        }
 
         return card;
     }
