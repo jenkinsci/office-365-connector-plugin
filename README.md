@@ -6,7 +6,7 @@
 
 Office 365 Connector plugin for Jenkins
 
-Plugin is used to send actionable messages in [Outlook](http://outlook.com), [Office 365 Groups](https://support.office.com/en-us/article/Learn-about-Office-365-Groups-b565caa1-5c40-40ef-9915-60fdb2d97fa2), and [Microsoft Teams](https://products.office.com/en-us/microsoft-teams/group-chat-software).
+Plugin is used to send actionable messages in [Outlook](http://outlook.com), [Office 365 Groups](https://support.office.com/article/Learn-about-Office-365-Groups-b565caa1-5c40-40ef-9915-60fdb2d97fa2), and [Microsoft Teams](https://products.office.com/microsoft-teams/group-chat-software).
 
 ## Screenshots
 
@@ -176,9 +176,9 @@ o365Connector.setGlobalName(o365Name)
 
 You may find useful below link if you like to contribute and add new feature:
 
-- [Office 365 Connectors for Microsoft Teams](https://docs.microsoft.com/pl-pl/microsoftteams/platform/concepts/connectors/connectors)
-- [Actionable messages](https://docs.microsoft.com/en-us/outlook/actionable-messages/)
-- [Support for Markdown](https://docs.microsoft.com/en-us/flow/approvals-markdown-support)
-- [Adding connector to Microsoft Teams](https://docs.microsoft.com/pl-pl/microsoftteams/platform/concepts/connectors/connectors-using)
+- [Office 365 Connectors for Microsoft Teams](https://docs.microsoft.com/microsoftteams/platform/concepts/connectors/connectors)
+- [Actionable messages](https://docs.microsoft.com/outlook/actionable-messages/)
+- [Support for Markdown](https://docs.microsoft.com/flow/approvals-markdown-support)
+- [Adding connector to Microsoft Teams](https://docs.microsoft.com/microsoftteams/platform/concepts/connectors/connectors-using)
 - [Office365 test dev account](https://developer.microsoft.com/office/dev-program)
 - [Office365ConnectorSend parameters](https://jenkins.io/doc/pipeline/steps/Office-365-Connector/)
