@@ -94,10 +94,10 @@ pipeline {
 
     options {
         office365ConnectorWebhooks([[
-                    startNotification: true,
-                        url: 'https://outlook.office.com/webhook/123456...'
-            ]]
-        )
+            name: 'Office 365',
+            startNotification: true,
+            url: 'https://outlook.office.com/webhook/123456...'
+        ]])
     }
 
     stages {
