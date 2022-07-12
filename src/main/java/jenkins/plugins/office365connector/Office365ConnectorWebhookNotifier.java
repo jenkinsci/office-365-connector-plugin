@@ -112,7 +112,7 @@ public class Office365ConnectorWebhookNotifier {
         try {
             String url = run.getEnvironment(taskListener).expand(webhook.getUrl());
             String data = gson.toJson(card);
-            HttpWorker worker = new HttpWorker(url, data, webhook.getTimeout(), taskListener.getLogger());
+            HttpWorker worker = new HttpWorker(url, data, webhook.getTimeout(), taskListener.getLogger(), webhook.getPluginProxy());
             worker.submit();
         } catch (IOException | InterruptedException | RejectedExecutionException e) {
             log(String.format("Failed to notify webhook: %s", webhook.getName()));

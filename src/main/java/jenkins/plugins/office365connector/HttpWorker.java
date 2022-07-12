@@ -13,9 +13,7 @@
  */
 package jenkins.plugins.office365connector;
 
-import java.io.IOException;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -43,17 +41,20 @@ public class HttpWorker implements Runnable {
 
     private final PrintStream logger;
 
+    private final Proxy pluginProxy;
+
     private final String url;
     private final String data;
     private final int timeout;
 
     private static final int RETRIES = 3;
 
-    public HttpWorker(String url, String data, int timeout, PrintStream logger) {
+    public HttpWorker(String url, String data, int timeout, PrintStream logger, Proxy pluginProxy) {
         this.url = url;
         this.data = data;
         this.timeout = timeout;
         this.logger = logger;
+        this.pluginProxy = pluginProxy;
     }
 
     /**
@@ -75,7 +76,7 @@ public class HttpWorker implements Runnable {
                 // uncomment to log what message has been sent
                 // log("Posted JSON: %s", data);
                 requestEntity = new StringRequestEntity(data, "application/json", StandardCharsets.UTF_8.name());
-            } catch (UnsupportedEncodingException e) {
+            } catch (Exception e) {
                 e.printStackTrace(logger);
                 break;
             }
@@ -92,7 +93,7 @@ public class HttpWorker implements Runnable {
                 } else {
                     success = true;
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 log("Failed to post data to webhook - %s", url);
                 e.printStackTrace(logger);
             } finally {
@@ -105,8 +106,16 @@ public class HttpWorker implements Runnable {
     private HttpClient getHttpClient() {
         HttpClient client = new HttpClient();
         Jenkins jenkins = Jenkins.get();
+        if (pluginProxy.proxyConfigured()) {
+            client.getHostConfiguration().setProxy(pluginProxy.getIp(), pluginProxy.getPort());
+            if (StringUtils.isNotBlank(pluginProxy.getUsername())) {
+                client.getState().setProxyCredentials(AuthScope.ANY,
+                        new UsernamePasswordCredentials(pluginProxy.getUsername(), pluginProxy.getPassword()));
+            }
+        }
         if (jenkins != null) {
             ProxyConfiguration proxy = jenkins.proxy;
+            // Check job proxy first
             if (proxy != null) {
                 List<Pattern> noHostProxyPatterns = proxy.getNoProxyHostPatterns();
                 if (!isNoProxyHost(this.url, noHostProxyPatterns)) {

@@ -72,6 +72,10 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
         return Util.fixEmptyAndTrim(StringUtils.isEmpty(name) ? getDescriptor().getGlobalName() : name);
     }
 
+    public Proxy getPluginProxy() {
+        return getDescriptor().proxyPluginConfiguration();
+    }
+
     @DataBoundSetter
     public void setName(String name) {
         this.name = Util.fixEmptyAndTrim(name);
@@ -183,14 +187,60 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
         private String globalUrl;
         private String globalName;
 
+        private String proxyIp;
+        private String proxyUsername;
+        private String proxyPassword;
+
+        private int proxyPort;
+
         public DescriptorImpl() {
             load();
+        }
+
+        public Proxy proxyPluginConfiguration() {
+            return new Proxy(this.proxyIp, this.proxyPort, this.proxyUsername, this.proxyPassword);
         }
 
         @Nonnull
         @Override
         public String getDisplayName() {
             return "Webhook";
+        }
+
+        public String getProxyIp() {
+            return proxyIp;
+        }
+
+        @DataBoundSetter
+        public void setProxyIp(String proxyIp) {
+            this.proxyIp = proxyIp;
+        }
+
+        public String getProxyUsername() {
+            return proxyUsername;
+        }
+
+        @DataBoundSetter
+        public void setProxyUsername(String proxyUsername) {
+            this.proxyUsername = proxyUsername;
+        }
+
+        public String getProxyPassword() {
+            return proxyPassword;
+        }
+
+        @DataBoundSetter
+        public void setProxyPassword(String proxyPassword) {
+            this.proxyPassword = proxyPassword;
+        }
+
+        public int getProxyPort() {
+            return proxyPort;
+        }
+
+        @DataBoundSetter
+        public void setProxyPort(int proxyPort) {
+            this.proxyPort = proxyPort;
         }
 
         public int getDefaultTimeout() {
