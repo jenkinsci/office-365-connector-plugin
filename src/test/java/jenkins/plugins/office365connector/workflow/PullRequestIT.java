@@ -47,9 +47,16 @@ public class PullRequestIT extends AbstractTest {
 
     @Before
     public void setUp() {
+
+        Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
+        when(mockDescriptor.getName()).thenReturn("testName");
+
         mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         mockListener();
+
+        when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
+        when(Jenkins.get()).thenReturn(jenkins);
 
         run = mockRun();
         mockCause("Branch indexing");
@@ -59,15 +66,7 @@ public class PullRequestIT extends AbstractTest {
         mockEnvironment();
         mockHttpWorker();
         mockGetChangeSets();
-
         mockPullRequest();
-
-        when(Jenkins.get()).thenReturn(jenkins);
-
-        Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
-        when(mockDescriptor.getName()).thenReturn("testName");
-
-        when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
     }
 
     private AbstractBuild mockRun() {

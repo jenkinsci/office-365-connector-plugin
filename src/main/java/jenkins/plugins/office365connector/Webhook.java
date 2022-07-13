@@ -50,6 +50,8 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     private int timeout;
 
+    private Proxy pluginProxy;
+
     private List<Macro> macros = Collections.emptyList();
 
     private List<FactDefinition> factDefinitions = Collections.emptyList();
@@ -62,6 +64,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     @DataBoundConstructor
     public Webhook(String url) {
         this.url = StringUtils.isEmpty(url) ? getDescriptor().getGlobalUrl() : url;
+        this.setProxyPluginConfiguration(getDescriptor().getProxyIp(), getDescriptor().getProxyPort(), getDescriptor().getProxyUsername(), getDescriptor().getProxyPassword());
     }
 
     public String getUrl() {
@@ -73,7 +76,11 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     }
 
     public Proxy getPluginProxy() {
-        return getDescriptor().proxyPluginConfiguration();
+        return this.pluginProxy;
+    }
+
+    public void setProxyPluginConfiguration(String proxyIp, Integer proxyPort, String proxyUsername, String proxyPassword) {
+        this.pluginProxy = new Proxy(proxyIp, proxyPort, proxyUsername, proxyPassword);
     }
 
     @DataBoundSetter
@@ -195,10 +202,6 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
         public DescriptorImpl() {
             load();
-        }
-
-        public Proxy proxyPluginConfiguration() {
-            return new Proxy(this.proxyIp, this.proxyPort, this.proxyUsername, this.proxyPassword);
         }
 
         @Nonnull
