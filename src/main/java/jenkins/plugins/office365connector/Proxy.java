@@ -49,7 +49,7 @@ public class Proxy {
 
     public Boolean proxyConfigured() {
         try {
-            return (this.ip != null);
+            return (this.ip != null && this.ip != "");
 
         } catch (NullPointerException ex) {
             return false;

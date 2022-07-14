@@ -64,7 +64,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     @DataBoundConstructor
     public Webhook(String url) {
         this.url = StringUtils.isEmpty(url) ? getDescriptor().getGlobalUrl() : url;
-        this.setProxyPluginConfiguration(getDescriptor().getProxyIp(), getDescriptor().getProxyPort(), getDescriptor().getProxyUsername(), getDescriptor().getProxyPassword());
+        this.setProxyPluginConfiguration(getDescriptor().getIp(), getDescriptor().getPort(), getDescriptor().getUsername(), getDescriptor().getPassword());
     }
 
     public String getUrl() {
@@ -194,11 +194,11 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
         private String globalUrl;
         private String globalName;
 
-        private String proxyIp;
-        private String proxyUsername;
-        private String proxyPassword;
+        private String ip;
+        private String username;
+        private String password;
 
-        private int proxyPort;
+        private Integer port;
 
         public DescriptorImpl() {
             load();
@@ -210,40 +210,40 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
             return "Webhook";
         }
 
-        public String getProxyIp() {
-            return proxyIp;
+        public String getIp() {
+            return ip;
         }
 
         @DataBoundSetter
-        public void setProxyIp(String proxyIp) {
-            this.proxyIp = proxyIp;
+        public void setIp(String ip) {
+            this.ip = ip;
         }
 
-        public String getProxyUsername() {
-            return proxyUsername;
-        }
-
-        @DataBoundSetter
-        public void setProxyUsername(String proxyUsername) {
-            this.proxyUsername = proxyUsername;
-        }
-
-        public String getProxyPassword() {
-            return proxyPassword;
+        public String getUsername() {
+            return username;
         }
 
         @DataBoundSetter
-        public void setProxyPassword(String proxyPassword) {
-            this.proxyPassword = proxyPassword;
+        public void setUsername(String username) {
+            this.username = username;
         }
 
-        public int getProxyPort() {
-            return proxyPort;
+        public String getPassword() {
+            return password;
         }
 
         @DataBoundSetter
-        public void setProxyPort(int proxyPort) {
-            this.proxyPort = proxyPort;
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public Integer getPort() {
+            return port;
+        }
+
+        @DataBoundSetter
+        public void setPort(Integer port) {
+            this.port = port;
         }
 
         public int getDefaultTimeout() {
