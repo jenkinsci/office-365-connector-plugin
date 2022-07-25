@@ -64,7 +64,9 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     @DataBoundConstructor
     public Webhook(String url) {
         this.url = StringUtils.isEmpty(url) ? getDescriptor().getGlobalUrl() : url;
-        this.setProxyPluginConfiguration(getDescriptor().getIp(), getDescriptor().getPort(), getDescriptor().getUsername(), getDescriptor().getPassword());
+
+        DescriptorImpl globalConfig = getDescriptor();
+        this.setProxyPluginConfiguration(globalConfig.getIp(), globalConfig.getPort(), globalConfig.getUsername(), globalConfig.getPassword());
     }
 
     public String getUrl() {
