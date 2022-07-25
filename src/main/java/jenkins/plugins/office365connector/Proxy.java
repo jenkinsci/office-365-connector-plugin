@@ -1,5 +1,7 @@
 package jenkins.plugins.office365connector;
 
+import org.apache.commons.lang.StringUtils;
+
 public class Proxy {
 
     private String ip;
@@ -48,11 +50,6 @@ public class Proxy {
     }
 
     public Boolean proxyConfigured() {
-        try {
-            return (this.ip != null && this.ip != "");
-
-        } catch (NullPointerException ex) {
-            return false;
-        }
+        return (StringUtils.isEmpty(this.ip) && StringUtils.isEmpty(String.valueOf(this.port)));
     }
 }
