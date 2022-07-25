@@ -14,6 +14,7 @@
 package jenkins.plugins.office365connector;
 
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -76,7 +77,7 @@ public class HttpWorker implements Runnable {
                 // uncomment to log what message has been sent
                 // log("Posted JSON: %s", data);
                 requestEntity = new StringRequestEntity(data, "application/json", StandardCharsets.UTF_8.name());
-            } catch (Exception e) {
+            } catch (UnsupportedEncodingException e) {
                 e.printStackTrace(logger);
                 break;
             }
