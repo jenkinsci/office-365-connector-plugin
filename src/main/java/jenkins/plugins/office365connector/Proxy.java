@@ -50,6 +50,6 @@ public class Proxy {
     }
 
     public Boolean proxyConfigured() {
-        return (StringUtils.isEmpty(this.ip) && StringUtils.isEmpty(String.valueOf(this.port)));
+        return (!StringUtils.isEmpty(this.ip) && !StringUtils.isEmpty(String.valueOf(this.port)));
     }
 }
