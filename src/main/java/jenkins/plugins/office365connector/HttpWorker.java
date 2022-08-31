@@ -13,6 +13,7 @@
  */
 package jenkins.plugins.office365connector;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -94,7 +95,7 @@ public class HttpWorker implements Runnable {
                 } else {
                     success = true;
                 }
-            } catch (Exception e) {
+            } catch (IOException e) {
                 log("Failed to post data to webhook - %s", url);
                 e.printStackTrace(logger);
             } finally {
