@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import hudson.Extension;
+import hudson.ProxyConfiguration;
 import hudson.Util;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
@@ -50,7 +51,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     private int timeout;
 
-    private Proxy pluginProxy;
+    private ProxyConfiguration pluginProxy;
 
     private List<Macro> macros = Collections.emptyList();
 
@@ -66,7 +67,9 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
         this.url = StringUtils.isEmpty(url) ? getDescriptor().getGlobalUrl() : url;
 
         DescriptorImpl globalConfig = getDescriptor();
-        this.setProxyPluginConfiguration(globalConfig.getIp(), globalConfig.getPort(), globalConfig.getUsername(), globalConfig.getPassword());
+        if (globalConfig.getIp().length() > 0) {
+            this.setProxyPluginConfiguration(globalConfig.getIp(), globalConfig.getPort(), globalConfig.getUsername(), globalConfig.getPassword());
+        }
     }
 
     public String getUrl() {
@@ -77,12 +80,12 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
         return Util.fixEmptyAndTrim(StringUtils.isEmpty(name) ? getDescriptor().getGlobalName() : name);
     }
 
-    public Proxy getPluginProxy() {
+    public ProxyConfiguration getPluginProxy() {
         return this.pluginProxy;
     }
 
-    public void setProxyPluginConfiguration(String proxyIp, Integer proxyPort, String proxyUsername, String proxyPassword) {
-        this.pluginProxy = new Proxy(proxyIp, proxyPort, proxyUsername, proxyPassword);
+    public void setProxyPluginConfiguration(String proxyIp, int proxyPort, String proxyUsername, String proxyPassword) {
+        this.pluginProxy = new ProxyConfiguration(proxyIp, proxyPort, proxyUsername, proxyPassword);
     }
 
     @DataBoundSetter

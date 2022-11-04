@@ -43,7 +43,7 @@ public class HttpWorker implements Runnable {
 
     private final PrintStream logger;
 
-    private final Proxy pluginProxy;
+    private final ProxyConfiguration pluginProxy;
 
     private final String url;
     private final String data;
@@ -51,7 +51,7 @@ public class HttpWorker implements Runnable {
 
     private static final int RETRIES = 3;
 
-    public HttpWorker(String url, String data, int timeout, PrintStream logger, Proxy pluginProxy) {
+    public HttpWorker(String url, String data, int timeout, PrintStream logger, ProxyConfiguration pluginProxy) {
         this.url = url;
         this.data = data;
         this.timeout = timeout;
@@ -108,14 +108,13 @@ public class HttpWorker implements Runnable {
     private HttpClient getHttpClient() {
         HttpClient client = new HttpClient();
         Jenkins jenkins = Jenkins.get();
-        if (pluginProxy.proxyConfigured()) {
-            client.getHostConfiguration().setProxy(pluginProxy.getIp(), pluginProxy.getPort());
-            if (StringUtils.isNotBlank(pluginProxy.getUsername())) {
+        if (pluginProxy != null) {
+            client.getHostConfiguration().setProxy(pluginProxy.getName(), pluginProxy.getPort());
+            if (StringUtils.isNotBlank(pluginProxy.getUserName())) {
                 client.getState().setProxyCredentials(AuthScope.ANY,
-                        new UsernamePasswordCredentials(pluginProxy.getUsername(), pluginProxy.getPassword()));
+                        new UsernamePasswordCredentials(pluginProxy.getUserName(), pluginProxy.getPassword()));
             }
-        }
-        if (jenkins != null) {
+        } else if (jenkins != null) {
             ProxyConfiguration proxy = jenkins.proxy;
             // Check job proxy first
             if (proxy != null) {

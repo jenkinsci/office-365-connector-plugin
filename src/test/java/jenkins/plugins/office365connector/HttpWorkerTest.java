@@ -37,7 +37,7 @@ public class HttpWorkerTest extends AbstractTest {
 
         // given
         // from @Before
-        Proxy thisPluginProxy = new Proxy(null, null, null, null);
+        ProxyConfiguration thisPluginProxy = new ProxyConfiguration(null, 0, null, null);
         HttpWorker httpWorker = new HttpWorker("http://127.0.0.1", "{}", 30, System.out, thisPluginProxy);
         Method method = HttpWorker.class.getDeclaredMethod("getHttpClient");
         method.setAccessible(true);
@@ -55,7 +55,7 @@ public class HttpWorkerTest extends AbstractTest {
 
         // given
         // from @Before
-        Proxy thisPluginProxy = new Proxy(null, null, null, null);
+        ProxyConfiguration thisPluginProxy = new ProxyConfiguration(null, 0, null, null);
         Jenkins jenkins = Jenkins.get();
         ProxyConfiguration proxyConfiguration = new ProxyConfiguration("name", 123, null, null, "*mockwebsite.com*");
         jenkins.proxy = proxyConfiguration;
@@ -77,7 +77,7 @@ public class HttpWorkerTest extends AbstractTest {
 
         // given
         // from @Before
-        Proxy thisPluginProxy = new Proxy(null, null, null, null);
+        ProxyConfiguration thisPluginProxy = new ProxyConfiguration(null, 0, null, null);
         Jenkins jenkins = Jenkins.get();
         ProxyConfiguration proxyConfiguration = new ProxyConfiguration("name", 123, null, null, "*mockwebsite.com*");
         jenkins.proxy = proxyConfiguration;
@@ -99,7 +99,7 @@ public class HttpWorkerTest extends AbstractTest {
 
         // given
         // from @Before
-        Proxy thisPluginProxy = new Proxy("10.0.0.1", 12345, null, null);
+        ProxyConfiguration thisPluginProxy = new ProxyConfiguration("10.0.0.1", 12345, null, null);
         HttpWorker httpWorker = new HttpWorker("http://127.0.0.1", "{}", 30, System.out, thisPluginProxy);
         Method method = HttpWorker.class.getDeclaredMethod("getHttpClient");
         method.setAccessible(true);
@@ -108,7 +108,7 @@ public class HttpWorkerTest extends AbstractTest {
         HttpClient httpClient = (HttpClient) ReflectionUtils.invokeMethod(method, httpWorker);
 
         // then
-        assertThat(httpClient.getHostConfiguration().getProxyHost()).isEqualTo(thisPluginProxy.getIp());
+        assertThat(httpClient.getHostConfiguration().getProxyHost()).isEqualTo(thisPluginProxy.getName());
         assertThat(httpClient.getHostConfiguration().getProxyPort()).isEqualTo(thisPluginProxy.getPort());
     }
 }
