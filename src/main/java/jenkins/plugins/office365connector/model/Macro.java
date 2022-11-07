@@ -13,7 +13,7 @@
  */
 package jenkins.plugins.office365connector.model;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import hudson.Extension;
 import hudson.Util;
@@ -55,7 +55,7 @@ public class Macro extends AbstractDescribableImpl<Macro> {
     @Extension
     public static class DescriptorImpl extends Descriptor<Macro> {
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Macro";

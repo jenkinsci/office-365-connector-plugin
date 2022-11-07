@@ -9,7 +9,7 @@ import hudson.Util;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.plugins.office365connector.model.FactDefinition;
 import jenkins.plugins.office365connector.utils.FormUtils;
 import org.jenkinsci.Symbol;
@@ -98,7 +98,7 @@ public class Office365ConnectorSendStep extends Step {
         }
 
         @Override
-        @Nonnull
+        @NonNull
         public String getDisplayName() {
             return "Send job status notifications to Office 365 (e.g. Microsoft Teams or Outlook)";
         }

@@ -16,7 +16,7 @@ package jenkins.plugins.office365connector;
 
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractDescribableImpl;
@@ -187,7 +187,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
             load();
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Webhook";
