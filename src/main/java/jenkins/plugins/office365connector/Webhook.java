@@ -51,8 +51,6 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     private int timeout;
 
-    private ProxyConfiguration pluginProxy;
-
     private List<Macro> macros = Collections.emptyList();
 
     private List<FactDefinition> factDefinitions = Collections.emptyList();
@@ -65,11 +63,6 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     @DataBoundConstructor
     public Webhook(String url) {
         this.url = StringUtils.isEmpty(url) ? getDescriptor().getGlobalUrl() : url;
-
-        DescriptorImpl globalConfig = getDescriptor();
-        if (globalConfig.getIp().length() > 0) {
-            this.setProxyPluginConfiguration(globalConfig.getIp(), globalConfig.getPort(), globalConfig.getUsername(), globalConfig.getPassword());
-        }
     }
 
     public String getUrl() {
@@ -78,14 +71,6 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     public String getName() {
         return Util.fixEmptyAndTrim(StringUtils.isEmpty(name) ? getDescriptor().getGlobalName() : name);
-    }
-
-    public ProxyConfiguration getPluginProxy() {
-        return this.pluginProxy;
-    }
-
-    public void setProxyPluginConfiguration(String proxyIp, int proxyPort, String proxyUsername, String proxyPassword) {
-        this.pluginProxy = new ProxyConfiguration(proxyIp, proxyPort, proxyUsername, proxyPassword);
     }
 
     @DataBoundSetter
@@ -200,10 +185,9 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
         private String globalName;
 
         private String ip;
+        private String port;
         private String username;
         private String password;
-
-        private Integer port;
 
         public DescriptorImpl() {
             load();
@@ -216,39 +200,40 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
         }
 
         public String getIp() {
-            return ip;
+            return Util.fixNull(ip);
         }
 
         @DataBoundSetter
         public void setIp(String ip) {
-            this.ip = ip;
+            this.ip = Util.fixNull(ip);
         }
 
         public String getUsername() {
-            return username;
+            return Util.fixNull(username);
         }
 
         @DataBoundSetter
         public void setUsername(String username) {
-            this.username = username;
+            this.username = Util.fixNull(username);
         }
 
         public String getPassword() {
-            return password;
+            return Util.fixNull(password);
         }
 
         @DataBoundSetter
         public void setPassword(String password) {
-            this.password = password;
+            this.password = Util.fixNull(password);
         }
 
-        public Integer getPort() {
-            return port;
+        @Nonnull
+        public String getPort() {
+            return Util.fixNull(port);
         }
 
         @DataBoundSetter
-        public void setPort(Integer port) {
-            this.port = port;
+        public void setPort(String port) {
+            this.port = Util.fixNull(port);
         }
 
         public int getDefaultTimeout() {
@@ -259,7 +244,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
             return FormUtils.formValidateUrl(value);
         }
 
-       public FormValidation doCheckGlobalUrl(@QueryParameter String value) {
+        public FormValidation doCheckGlobalUrl(@QueryParameter String value) {
             if(StringUtils.isNotBlank(value)) {
                 return FormUtils.formValidateUrl(value);
             } else {

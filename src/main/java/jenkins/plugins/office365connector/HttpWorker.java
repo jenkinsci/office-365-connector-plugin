@@ -108,7 +108,7 @@ public class HttpWorker implements Runnable {
     private HttpClient getHttpClient() {
         HttpClient client = new HttpClient();
         Jenkins jenkins = Jenkins.get();
-        if (pluginProxy != null) {
+        if (!StringUtils.isEmpty(pluginProxy.getName())) {
             client.getHostConfiguration().setProxy(pluginProxy.getName(), pluginProxy.getPort());
             if (StringUtils.isNotBlank(pluginProxy.getUserName())) {
                 client.getState().setProxyCredentials(AuthScope.ANY,
