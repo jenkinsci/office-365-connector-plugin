@@ -4,7 +4,7 @@ import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 
 /**
@@ -40,7 +40,7 @@ public class Office365ConnectorBuildListener extends RunListener<Run> {
      *                 operation.
      */
     @Override
-    public void onCompleted(Run run, @Nonnull TaskListener listener) {
+    public void onCompleted(Run run, @NonNull TaskListener listener) {
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, listener);
         notifier.sendBuildCompletedNotification();
     }
