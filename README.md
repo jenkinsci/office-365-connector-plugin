@@ -1,5 +1,5 @@
-[![Github build](https://github.com/damianszczepanik/office-365-connector-plugin/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/damianszczepanik/office-365-connector-plugin/actions/workflows/build.yml)
-[![Coverage Status](https://codecov.io/gh/damianszczepanik/office-365-connector-plugin/branch/master/graph/badge.svg)](https://codecov.io/github/damianszczepanik/office-365-connector-plugin)
+[![Github build](https://github.com/jenkinsci/office-365-connector-plugin/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/jenkinsci/office-365-connector-plugin/actions/workflows/build.yml)
+[![Coverage Status](https://codecov.io/gh/jenkinsci/office-365-connector-plugin/branch/master/graph/badge.svg)](https://codecov.io/github/jenkinsci/office-365-connector-plugin)
 
 [![Popularity](https://img.shields.io/jenkins/plugin/i/Office-365-Connector.svg)](https://plugins.jenkins.io/Office-365-Connector)
 
