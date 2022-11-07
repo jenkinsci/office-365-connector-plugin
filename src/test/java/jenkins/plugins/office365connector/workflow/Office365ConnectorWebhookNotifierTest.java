@@ -3,6 +3,7 @@ package jenkins.plugins.office365connector.workflow;
 import java.util.Collections;
 import java.util.List;
 import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.TaskListener;
@@ -19,14 +20,13 @@ import mockit.Deencapsulation;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -49,7 +49,7 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
         run = mock(AbstractBuild.class);
         when(run.getResult()).thenReturn(Result.SUCCESS);
 
-        job = mock(Job.class);
+        job = mock(AbstractProject.class);
         when(run.getParent()).thenReturn(job);
 
         mockEnvironment();
@@ -61,7 +61,7 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
         Jenkins jenkins = mock(Jenkins.class);
         mockStatic(Jenkins.class);
         Mockito.when(Jenkins.get()).thenReturn(jenkins);
-        Mockito.when(jenkins.getDescriptorOrDie(anyObject())).thenReturn(mockDescriptor);
+        Mockito.when(jenkins.getDescriptorOrDie(any())).thenReturn(mockDescriptor);
     }
 
     @Test
@@ -158,7 +158,7 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
 
     private void injectFakeDecisionMaker(Office365ConnectorWebhookNotifier notifier) {
         DecisionMaker decisionMaker = mock(DecisionMaker.class);
-        when(decisionMaker.isAtLeastOneRuleMatched(Matchers.any())).thenThrow(new IllegalStateException());
+        when(decisionMaker.isAtLeastOneRuleMatched(any())).thenThrow(new IllegalStateException());
         Deencapsulation.setField(notifier, "decisionMaker", decisionMaker);
     }
 

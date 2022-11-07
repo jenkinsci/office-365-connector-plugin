@@ -1,17 +1,19 @@
 package jenkins.plugins.office365connector;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.Collections;
 
 import hudson.model.AbstractBuild;
-import hudson.model.ItemGroup;
+import hudson.model.AbstractProject;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.AbstractTest;
@@ -35,12 +37,12 @@ public class CardBuilderTest extends AbstractTest {
 
     @Before
     public void setUp() throws Exception {
-        ItemGroup itemGroup = mock(ItemGroup.class);
-        when(itemGroup.getFullDisplayName()).thenReturn(StringUtils.EMPTY);
+        Jenkins jenkinsMock = mock(Jenkins.class);
+        when(jenkinsMock.getFullDisplayName()).thenReturn(StringUtils.EMPTY);
 
-        Job job = mock(Job.class);
+        Job job = mock(AbstractProject.class);
         when(job.getDisplayName()).thenReturn(JOB_DISPLAY_NAME);
-        when(job.getParent()).thenReturn(itemGroup);
+        doReturn(jenkinsMock).when(job).getParent();
 
         run = mock(AbstractBuild.class);
         when(run.getNumber()).thenReturn(BUILD_NUMBER);
@@ -116,7 +118,7 @@ public class CardBuilderTest extends AbstractTest {
         when(previousBuild.getResult()).thenReturn(Result.FAILURE);
         when(run.getPreviousBuild()).thenReturn(previousBuild);
 
-        Run previousNotFailedBuild = mock(Run.class);
+        AbstractBuild previousNotFailedBuild = mock(AbstractBuild.class);
         int previousNotFailedBuildNumber = BUILD_NUMBER - 3;
         when(previousNotFailedBuild.getNumber()).thenReturn(previousNotFailedBuildNumber);
         when(previousNotFailedBuild.getNextBuild()).thenReturn(previousNotFailedBuild);
@@ -146,7 +148,7 @@ public class CardBuilderTest extends AbstractTest {
         when(previousBuild.getResult()).thenReturn(Result.ABORTED);
         when(run.getPreviousBuild()).thenReturn(previousBuild);
 
-        Run previousNotFailedBuild = mock(Run.class);
+        AbstractBuild previousNotFailedBuild = mock(AbstractBuild.class);
         int previousNotFailedBuildNumber = BUILD_NUMBER - 3;
         when(previousNotFailedBuild.getNumber()).thenReturn(previousNotFailedBuildNumber);
         when(previousNotFailedBuild.getNextBuild()).thenReturn(previousNotFailedBuild);
@@ -486,12 +488,12 @@ public class CardBuilderTest extends AbstractTest {
 
         // given
         final String specialDisplayName = "this_is_my-very#special *job*";
-        ItemGroup itemGroup = mock(ItemGroup.class);
-        when(itemGroup.getFullDisplayName()).thenReturn(StringUtils.EMPTY);
+        Jenkins jenkinsMock = mock(Jenkins.class);
+        when(jenkinsMock.getFullDisplayName()).thenReturn(StringUtils.EMPTY);
 
-        Job job = mock(Job.class);
+        AbstractProject job = mock(AbstractProject.class);
         when(job.getDisplayName()).thenReturn(specialDisplayName);
-        when(job.getParent()).thenReturn(itemGroup);
+        doReturn(jenkinsMock).when(job).getParent();
 
         run = mock(AbstractBuild.class);
         when(run.getParent()).thenReturn(job);

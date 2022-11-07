@@ -1,6 +1,7 @@
 package jenkins.plugins.office365connector.workflow;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -13,13 +14,14 @@ import java.util.List;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Cause;
-import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.HttpWorker;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.Webhook;
@@ -33,13 +35,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-@PrepareForTest({DisplayURLProvider.class, Run.class})
+@PrepareForTest(DisplayURLProvider.class)
 public abstract class AbstractTest {
 
     private static final String PARENT_JOB_NAME = "Parent project";
@@ -55,10 +57,10 @@ public abstract class AbstractTest {
         when(run.getPreviousBuild()).thenReturn(previousBuild);
         when(previousBuild.getResult()).thenReturn(Result.FAILURE);
 
-        Run failingSinceBuild = mock(Run.class);
+        AbstractBuild failingSinceBuild = mock(AbstractBuild.class);
         when(failingSinceBuild.getNumber()).thenReturn(10);
 
-        Run lastNotFailedBuild = mock(Run.class);
+        AbstractBuild lastNotFailedBuild = mock(AbstractBuild.class);
         when(lastNotFailedBuild.getNextBuild()).thenReturn(failingSinceBuild);
         when(run.getPreviousNotFailedBuild()).thenReturn(lastNotFailedBuild);
     }
@@ -80,7 +82,7 @@ public abstract class AbstractTest {
     protected void mockEnvironment() {
         EnvVars envVars = mock(EnvVars.class);
         try {
-            TaskListener taskListener = Matchers.any();
+            TaskListener taskListener = ArgumentMatchers.any();
             when(run.getEnvironment(taskListener)).thenReturn(envVars);
         } catch (IOException | InterruptedException e) {
             throw new IllegalArgumentException(e);
@@ -88,15 +90,15 @@ public abstract class AbstractTest {
         when(envVars.expand(ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE)).thenReturn(ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE);
     }
 
-    protected Job mockJob(String jobName) {
+    protected AbstractProject mockJob(String jobName) {
         return mockJob(jobName, PARENT_JOB_NAME);
     }
 
-    protected Job mockJob(String jobName, String parentJobName) {
-        Job job = mock(Job.class);
-        ItemGroup itemGroup = mock(ItemGroup.class);
-        when(itemGroup.getFullDisplayName()).thenReturn(parentJobName);
-        when(job.getParent()).thenReturn(itemGroup);
+    protected AbstractProject mockJob(String jobName, String parentJobName) {
+        AbstractProject job = mock(AbstractProject.class);
+        Jenkins jenkinsMock = mock(Jenkins.class);
+        when(jenkinsMock.getFullDisplayName()).thenReturn(parentJobName);
+        doReturn(jenkinsMock).when(job).getParent();
         when(job.getFullDisplayName()).thenReturn(jobName);
 
         return job;
@@ -121,7 +123,7 @@ public abstract class AbstractTest {
         mockStatic(FilePath.class);
         mockStatic(TokenMacro.class);
         try {
-            when(TokenMacro.expandAll(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(evaluatedValue);
+            when(TokenMacro.expandAll(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(evaluatedValue);
         } catch (MacroEvaluationException | IOException | InterruptedException e) {
             throw new IllegalArgumentException(e);
         }
