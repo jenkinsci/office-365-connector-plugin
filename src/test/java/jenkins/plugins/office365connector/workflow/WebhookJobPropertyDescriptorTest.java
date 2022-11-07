@@ -17,7 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kohsuke.stapler.StaplerRequest;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -186,7 +186,7 @@ public class WebhookJobPropertyDescriptorTest {
         jsonObject.putAll(map, config);
 
         StaplerRequest request = mock(StaplerRequest.class);
-        when(request.bindJSON(Matchers.any(), (JSONObject) Matchers.eq(jsonObject.get(KEY)))).thenReturn(webhook);
+        when(request.bindJSON(ArgumentMatchers.any(), (JSONObject) ArgumentMatchers.eq(jsonObject.get(KEY)))).thenReturn(webhook);
 
         // when
         WebhookJobProperty property = descriptor.newInstance(request, jsonObject);
@@ -214,7 +214,7 @@ public class WebhookJobPropertyDescriptorTest {
         jsonObject.putAll(map, config);
 
         StaplerRequest request = mock(StaplerRequest.class);
-        when(request.bindJSONToList(Matchers.any(), Matchers.eq(jsonObject.get(KEY)))).thenReturn(webhooks);
+        when(request.bindJSONToList(ArgumentMatchers.any(), ArgumentMatchers.eq(jsonObject.get(KEY)))).thenReturn(webhooks);
 
         // when
         WebhookJobProperty property = descriptor.newInstance(request, jsonObject);

@@ -23,8 +23,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -42,7 +41,7 @@ public class DecisionMakerTest extends AbstractTest {
         Jenkins mockJenkins = mock(Jenkins.class);
         mockStatic(Jenkins.class);
         Mockito.when(Jenkins.get()).thenReturn(mockJenkins);
-        Mockito.when(mockJenkins.getDescriptorOrDie(anyObject())).thenReturn(mockDescriptor);
+        Mockito.when(mockJenkins.getDescriptorOrDie(any())).thenReturn(mockDescriptor);
     }
 
     @Test

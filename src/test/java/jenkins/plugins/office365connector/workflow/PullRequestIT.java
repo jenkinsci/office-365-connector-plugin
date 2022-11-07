@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.User;
@@ -75,7 +76,7 @@ public class PullRequestIT extends AbstractTest {
 
         when(run.getNumber()).thenReturn(BUILD_NUMBER);
 
-        Job job = mockJob(JOB_NAME, PARENT_JOB_NAME);
+        AbstractProject job = mockJob(JOB_NAME, PARENT_JOB_NAME);
         when(run.getParent()).thenReturn(job);
 
         mockProperty(job);
