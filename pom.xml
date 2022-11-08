@@ -1,9 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.16</version>
+        <version>4.47</version>
+        <relativePath />
     </parent>
 
     <licenses>
@@ -16,51 +18,42 @@
 
     <artifactId>Office-365-Connector</artifactId>
     <name>Office 365 Connector</name>
-    <version>4.17.1-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
     <packaging>hpi</packaging>
     <description>This plugin sends Job notifications to JenkinsCI Office 365 Connector.</description>
     <url>https://github.com/jenkinsci/office-365-connector-plugin</url>
 
     <properties>
+        <revision>4.17.1</revision>
+        <changelist>-SNAPSHOT</changelist>
+        <mockito.version>3.12.4</mockito.version>
         <powermock.version>2.0.9</powermock.version>
-        <jenkins.version>2.277.2</jenkins.version>
-        <java.level>8</java.level>
+        <jenkins.version>2.319.3</jenkins.version>
+        <gitHubRepo>jenkinsci/office-365-connector-plugin</gitHubRepo>
     </properties>
 
-    <dependencies>
-        <!-- fixes error:
-             Failed while enforcing RequireUpperBoundDeps -->
-        <dependency>
-            <groupId>commons-beanutils</groupId>
-            <artifactId>commons-beanutils</artifactId>
-            <version>1.9.4</version>
-            <scope>provided</scope>
-        </dependency>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.jenkins.tools.bom</groupId>
+                <artifactId>bom-2.319.x</artifactId>
+                <version>1654.vcb_69d035fa_20</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.1</version>
-            <scope>test</scope>
-        </dependency>
+    <dependencies>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.12.4</version>
             <scope>test</scope>
-            <!-- powermock wants objenesis 2.4 and mockito wants objenesis 2.1 -->
-            <!-- exclude from mockito so that powermock version is used -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.objenesis</groupId>
-                    <artifactId>objenesis</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>2.8.0</version>
+            <version>2.9.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -101,22 +94,18 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>token-macro</artifactId>
-            <version>2.15</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>display-url-api</artifactId>
-            <version>2.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>scm-api</artifactId>
-            <version>2.6.3</version>
         </dependency>
         <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>structs</artifactId>
-            <version>1.20</version>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-validator</groupId>
@@ -130,7 +119,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.22.2</version>
                 <executions>
                     <execution>
                         <goals>
@@ -143,7 +131,6 @@
             <plugin>
                 <groupId>org.jenkins-ci.tools</groupId>
                 <artifactId>maven-hpi-plugin</artifactId>
-                <version>3.24</version>
                 <configuration>
                     <!-- Jenkins test InjectedTest renamed to InjectedIT so it is executed only during integration tests -->
                     <injectedTestName>InjectionIT</injectedTestName>
@@ -175,10 +162,10 @@
     </developers>
 
     <scm>
-        <connection>scm:git:ssh://github.com/jenkinsci/office-365-connector.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/jenkinsci/office-365-connector.git</developerConnection>
-        <url>https://github.com/jenkinsci/office-365-connector.git</url>
-        <tag>HEAD</tag>
+        <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
+        <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
+        <url>https://github.com/${gitHubRepo}</url>
+        <tag>${scmTag}</tag>
     </scm>
 
     <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
