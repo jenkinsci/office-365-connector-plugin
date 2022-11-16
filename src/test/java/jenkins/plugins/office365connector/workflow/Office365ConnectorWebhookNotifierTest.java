@@ -1,7 +1,16 @@
 package jenkins.plugins.office365connector.workflow;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+
 import java.util.Collections;
 import java.util.List;
+
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Job;
@@ -13,34 +22,23 @@ import jenkins.plugins.office365connector.DecisionMaker;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.WebhookJobProperty;
-import jenkins.plugins.office365connector.helpers.CardBuilderAnswer;
-import jenkins.plugins.office365connector.helpers.MockHelper;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
-import mockit.Deencapsulation;
+import mockit.internal.reflection.FieldReflection;
+import mockit.internal.reflection.MethodReflection;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-@PowerMockIgnore("jdk.internal.reflect.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Office365ConnectorWebhookNotifier.class, Jenkins.class})
 public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
 
     private TaskListener taskListener;
     private Job job;
+    private MockedStatic<Jenkins> staticJenkins;
 
     @Before
     public void setUp() throws Exception {
@@ -53,19 +51,23 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
         when(run.getParent()).thenReturn(job);
 
         mockEnvironment();
-        mockHttpWorker();
 
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
         when(mockDescriptor.getName()).thenReturn("test");
 
         Jenkins jenkins = mock(Jenkins.class);
-        mockStatic(Jenkins.class);
-        Mockito.when(Jenkins.get()).thenReturn(jenkins);
-        Mockito.when(jenkins.getDescriptorOrDie(any())).thenReturn(mockDescriptor);
+        staticJenkins = mockStatic(Jenkins.class);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
+        when(jenkins.getDescriptorOrDie(any())).thenReturn(mockDescriptor);
+    }
+
+    @After
+    public void tearDown() {
+        staticJenkins.close();
     }
 
     @Test
-    public void Office365ConnectorWebhookNotifier_InitializeJob() {
+    public void Office365ConnectorWebhookNotifier_InitializeJob() throws Exception {
 
         // given
         // from @Before
@@ -74,11 +76,11 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
 
         // then
-        assertThat((Job) Deencapsulation.getField(notifier, "job")).isSameAs(job);
+        assertThat((Job) FieldReflection.getFieldValue(notifier.getClass().getDeclaredField("job"), notifier)).isSameAs(job);
     }
 
     @Test
-    public void sendBuildStartedNotification_OnEmptyWebhooks_SkipsProcessing() {
+    public void sendBuildStartedNotification_OnEmptyWebhooks_SkipsProcessing() throws Exception {
 
         // given
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
@@ -93,7 +95,7 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
     }
 
     @Test
-    public void sendBuildStartedNotification_OnNoBuild_SkipsProcessing() {
+    public void sendBuildStartedNotification_OnNoBuild_SkipsProcessing() throws Exception {
 
         // given
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
@@ -111,21 +113,20 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
     public void sendBuildStartedNotification_OnWebhook_SendsNotification() {
 
         // given
-        CardBuilderAnswer builderAnswer = new CardBuilderAnswer();
-        MockHelper.mockNew(CardBuilder.class, builderAnswer);
-
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
         setWebhookToJob(WebhookBuilder.sampleWebhookWithAllStatuses());
 
-        // when
-        notifier.sendBuildStartedNotification(true);
+        try (MockedConstruction<CardBuilder> cardBuilderConstruction = mockConstruction(CardBuilder.class)) {
+            // when
+            notifier.sendBuildStartedNotification(true);
 
-        // then
-        assertThat(builderAnswer.getTimes()).isOne();
+            // then
+            assertEquals(1, cardBuilderConstruction.constructed().size());
+        }
     }
 
     @Test
-    public void sendBuildCompletedNotification_OnEmptyWebhooks_SkipsProcessing() {
+    public void sendBuildCompletedNotification_OnEmptyWebhooks_SkipsProcessing() throws Exception {
 
         // given
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
@@ -141,25 +142,23 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
 
     @Test
     public void sendBuildCompletedNotification_OnWebhook_SendsNotification() {
-
         // given
-        CardBuilderAnswer builderAnswer = new CardBuilderAnswer();
-        MockHelper.mockNew(CardBuilder.class, builderAnswer);
-
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
         setWebhookToJob(WebhookBuilder.sampleWebhookWithAllStatuses());
 
-        // when
-        notifier.sendBuildCompletedNotification();
+        try (MockedConstruction<CardBuilder> cardBuilderConstruction = mockConstruction(CardBuilder.class)) {
+            // when
+            notifier.sendBuildCompletedNotification();
 
-        // then
-        assertThat(builderAnswer.getTimes()).isOne();
+            // then
+            assertEquals(1, cardBuilderConstruction.constructed().size());
+        }
     }
 
-    private void injectFakeDecisionMaker(Office365ConnectorWebhookNotifier notifier) {
+    private void injectFakeDecisionMaker(Office365ConnectorWebhookNotifier notifier) throws NoSuchFieldException {
         DecisionMaker decisionMaker = mock(DecisionMaker.class);
         when(decisionMaker.isAtLeastOneRuleMatched(any())).thenThrow(new IllegalStateException());
-        Deencapsulation.setField(notifier, "decisionMaker", decisionMaker);
+        FieldReflection.setFieldValue(notifier.getClass().getDeclaredField("decisionMaker"), notifier, decisionMaker);
     }
 
     private void setWebhookToJob(List<Webhook> webhooks) {
@@ -168,7 +167,7 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
     }
 
     @Test
-    public void extractWebhooks_OnMissingProperty_ReturnsEmptyWebhooks() {
+    public void extractWebhooks_OnMissingProperty_ReturnsEmptyWebhooks() throws Throwable {
 
         // given
         Job job = mock(Job.class);
@@ -176,14 +175,14 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
 
         // when
-        List<Webhook> webhooks = Deencapsulation.invoke(notifier, "extractWebhooks", job);
+        List<Webhook> webhooks = MethodReflection.invokeWithCheckedThrows(notifier.getClass(), notifier, "extractWebhooks", new Class[]{Job.class}, job);
 
         // then
         assertThat(webhooks).isEmpty();
     }
 
     @Test
-    public void extractWebhooks_OnMissingWebhooks_ReturnsEmptyWebhooks() {
+    public void extractWebhooks_OnMissingWebhooks_ReturnsEmptyWebhooks() throws Throwable {
 
         // given
         Job job = mock(Job.class);
@@ -193,7 +192,7 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
 
         // when
-        List<Webhook> webhooks = Deencapsulation.invoke(notifier, "extractWebhooks", job);
+        List<Webhook> webhooks = MethodReflection.invokeWithCheckedThrows(notifier.getClass(), notifier, "extractWebhooks", new Class[]{Job.class}, job);
 
         // then
         assertThat(webhooks).isEmpty();

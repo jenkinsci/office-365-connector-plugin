@@ -1,6 +1,6 @@
 package jenkins.plugins.office365connector.helpers;
 
-import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
 import java.util.Iterator;

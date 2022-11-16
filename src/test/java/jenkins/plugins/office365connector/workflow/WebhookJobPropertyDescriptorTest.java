@@ -1,11 +1,17 @@
 package jenkins.plugins.office365connector.workflow;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.WebhookJobProperty;
@@ -13,37 +19,29 @@ import jenkins.plugins.office365connector.WebhookJobPropertyDescriptor;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
 import net.sf.json.JSONObject;
 import net.sf.json.JsonConfig;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.kohsuke.stapler.StaplerRequest;
 import org.mockito.ArgumentMatchers;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import org.mockito.MockedStatic;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-@PowerMockIgnore("jdk.internal.reflect.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Jenkins.class, Webhook.DescriptorImpl.class})
 public class WebhookJobPropertyDescriptorTest {
 
     private static final String KEY = "webhooks";
 
+    private MockedStatic<Jenkins> staticJenkins;
+
     @Before
     public void setUp() {
-        mockStatic(Jenkins.class);
+        staticJenkins = mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         File rootDir = new File(".");
         when(jenkins.getRootDir()).thenReturn(rootDir);
-        when(Jenkins.get()).thenReturn(jenkins);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
 
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
         when(mockDescriptor.getName()).thenReturn("testName");
@@ -51,6 +49,11 @@ public class WebhookJobPropertyDescriptorTest {
         when(mockDescriptor.getDescriptorFullUrl()).thenReturn("http://test.com");
 
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
+    }
+
+    @After
+    public void tearDown() {
+        staticJenkins.close();
     }
 
     @Test

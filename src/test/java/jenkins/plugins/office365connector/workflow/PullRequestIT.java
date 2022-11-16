@@ -1,9 +1,10 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -19,36 +20,31 @@ import jenkins.plugins.office365connector.FileUtils;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
-import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.SCMHeadBuilder;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.metadata.ContributorMetadataAction;
 import jenkins.scm.api.metadata.ObjectMetadataAction;
-import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockedStatic;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-@PowerMockIgnore("jdk.internal.reflect.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Office365ConnectorWebhookNotifier.class, SCMHead.HeadByItem.class, Jenkins.class})
 public class PullRequestIT extends AbstractTest {
 
-    private static final String PARENT_JOB_NAME = "Damian Szczepanik";
     private static final String JOB_NAME = "hook » PR-1";
     private static final int BUILD_NUMBER = 3;
     private static final String URL_TEMPLATE = "http://localhost:8080/job/GitHub%%20Branch%%20Source/job/hook/job/%s/%s/display/redirect";
     private static final String USER_NAME = "damian";
 
+    private MockedStatic<Jenkins> staticJenkins;
+    private MockedStatic<SCMHead.HeadByItem> headByItem;
+
     @Before
     public void setUp() {
-        mockStatic(Jenkins.class);
+        staticJenkins = mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         mockListener();
 
@@ -56,14 +52,14 @@ public class PullRequestIT extends AbstractTest {
         mockCause("Branch indexing");
         mockCommitters();
 
-        mockDisplayURLProvider();
+        mockDisplayURLProvider(JOB_NAME, BUILD_NUMBER, URL_TEMPLATE);
         mockEnvironment();
         mockHttpWorker();
         mockGetChangeSets();
 
         mockPullRequest();
 
-        when(Jenkins.get()).thenReturn(jenkins);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
 
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
         when(mockDescriptor.getName()).thenReturn("testName");
@@ -71,12 +67,18 @@ public class PullRequestIT extends AbstractTest {
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
     }
 
+    @After
+    public void tearDown() {
+        headByItem.close();
+        staticJenkins.close();
+    }
+
     private AbstractBuild mockRun() {
         AbstractBuild run = mock(AbstractBuild.class);
 
         when(run.getNumber()).thenReturn(BUILD_NUMBER);
 
-        AbstractProject job = mockJob(JOB_NAME, PARENT_JOB_NAME);
+        AbstractProject job = mockJob(JOB_NAME);
         when(run.getParent()).thenReturn(job);
 
         mockProperty(job);
@@ -96,18 +98,12 @@ public class PullRequestIT extends AbstractTest {
         when(run.getChangeSets()).thenReturn(files);
     }
 
-    private void mockDisplayURLProvider() {
-        mockStatic(DisplayURLProvider.class);
-        when(DisplayURLProvider.get()).thenReturn(
-                new ClassicDisplayURLProviderBuilder(JOB_NAME, BUILD_NUMBER, URL_TEMPLATE));
-    }
-
     private void mockPullRequest() {
         Job job = run.getParent();
         SCMHead head = new SCMHeadBuilder("Pull Request");
 
-        mockStatic(SCMHead.HeadByItem.class);
-        when(SCMHead.HeadByItem.findHead(run.getParent())).thenReturn(head);
+        headByItem = mockStatic(SCMHead.HeadByItem.class);
+        headByItem.when(() -> SCMHead.HeadByItem.findHead(job)).thenReturn(head);
 
         ObjectMetadataAction objectMetadataAction = mock(ObjectMetadataAction.class);
         when(objectMetadataAction.getObjectUrl()).thenReturn("https://github.com/damianszczepanik/hook/pull/1");
@@ -131,7 +127,7 @@ public class PullRequestIT extends AbstractTest {
         notifier.sendBuildCompletedNotification();
 
         // then
-        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("repeated_failure-pull_request.json"));
+        assertHasSameContent(workerData.get(0), FileUtils.getContentFile("repeated_failure-pull_request.json"));
     }
 
     @Test
@@ -145,6 +141,6 @@ public class PullRequestIT extends AbstractTest {
         notifier.sendBuildCompletedNotification();
 
         // then
-        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("back_to_normal-without_actions.json"));
+        assertHasSameContent(workerData.get(0), FileUtils.getContentFile("back_to_normal-without_actions.json"));
     }
 }

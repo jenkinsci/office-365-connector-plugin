@@ -1,7 +1,7 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -13,17 +13,10 @@ import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-@PowerMockIgnore("jdk.internal.reflect.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Office365ConnectorWebhookNotifier.class)
 public class DevelopersIT extends AbstractTest {
 
     private static final String JOB_NAME = "simple job";
@@ -70,6 +63,6 @@ public class DevelopersIT extends AbstractTest {
         notifier.sendBuildStartedNotification(true);
 
         // then
-        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("started-developers.json"));
+        assertHasSameContent(workerData.get(0), FileUtils.getContentFile("started-developers.json"));
     }
 }

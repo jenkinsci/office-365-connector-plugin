@@ -1,14 +1,13 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.List;
 
-import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Job;
 import hudson.scm.ChangeLogSet;
@@ -18,28 +17,24 @@ import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.WebhookJobProperty;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
-import org.jenkinsci.plugins.tokenmacro.TokenMacro;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockedStatic;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-@PowerMockIgnore("jdk.internal.reflect.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Office365ConnectorWebhookNotifier.class, TokenMacro.class, FilePath.class, Jenkins.class})
 public class MacroIT extends AbstractTest {
 
     private static final String JOB_NAME = "simple job";
     private static final int BUILD_NUMBER = 1;
 
+    private MockedStatic<Jenkins> staticJenkins;
+
     @Before
     public void setUp() {
-        mockStatic(Jenkins.class);
+        staticJenkins = mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
 
         mockListener();
@@ -52,12 +47,17 @@ public class MacroIT extends AbstractTest {
         mockGetChangeSets();
         mockTokenMacro(String.valueOf(BUILD_NUMBER));
 
-        when(Jenkins.get()).thenReturn(jenkins);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
 
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
         when(mockDescriptor.getName()).thenReturn("testName");
 
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
+    }
+
+    @After
+    public void tearDown() {
+        staticJenkins.close();
     }
 
     private AbstractBuild mockRun() {
@@ -110,7 +110,7 @@ public class MacroIT extends AbstractTest {
         notifier.sendBuildStartedNotification(true);
 
         // then
-        assertThat(workerAnswer.getTimes()).isZero();
+        assertEquals(0, workerConstruction.constructed().size());
     }
 
     @Test
@@ -125,7 +125,7 @@ public class MacroIT extends AbstractTest {
         notifier.sendBuildStartedNotification(true);
 
         // then
-        assertThat(workerAnswer.getTimes()).isEqualTo(repeated);
+        assertEquals(repeated, workerConstruction.constructed().size());
     }
 
     @Test
@@ -140,6 +140,6 @@ public class MacroIT extends AbstractTest {
         notifier.sendBuildStartedNotification(true);
 
         // then
-        assertThat(workerAnswer.getTimes()).isEqualTo(repeated);
+        assertEquals(repeated, workerConstruction.constructed().size());
     }
 }

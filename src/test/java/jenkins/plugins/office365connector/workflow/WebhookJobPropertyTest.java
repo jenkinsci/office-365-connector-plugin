@@ -1,7 +1,9 @@
 package jenkins.plugins.office365connector.workflow;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 
 import java.util.Collections;
 import java.util.List;
@@ -12,17 +14,11 @@ import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.WebhookJobProperty;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockedConstruction;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-@PowerMockIgnore("jdk.internal.reflect.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Office365ConnectorWebhookNotifier.class, WebhookJobProperty.class})
 public class WebhookJobPropertyTest extends AbstractTest {
 
     @Test
@@ -47,13 +43,14 @@ public class WebhookJobPropertyTest extends AbstractTest {
 
         // given
         run = mock(AbstractBuild.class);
-        mockOffice365ConnectorWebhookNotifier();
-
         WebhookJobProperty property = new WebhookJobProperty(Collections.emptyList());
 
-        // when
-        property.prebuild(run, mockListener());
+        try (MockedConstruction<Office365ConnectorWebhookNotifier> notifierConstruction = mockConstruction(Office365ConnectorWebhookNotifier.class)) {
+            // when
+            property.prebuild(run, mockListener());
 
-        assertThat(notifierAnswer.getTimes()).isOne();
+            // then
+            assertEquals(1, notifierConstruction.constructed().size());
+        }
     }
 }

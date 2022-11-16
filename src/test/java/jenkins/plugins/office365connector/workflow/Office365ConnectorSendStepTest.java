@@ -1,7 +1,7 @@
 package jenkins.plugins.office365connector.workflow;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,21 +9,15 @@ import java.util.Set;
 
 import hudson.util.FormValidation;
 import jenkins.plugins.office365connector.model.FactDefinition;
-import mockit.Deencapsulation;
+import mockit.internal.reflection.FieldReflection;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.spi.testresult.Result;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-@PowerMockIgnore("jdk.internal.reflect.*")
-@RunWith(PowerMockRunner.class)
 public class Office365ConnectorSendStepTest {
 
     @Test
@@ -84,7 +78,7 @@ public class Office365ConnectorSendStepTest {
     public void getStatus_ReturnsStatus() {
 
         // given
-        String status = Result.FAILED.toString();
+        String status = "FAILED";
         Office365ConnectorSendStep step = new Office365ConnectorSendStep(null);
         step.setStatus(status);
 
@@ -99,7 +93,7 @@ public class Office365ConnectorSendStepTest {
     public void getStatus_OnBlankStatus_ReturnsTrimmedStatus() {
 
         // given
-        String status = Result.FAILED.toString() + " ";
+        String status = "FAILED ";
         Office365ConnectorSendStep step = new Office365ConnectorSendStep(null);
         step.setStatus(status);
 
@@ -156,7 +150,7 @@ public class Office365ConnectorSendStepTest {
     }
 
     @Test
-    public void start_CreatesExecution() {
+    public void start_CreatesExecution() throws Exception {
 
         // given
         String message = "Hi there.";
@@ -169,7 +163,7 @@ public class Office365ConnectorSendStepTest {
 
         // then
         assertThat(execution.getContext()).isEqualTo(stepContext);
-        StepParameters stepParameters = Deencapsulation.getField(execution, "stepParameters");
+        StepParameters stepParameters = FieldReflection.getFieldValue(execution.getClass().getDeclaredField("stepParameters"), execution);
         assertThat(stepParameters.getMessage()).isEqualTo(message);
     }
 

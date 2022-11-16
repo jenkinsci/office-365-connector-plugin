@@ -1,37 +1,35 @@
 package jenkins.plugins.office365connector;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
+
 import hudson.FilePath;
+import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.model.Macro;
 import jenkins.plugins.office365connector.workflow.AbstractTest;
-import mockit.Deencapsulation;
+import mockit.internal.reflection.FieldReflection;
+import mockit.internal.reflection.MethodReflection;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockedStatic;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
-
-@PowerMockIgnore("jdk.internal.reflect.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({TokenMacro.class, FilePath.class, Jenkins.class})
 public class DecisionMakerTest extends AbstractTest {
+
+    private MockedStatic<Jenkins> staticJenkins;
 
     @Before
     public void setup() throws Exception {
@@ -39,33 +37,38 @@ public class DecisionMakerTest extends AbstractTest {
         when(mockDescriptor.getName()).thenReturn("test");
 
         Jenkins mockJenkins = mock(Jenkins.class);
-        mockStatic(Jenkins.class);
-        Mockito.when(Jenkins.get()).thenReturn(mockJenkins);
-        Mockito.when(mockJenkins.getDescriptorOrDie(any())).thenReturn(mockDescriptor);
+        staticJenkins = mockStatic(Jenkins.class);
+        staticJenkins.when(Jenkins::get).thenReturn(mockJenkins);
+        when(mockJenkins.getDescriptorOrDie(any())).thenReturn(mockDescriptor);
+    }
+
+    @After
+    public void tearDown() {
+        staticJenkins.close();
     }
 
     @Test
-    public void DecisionMaker_OnEmptyPreviousBuild_StoresParameters() {
+    public void DecisionMaker_OnEmptyPreviousBuild_StoresParameters() throws Exception {
 
         // given
-        Run run = mock(Run.class);
+        AbstractBuild run = mock(AbstractBuild.class);
         TaskListener taskListener = mockListener();
 
         // when
         DecisionMaker decisionMaker = new DecisionMaker(run, taskListener);
 
         // then
-        assertThat((Run) Deencapsulation.getField(decisionMaker, "run")).isSameAs(run);
-        assertThat((TaskListener) Deencapsulation.getField(decisionMaker, "taskListener")).isSameAs(taskListener);
-        assertThat((Result) Deencapsulation.getField(decisionMaker, "previousResult")).isEqualTo(Result.SUCCESS);
+        assertThat((Run) FieldReflection.getFieldValue(decisionMaker.getClass().getDeclaredField("run"), decisionMaker)).isSameAs(run);
+        assertThat((TaskListener) FieldReflection.getFieldValue(decisionMaker.getClass().getDeclaredField("taskListener"), decisionMaker)).isSameAs(taskListener);
+        assertThat((Result) FieldReflection.getFieldValue(decisionMaker.getClass().getDeclaredField("previousResult"), decisionMaker)).isEqualTo(Result.SUCCESS);
     }
 
     @Test
-    public void DecisionMaker_OnPreviousBuild_StoresParameters() {
+    public void DecisionMaker_OnPreviousBuild_StoresParameters() throws Exception {
 
         // given
-        Run run = mock(Run.class);
-        Run previousRun = mock(Run.class);
+        AbstractBuild run = mock(AbstractBuild.class);
+        AbstractBuild previousRun = mock(AbstractBuild.class);
         Result previousResult = Result.ABORTED;
         when(run.getPreviousBuild()).thenReturn(previousRun);
         when(previousRun.getResult()).thenReturn(previousResult);
@@ -75,9 +78,9 @@ public class DecisionMakerTest extends AbstractTest {
         DecisionMaker decisionMaker = new DecisionMaker(run, taskListener);
 
         // then
-        assertThat((Run) Deencapsulation.getField(decisionMaker, "run")).isSameAs(run);
-        assertThat((TaskListener) Deencapsulation.getField(decisionMaker, "taskListener")).isSameAs(taskListener);
-        assertThat((Result) Deencapsulation.getField(decisionMaker, "previousResult")).isEqualTo(previousResult);
+        assertThat((Run) FieldReflection.getFieldValue(decisionMaker.getClass().getDeclaredField("run"), decisionMaker)).isSameAs(run);
+        assertThat((TaskListener) FieldReflection.getFieldValue(decisionMaker.getClass().getDeclaredField("taskListener"), decisionMaker)).isSameAs(taskListener);
+        assertThat((Result) FieldReflection.getFieldValue(decisionMaker.getClass().getDeclaredField("previousResult"), decisionMaker)).isEqualTo(previousResult);
     }
 
     @Test
@@ -562,20 +565,14 @@ public class DecisionMakerTest extends AbstractTest {
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker();
 
-        mockStatic(TokenMacro.class);
-        mockStatic(FilePath.class);
+        try (MockedStatic<TokenMacro> tokenMacroStatic = mockStatic(TokenMacro.class); MockedStatic<FilePath> filePathStatic = mockStatic(FilePath.class)) {
+            tokenMacroStatic.when(() -> TokenMacro.expandAll(any(), any(), any(), any())).thenThrow(new MacroEvaluationException("ups!"));
 
-        try {
-            when(TokenMacro.expandAll(any(), any(), any(), any()))
-                    .thenThrow(new MacroEvaluationException("ups!"));
-        } catch (MacroEvaluationException | IOException | InterruptedException e) {
-            throw new IllegalArgumentException(e);
+            // when & then
+            assertThatThrownBy(() -> MethodReflection.invokeWithCheckedThrows(decisionMaker.getClass(), decisionMaker, "evaluateMacro", new Class[]{String.class}, "anyTemplate"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasCauseExactlyInstanceOf(MacroEvaluationException.class);
         }
-
-        // when & then
-        assertThatThrownBy(() -> Deencapsulation.invoke(decisionMaker, "evaluateMacro", "anyTemplate"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasCauseExactlyInstanceOf(MacroEvaluationException.class);
     }
 
     private static DecisionMaker buildSampleDecisionMaker() {
