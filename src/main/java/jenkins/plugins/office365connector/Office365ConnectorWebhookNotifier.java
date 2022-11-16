@@ -23,6 +23,7 @@ import java.util.concurrent.RejectedExecutionException;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import hudson.ProxyConfiguration;
 import hudson.model.AbstractBuild;
 import hudson.model.Job;
 import hudson.model.Run;
@@ -112,7 +113,14 @@ public class Office365ConnectorWebhookNotifier {
         try {
             String url = run.getEnvironment(taskListener).expand(webhook.getUrl());
             String data = gson.toJson(card);
-            HttpWorker worker = new HttpWorker(url, data, webhook.getTimeout(), taskListener.getLogger());
+
+            Integer port = 0;
+            if (!StringUtils.isEmpty(webhook.getDescriptor().getPort())) {
+                port = Integer.parseInt(webhook.getDescriptor().getPort());
+            }
+
+            ProxyConfiguration pluginProxy = new ProxyConfiguration(webhook.getDescriptor().getIp(), port, webhook.getDescriptor().getUsername(), webhook.getDescriptor().getPassword());
+            HttpWorker worker = new HttpWorker(url, data, webhook.getTimeout(), taskListener.getLogger(), pluginProxy);
             worker.submit();
         } catch (IOException | InterruptedException | RejectedExecutionException e) {
             log(String.format("Failed to notify webhook: %s", webhook.getName()));

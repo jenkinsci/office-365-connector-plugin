@@ -14,7 +14,7 @@
                 This section defines for which build statuses the notification is sent.
             </f:description>
 
-            <f:entry title="Notify Build Start" field="startNotification">
+            <f:entry title="Notify Build Start" field="startNotification" >
                 <f:checkbox/>
             </f:entry>
 

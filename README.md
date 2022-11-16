@@ -22,7 +22,7 @@ Plugin is used to send actionable messages in [Outlook](http://outlook.com), [Of
 
 #### Global configuration values used as default in jobs
 
-![GlobalConfigurationDefault](.README/globalconfigdefault.png?raw=true)
+![GlobalConfiguratio![img.png](.README/globalconfig.png)nDefault](.README/globalconfigdefault.png?raw=true)
 
 ### Microsoft Teams
 

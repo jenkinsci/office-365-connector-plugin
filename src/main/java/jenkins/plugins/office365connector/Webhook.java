@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
+import hudson.ProxyConfiguration;
 import hudson.Util;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
@@ -183,6 +184,11 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
         private String globalUrl;
         private String globalName;
 
+        private String ip;
+        private String port;
+        private String username;
+        private String password;
+
         public DescriptorImpl() {
             load();
         }
@@ -193,6 +199,43 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
             return "Webhook";
         }
 
+        public String getIp() {
+            return Util.fixNull(ip);
+        }
+
+        @DataBoundSetter
+        public void setIp(String ip) {
+            this.ip = Util.fixNull(ip);
+        }
+
+        public String getUsername() {
+            return Util.fixNull(username);
+        }
+
+        @DataBoundSetter
+        public void setUsername(String username) {
+            this.username = Util.fixNull(username);
+        }
+
+        public String getPassword() {
+            return Util.fixNull(password);
+        }
+
+        @DataBoundSetter
+        public void setPassword(String password) {
+            this.password = Util.fixNull(password);
+        }
+
+        @Nonnull
+        public String getPort() {
+            return Util.fixNull(port);
+        }
+
+        @DataBoundSetter
+        public void setPort(String port) {
+            this.port = Util.fixNull(port);
+        }
+
         public int getDefaultTimeout() {
             return Webhook.DEFAULT_TIMEOUT;
         }
@@ -201,7 +244,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
             return FormUtils.formValidateUrl(value);
         }
 
-       public FormValidation doCheckGlobalUrl(@QueryParameter String value) {
+        public FormValidation doCheckGlobalUrl(@QueryParameter String value) {
             if(StringUtils.isNotBlank(value)) {
                 return FormUtils.formValidateUrl(value);
             } else {

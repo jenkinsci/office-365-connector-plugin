@@ -33,11 +33,12 @@ public class HttpWorkerTest extends AbstractTest {
     }
 
     @Test
-    public void HttpWorker_getHttpClient_NoProxy() throws NoSuchMethodException {
+    public void HttpWorker_getHttpClient_NoJenkinsProxy() throws NoSuchMethodException {
 
         // given
         // from @Before
-        HttpWorker httpWorker = new HttpWorker("http://127.0.0.1", "{}", 30, System.out);
+        ProxyConfiguration thisPluginProxy = new ProxyConfiguration("", 0, "", "");
+        HttpWorker httpWorker = new HttpWorker("http://127.0.0.1", "{}", 30, System.out, thisPluginProxy);
         Method method = HttpWorker.class.getDeclaredMethod("getHttpClient");
         method.setAccessible(true);
 
@@ -50,15 +51,16 @@ public class HttpWorkerTest extends AbstractTest {
     }
 
     @Test
-    public void HttpWorker_getHttpClient_Proxy() throws NoSuchMethodException {
+    public void HttpWorker_getHttpClient_JenkinsProxy() throws NoSuchMethodException {
 
         // given
         // from @Before
+        ProxyConfiguration thisPluginProxy = new ProxyConfiguration("", 0, "", "");
         Jenkins jenkins = Jenkins.get();
         ProxyConfiguration proxyConfiguration = new ProxyConfiguration("name", 123, null, null, "*mockwebsite.com*");
         jenkins.proxy = proxyConfiguration;
 
-        HttpWorker httpWorker = new HttpWorker("http://127.0.0.1", "{}", 30, System.out);
+        HttpWorker httpWorker = new HttpWorker("http://127.0.0.1", "{}", 30, System.out, thisPluginProxy);
         Method method = HttpWorker.class.getDeclaredMethod("getHttpClient");
         method.setAccessible(true);
 
@@ -71,15 +73,16 @@ public class HttpWorkerTest extends AbstractTest {
     }
 
     @Test
-    public void HttpWorker_getHttpClient_Proxy_Ignored() throws NoSuchMethodException {
+    public void HttpWorker_getHttpClient_JenkinsProxy_Ignored() throws NoSuchMethodException {
 
         // given
         // from @Before
+        ProxyConfiguration thisPluginProxy = new ProxyConfiguration("", 0, "", "");
         Jenkins jenkins = Jenkins.get();
         ProxyConfiguration proxyConfiguration = new ProxyConfiguration("name", 123, null, null, "*mockwebsite.com*");
         jenkins.proxy = proxyConfiguration;
 
-        HttpWorker httpWorker = new HttpWorker("http://mockwebsite.com", "{}", 30, System.out);
+        HttpWorker httpWorker = new HttpWorker("http://mockwebsite.com", "{}", 30, System.out, thisPluginProxy);
         Method method = HttpWorker.class.getDeclaredMethod("getHttpClient");
         method.setAccessible(true);
 
@@ -89,5 +92,23 @@ public class HttpWorkerTest extends AbstractTest {
         // then
         assertThat(httpClient.getHostConfiguration().getProxyHost()).isNull();
         assertThat(httpClient.getHostConfiguration().getProxyPort()).isEqualTo(-1);
+    }
+
+    @Test
+    public void HttpWorker_getHttpClient_PluginProxy() throws NoSuchMethodException {
+
+        // given
+        // from @Before
+        ProxyConfiguration thisPluginProxy = new ProxyConfiguration("10.0.0.1", 12345, "", "");
+        HttpWorker httpWorker = new HttpWorker("http://127.0.0.1", "{}", 30, System.out, thisPluginProxy);
+        Method method = HttpWorker.class.getDeclaredMethod("getHttpClient");
+        method.setAccessible(true);
+
+        // when
+        HttpClient httpClient = (HttpClient) ReflectionUtils.invokeMethod(method, httpWorker);
+
+        // then
+        assertThat(httpClient.getHostConfiguration().getProxyHost()).isEqualTo(thisPluginProxy.getName());
+        assertThat(httpClient.getHostConfiguration().getProxyPort()).isEqualTo(thisPluginProxy.getPort());
     }
 }

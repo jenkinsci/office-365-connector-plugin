@@ -43,17 +43,20 @@ public class HttpWorker implements Runnable {
 
     private final PrintStream logger;
 
+    private final ProxyConfiguration pluginProxy;
+
     private final String url;
     private final String data;
     private final int timeout;
 
     private static final int RETRIES = 3;
 
-    public HttpWorker(String url, String data, int timeout, PrintStream logger) {
+    public HttpWorker(String url, String data, int timeout, PrintStream logger, ProxyConfiguration pluginProxy) {
         this.url = url;
         this.data = data;
         this.timeout = timeout;
         this.logger = logger;
+        this.pluginProxy = pluginProxy;
     }
 
     /**
@@ -105,8 +108,15 @@ public class HttpWorker implements Runnable {
     private HttpClient getHttpClient() {
         HttpClient client = new HttpClient();
         Jenkins jenkins = Jenkins.get();
-        if (jenkins != null) {
+        if (!StringUtils.isEmpty(pluginProxy.getName())) {
+            client.getHostConfiguration().setProxy(pluginProxy.getName(), pluginProxy.getPort());
+            if (StringUtils.isNotBlank(pluginProxy.getUserName())) {
+                client.getState().setProxyCredentials(AuthScope.ANY,
+                        new UsernamePasswordCredentials(pluginProxy.getUserName(), pluginProxy.getPassword()));
+            }
+        } else if (jenkins != null) {
             ProxyConfiguration proxy = jenkins.proxy;
+            // Check job proxy first
             if (proxy != null) {
                 List<Pattern> noHostProxyPatterns = proxy.getNoProxyHostPatterns();
                 if (!isNoProxyHost(this.url, noHostProxyPatterns)) {
