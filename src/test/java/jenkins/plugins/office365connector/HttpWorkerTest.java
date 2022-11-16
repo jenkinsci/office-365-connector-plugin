@@ -1,35 +1,35 @@
 package jenkins.plugins.office365connector;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+
+import java.lang.reflect.Method;
+
 import hudson.ProxyConfiguration;
 import hudson.util.ReflectionUtils;
 import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.workflow.AbstractTest;
 import org.apache.commons.httpclient.HttpClient;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockedStatic;
 
-import java.lang.reflect.Method;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-
-@PowerMockIgnore("jdk.internal.reflect.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Jenkins.class, HttpWorker.class})
 public class HttpWorkerTest extends AbstractTest {
 
+    private MockedStatic<Jenkins> staticJenkins;
 
     @Before
     public void setUp() {
         Jenkins mockJenkins = mock(Jenkins.class);
-        mockStatic(Jenkins.class);
-        Mockito.when(Jenkins.get()).thenReturn(mockJenkins);
+        staticJenkins = mockStatic(Jenkins.class);
+        staticJenkins.when(Jenkins::get).thenReturn(mockJenkins);
+    }
+
+    @After
+    public void tearDown() {
+        staticJenkins.close();
     }
 
     @Test

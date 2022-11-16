@@ -1,15 +1,13 @@
 package jenkins.plugins.office365connector;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -18,16 +16,11 @@ import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.AbstractTest;
 import jenkins.plugins.office365connector.workflow.StepParameters;
-import mockit.Deencapsulation;
+import mockit.internal.reflection.MethodReflection;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@PowerMockIgnore("jdk.internal.reflect.*")
-@RunWith(PowerMockRunner.class)
 public class CardBuilderTest extends AbstractTest {
 
     private static final String JOB_DISPLAY_NAME = "myJobDisplayName";
@@ -40,9 +33,10 @@ public class CardBuilderTest extends AbstractTest {
         Jenkins jenkinsMock = mock(Jenkins.class);
         when(jenkinsMock.getFullDisplayName()).thenReturn(StringUtils.EMPTY);
 
-        Job job = mock(AbstractProject.class);
+        AbstractProject job = mock(AbstractProject.class);
         when(job.getDisplayName()).thenReturn(JOB_DISPLAY_NAME);
-        doReturn(jenkinsMock).when(job).getParent();
+        when(job.getFullDisplayName()).thenCallRealMethod();
+        when(job.getParent()).thenReturn(jenkinsMock);
 
         run = mock(AbstractBuild.class);
         when(run.getNumber()).thenReturn(BUILD_NUMBER);
@@ -390,7 +384,7 @@ public class CardBuilderTest extends AbstractTest {
 
 
     @Test
-    public void getCompletedResult_ReturnsSuccess() {
+    public void getCompletedResult_ReturnsSuccess() throws Throwable {
 
         // given
         final Result result = Result.UNSTABLE;
@@ -398,20 +392,20 @@ public class CardBuilderTest extends AbstractTest {
         when(run.getResult()).thenReturn(result);
 
         // when
-        Result completedResult = Deencapsulation.invoke(cardBuilder, "getCompletedResult", run);
+        Result completedResult = MethodReflection.invokeWithCheckedThrows(cardBuilder.getClass(), cardBuilder, "getCompletedResult", new Class[]{Run.class}, run);
 
         // then
         assertThat(completedResult).isEqualTo(result);
     }
 
     @Test
-    public void getCompletedResult_OnNullRun_ReturnsSuccess() {
+    public void getCompletedResult_OnNullRun_ReturnsSuccess() throws Throwable {
 
         // given
         Run run = mock(Run.class);
 
         // when
-        Result completedResult = Deencapsulation.invoke(cardBuilder, "getCompletedResult", run);
+        Result completedResult = MethodReflection.invokeWithCheckedThrows(cardBuilder.getClass(), cardBuilder, "getCompletedResult", new Class[]{Run.class}, run);
 
         // then
         assertThat(completedResult).isEqualTo(Result.SUCCESS);
@@ -484,7 +478,7 @@ public class CardBuilderTest extends AbstractTest {
     }
 
     @Test
-    public void getEscapedDisplayName_OnNameWithSpecialCharacters_EscapesSpecialCharacters() {
+    public void getEscapedDisplayName_OnNameWithSpecialCharacters_EscapesSpecialCharacters() throws Throwable {
 
         // given
         final String specialDisplayName = "this_is_my-very#special *job*";
@@ -493,82 +487,82 @@ public class CardBuilderTest extends AbstractTest {
 
         AbstractProject job = mock(AbstractProject.class);
         when(job.getDisplayName()).thenReturn(specialDisplayName);
-        doReturn(jenkinsMock).when(job).getParent();
+        when(job.getFullDisplayName()).thenCallRealMethod();
+        when(job.getParent()).thenReturn(jenkinsMock);
 
         run = mock(AbstractBuild.class);
         when(run.getParent()).thenReturn(job);
         TaskListener taskListener = mock(TaskListener.class);
 
-        mockDisplayURLProvider(JOB_DISPLAY_NAME, BUILD_NUMBER);
         cardBuilder = new CardBuilder(run, taskListener);
 
         // when
-        String displayName = Deencapsulation.invoke(cardBuilder, "getEscapedDisplayName");
+        String displayName = MethodReflection.invokeWithCheckedThrows(cardBuilder.getClass(), cardBuilder, "getEscapedDisplayName", new Class[]{});
 
         // then
         assertThat(displayName).isEqualTo("this\\_is\\_my\\-very\\#special \\*job\\*");
     }
 
     @Test
-    public void getCardThemeColor_OnSuccessResult_ReturnsGreen() {
+    public void getCardThemeColor_OnSuccessResult_ReturnsGreen() throws Throwable {
         // given
         Result successResult = Result.SUCCESS;
         String greenColorString = "#00FF00";
 
         // when
-        String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", successResult);
+        String themeColor = MethodReflection.invokeWithCheckedThrows(cardBuilder.getClass(), cardBuilder, "getCardThemeColor", new Class[]{Result.class}, successResult);
 
         // then
         assertThat(themeColor).isEqualToIgnoringCase(greenColorString);
     }
 
     @Test
-    public void getCardThemeColor_OnAbortedResult_ReturnsBallColor() {
+    public void getCardThemeColor_OnAbortedResult_ReturnsBallColor() throws Throwable {
         // given
         Result abortedResult = Result.ABORTED;
         String ballColorString = Result.ABORTED.color.getHtmlBaseColor();
 
         // when
-        String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", abortedResult);
+        String themeColor = MethodReflection.invokeWithCheckedThrows(cardBuilder.getClass(), cardBuilder, "getCardThemeColor", new Class[]{Result.class}, abortedResult);
 
         // then
         assertThat(themeColor).isEqualToIgnoringCase(ballColorString);
     }
 
     @Test
-    public void getCardThemeColor_OnFailureResult_ReturnsBallColor() {
+    public void getCardThemeColor_OnFailureResult_ReturnsBallColor() throws Throwable {
         // given
         Result failureResult = Result.FAILURE;
         String ballColorString = Result.FAILURE.color.getHtmlBaseColor();
 
         // when
-        String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", failureResult);
+        String themeColor = MethodReflection.invokeWithCheckedThrows(cardBuilder.getClass(), cardBuilder, "getCardThemeColor", new Class[]{Result.class}, failureResult);
 
         // then
         assertThat(themeColor).isEqualToIgnoringCase(ballColorString);
     }
 
     @Test
-    public void getCardThemeColor_OnNotBuiltResult_ReturnsBallColor() {
+    public void getCardThemeColor_OnNotBuiltResult_ReturnsBallColor() throws Throwable {
         // given
         Result notBuiltResult = Result.NOT_BUILT;
         String ballColorString = Result.NOT_BUILT.color.getHtmlBaseColor();
 
         // when
-        String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", notBuiltResult);
+        String themeColor = MethodReflection.invokeWithCheckedThrows(cardBuilder.getClass(), cardBuilder, "getCardThemeColor", new Class[]{Result.class}, notBuiltResult);
 
         // then
         assertThat(themeColor).isEqualToIgnoringCase(ballColorString);
     }
 
     @Test
-    public void getCardThemeColor_OnUnstableResult_ReturnsBallColor() {
+    public void getCardThemeColor_OnUnstableResult_ReturnsBallColor() throws Throwable {
         // given
         Result unstableResult = Result.UNSTABLE;
         String ballColorString = Result.UNSTABLE.color.getHtmlBaseColor();
 
         // when
-        String themeColor = Deencapsulation.invoke(CardBuilder.class, "getCardThemeColor", unstableResult);
+        String themeColor = MethodReflection.invokeWithCheckedThrows(cardBuilder.getClass(), cardBuilder, "getCardThemeColor", new Class[]{Result.class}, unstableResult);
 
         // then
         assertThat(themeColor).isEqualToIgnoringCase(ballColorString);

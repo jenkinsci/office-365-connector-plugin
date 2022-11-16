@@ -1,13 +1,14 @@
 package jenkins.plugins.office365connector.workflow;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,36 +20,49 @@ import hudson.model.BuildListener;
 import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.Result;
-import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.HttpWorker;
-import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.WebhookJobProperty;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
-import jenkins.plugins.office365connector.helpers.HttpWorkerAnswer;
-import jenkins.plugins.office365connector.helpers.MockHelper;
-import jenkins.plugins.office365connector.helpers.Office365ConnectorWebhookNotifierAnswer;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
-import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
+import org.junit.After;
 import org.mockito.ArgumentMatchers;
-import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-@PrepareForTest(DisplayURLProvider.class)
 public abstract class AbstractTest {
 
-    private static final String PARENT_JOB_NAME = "Parent project";
-
     protected AbstractBuild run;
-    protected HttpWorkerAnswer workerAnswer;
-    protected Office365ConnectorWebhookNotifierAnswer notifierAnswer;
+
+    protected MockedConstruction<HttpWorker> workerConstruction;
+    protected List<String> workerData;
+    private MockedStatic<DisplayURLProvider> displayUrlProviderStatic;
+    private MockedStatic<TokenMacro> tokenMacroStatic;
+    private MockedStatic<FilePath> filePathStatic;
+
+    @After
+    public void closeMocks() {
+        if (workerConstruction != null) {
+            workerConstruction.close();
+        }
+        if (displayUrlProviderStatic != null) {
+            displayUrlProviderStatic.close();
+        }
+        if (tokenMacroStatic != null) {
+            tokenMacroStatic.close();
+        }
+        if (filePathStatic != null) {
+            filePathStatic.close();
+        }
+    }
 
     protected void mockResult(Result lastResult) {
         when(run.getResult()).thenReturn(lastResult);
@@ -75,8 +89,19 @@ public abstract class AbstractTest {
     }
 
     protected void mockDisplayURLProvider(String jobName, int jobNumber) {
-        mockStatic(DisplayURLProvider.class);
-        when(DisplayURLProvider.get()).thenReturn(new ClassicDisplayURLProviderBuilder(jobName, jobNumber));
+        mockDisplayURLProviderImpl(new ClassicDisplayURLProviderBuilder(jobName, jobNumber));
+    }
+
+    protected void mockDisplayURLProvider(String jobName, int jobNumber, String urlTemplate) {
+        mockDisplayURLProviderImpl(new ClassicDisplayURLProviderBuilder(jobName, jobNumber, urlTemplate));
+    }
+
+    private void mockDisplayURLProviderImpl(ClassicDisplayURLProviderBuilder value) {
+        if (displayUrlProviderStatic != null) {
+            throw new IllegalStateException("Can only mock the display URL provider once per test");
+        }
+        displayUrlProviderStatic = mockStatic(DisplayURLProvider.class);
+        displayUrlProviderStatic.when(DisplayURLProvider::get).thenReturn(value);
     }
 
     protected void mockEnvironment() {
@@ -91,14 +116,9 @@ public abstract class AbstractTest {
     }
 
     protected AbstractProject mockJob(String jobName) {
-        return mockJob(jobName, PARENT_JOB_NAME);
-    }
-
-    protected AbstractProject mockJob(String jobName, String parentJobName) {
         AbstractProject job = mock(AbstractProject.class);
         Jenkins jenkinsMock = mock(Jenkins.class);
-        when(jenkinsMock.getFullDisplayName()).thenReturn(parentJobName);
-        doReturn(jenkinsMock).when(job).getParent();
+        when(job.getParent()).thenReturn(jenkinsMock);
         when(job.getFullDisplayName()).thenReturn(jobName);
 
         return job;
@@ -119,24 +139,23 @@ public abstract class AbstractTest {
         when(job.getProperty(WebhookJobProperty.class)).thenReturn(property);
     }
 
-    public static void mockTokenMacro(String evaluatedValue) {
-        mockStatic(FilePath.class);
-        mockStatic(TokenMacro.class);
-        try {
-            when(TokenMacro.expandAll(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(evaluatedValue);
-        } catch (MacroEvaluationException | IOException | InterruptedException e) {
-            throw new IllegalArgumentException(e);
+    protected void mockTokenMacro(String evaluatedValue) {
+        if (tokenMacroStatic != null || filePathStatic != null) {
+            throw new IllegalStateException("Can only mock token macro once per test");
         }
+
+        tokenMacroStatic = mockStatic(TokenMacro.class);
+        filePathStatic = mockStatic(FilePath.class);
+
+        tokenMacroStatic.when(() -> TokenMacro.expandAll(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(evaluatedValue);
     }
 
     protected void mockHttpWorker() {
-        workerAnswer = new HttpWorkerAnswer();
-        MockHelper.mockNew(HttpWorker.class, workerAnswer);
-    }
-
-    protected void mockOffice365ConnectorWebhookNotifier() {
-        notifierAnswer = new Office365ConnectorWebhookNotifierAnswer();
-        MockHelper.mockNew(Office365ConnectorWebhookNotifier.class, notifierAnswer);
+        if (workerConstruction != null || workerData != null) {
+            throw new IllegalStateException("Can only mock worker construction once per test");
+        }
+        workerData = new ArrayList<>();
+        workerConstruction = mockConstruction(HttpWorker.class, (mock, context) -> workerData.add(context.arguments().get(1).toString()));
     }
 
     // compares files without worrying about EOL

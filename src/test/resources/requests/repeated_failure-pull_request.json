@@ -1,5 +1,5 @@
 {
-    "summary": "Damian Szczepanik » hook » PR-1: Build #3 Repeated Failure",
+    "summary": "hook » PR-1: Build #3 Repeated Failure",
     "themeColor": "#EF2929",
     "sections": [
         {
@@ -34,7 +34,7 @@
                     "value": "damianszczepanik (Damian Szczepanik)"
                 }
             ],
-            "activityTitle": "Notification from Damian Szczepanik » hook » PR\\-1",
+            "activityTitle": "Notification from hook » PR\\-1",
             "activitySubtitle": "Latest status of build #3"
         }
     ],

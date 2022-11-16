@@ -1,39 +1,42 @@
 package jenkins.plugins.office365connector;
 
-import java.io.File;
-import hudson.util.FormValidation;
-import jenkins.model.Jenkins;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.kohsuke.stapler.StaplerRequest;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+
+import hudson.util.FormValidation;
+import jenkins.model.Jenkins;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.kohsuke.stapler.StaplerRequest;
+import org.mockito.MockedStatic;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-@PowerMockIgnore("jdk.internal.reflect.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Jenkins.class)
 public class WebhookDescriptorImplTest {
 
     private final WebhookStub.DescriptorImplStub descriptor = new WebhookStub.DescriptorImplStub();
 
+    private MockedStatic<Jenkins> staticJenkins;
+
     @Before
     public void setUp() {
-        mockStatic(Jenkins.class);
+        staticJenkins = mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         File rootDir = new File(".");
         when(jenkins.getRootDir()).thenReturn(rootDir);
-        when(Jenkins.get()).thenReturn(jenkins);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
+    }
+
+    @After
+    public void tearDown() {
+        staticJenkins.close();
     }
 
     @Test

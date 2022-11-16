@@ -1,30 +1,23 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 
 import hudson.model.AbstractBuild;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockedConstruction;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-@PowerMockIgnore("jdk.internal.reflect.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Office365ConnectorWebhookNotifier.class, Office365ConnectorBuildListener.class})
 public class Office365ConnectorBuildListenerTest extends AbstractTest {
 
     @Before
     public void setUp() {
         run = mock(AbstractBuild.class);
-
-        mockOffice365ConnectorWebhookNotifier();
     }
 
     @Test
@@ -33,11 +26,13 @@ public class Office365ConnectorBuildListenerTest extends AbstractTest {
         // given
         Office365ConnectorBuildListener listener = new Office365ConnectorBuildListener();
 
-        // when
-        listener.onStarted(run, mockListener());
+        try (MockedConstruction<Office365ConnectorWebhookNotifier> notifierConstruction = mockConstruction(Office365ConnectorWebhookNotifier.class)) {
+            // when
+            listener.onStarted(run, mockListener());
 
-        // then
-        assertThat(notifierAnswer.getTimes()).isOne();
+            // then
+            assertEquals(1, notifierConstruction.constructed().size());
+        }
     }
 
     @Test
@@ -46,10 +41,12 @@ public class Office365ConnectorBuildListenerTest extends AbstractTest {
         // given
         Office365ConnectorBuildListener listener = new Office365ConnectorBuildListener();
 
-        // when
-        listener.onCompleted(run, mockListener());
+        try (MockedConstruction<Office365ConnectorWebhookNotifier> notifierConstruction = mockConstruction(Office365ConnectorWebhookNotifier.class)) {
+            // when
+            listener.onCompleted(run, mockListener());
 
-        // then
-        assertThat(notifierAnswer.getTimes()).isOne();
+            // then
+            assertEquals(1, notifierConstruction.constructed().size());
+        }
     }
 }
