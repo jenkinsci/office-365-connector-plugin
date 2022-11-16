@@ -1,5 +1,5 @@
 {
-    "summary": "Parent project » myFirst_Job_: Build #167 Success",
+    "summary": "myFirst_Job_: Build #167 Success",
     "themeColor": "#00FF00",
     "sections": [
         {
@@ -18,7 +18,7 @@
                     "value": "Mike"
                 }
             ],
-            "activityTitle": "Notification from Parent project » myFirst\\_Job\\_",
+            "activityTitle": "Notification from myFirst\\_Job\\_",
             "activitySubtitle": "Latest status of build #167"
         }
     ]

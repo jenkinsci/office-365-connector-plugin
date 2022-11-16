@@ -1,9 +1,10 @@
 package jenkins.plugins.office365connector.workflow;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,19 +20,14 @@ import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockedStatic;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-@PowerMockIgnore("jdk.internal.reflect.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Office365ConnectorWebhookNotifier.class, Jenkins.class})
 public class SampleIT extends AbstractTest {
 
     private static final String JOB_NAME = "myFirst_Job_";
@@ -39,9 +35,11 @@ public class SampleIT extends AbstractTest {
     private static final int BUILD_NUMBER = 167;
     private static final String DEVELOPER = "Mike";
 
+    private MockedStatic<Jenkins> staticJenkins;
+
     @Before
     public void setUp() {
-        mockStatic(Jenkins.class);
+        staticJenkins = mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         mockListener();
 
@@ -53,12 +51,17 @@ public class SampleIT extends AbstractTest {
         mockHttpWorker();
         mockGetChangeSets();
 
-        when(Jenkins.get()).thenReturn(jenkins);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
 
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
         when(mockDescriptor.getName()).thenReturn("testName");
 
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
+    }
+
+    @After
+    public void tearDown() {
+        staticJenkins.close();
     }
 
     private AbstractBuild mockRun() {
@@ -90,8 +93,8 @@ public class SampleIT extends AbstractTest {
         notifier.sendBuildStartedNotification(true);
 
         // then
-        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("started.json"));
-        assertThat(workerAnswer.getTimes()).isOne();
+        assertHasSameContent(workerData.get(0), FileUtils.getContentFile("started.json"));
+        assertEquals(1, workerConstruction.constructed().size());
     }
 
     @Test
@@ -105,9 +108,9 @@ public class SampleIT extends AbstractTest {
         notifier.sendBuildStartedNotification(true);
 
         // then
-        assertThat(workerAnswer.getAllData()).hasSize(2);
-        assertThat(workerAnswer.getAllData().get(0)).isEqualTo(workerAnswer.getAllData().get(1));
-        assertThat(workerAnswer.getTimes()).isEqualTo(2);
+        assertThat(workerData).hasSize(2);
+        assertThat(workerData.get(0)).isEqualTo(workerData.get(1));
+        assertEquals(2, workerConstruction.constructed().size());
     }
 
     @Test
@@ -121,8 +124,8 @@ public class SampleIT extends AbstractTest {
         notifier.sendBuildCompletedNotification();
 
         // then
-        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("completed-success.json"));
-        assertThat(workerAnswer.getTimes()).isOne();
+        assertHasSameContent(workerData.get(0), FileUtils.getContentFile("completed-success.json"));
+        assertEquals(1, workerConstruction.constructed().size());
     }
 
     @Test
@@ -136,8 +139,8 @@ public class SampleIT extends AbstractTest {
         notifier.sendBuildCompletedNotification();
 
         // then
-        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("completed-failed.json"));
-        assertThat(workerAnswer.getTimes()).isOne();
+        assertHasSameContent(workerData.get(0), FileUtils.getContentFile("completed-failed.json"));
+        assertEquals(1, workerConstruction.constructed().size());
     }
 
     @Test
@@ -155,8 +158,8 @@ public class SampleIT extends AbstractTest {
         notifier.sendBuildStepNotification(stepParameters);
 
         // then
-        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("sendstep.json"));
-        assertThat(workerAnswer.getTimes()).isOne();
+        assertHasSameContent(workerData.get(0), FileUtils.getContentFile("sendstep.json"));
+        assertEquals(1, workerConstruction.constructed().size());
     }
 
     @Test
@@ -170,8 +173,8 @@ public class SampleIT extends AbstractTest {
         notifier.sendBuildCompletedNotification();
 
         // then
-        assertHasSameContent(workerAnswer.getData(), FileUtils.getContentFile("completed-repeated_failure.json"));
-        assertThat(workerAnswer.getTimes()).isOne();
+        assertHasSameContent(workerData.get(0), FileUtils.getContentFile("completed-repeated_failure.json"));
+        assertEquals(1, workerConstruction.constructed().size());
     }
 
     @Test
@@ -186,8 +189,8 @@ public class SampleIT extends AbstractTest {
         notifier.sendBuildCompletedNotification();
 
         // then
-        assertThat(workerAnswer.getAllData()).hasSize(2);
-        assertThat(workerAnswer.getAllData().get(0)).isEqualTo(workerAnswer.getAllData().get(1));
-        assertThat(workerAnswer.getTimes()).isEqualTo(2);
+        assertThat(workerData).hasSize(2);
+        assertThat(workerData.get(0)).isEqualTo(workerData.get(1));
+        assertEquals(2, workerConstruction.constructed().size());
     }
 }

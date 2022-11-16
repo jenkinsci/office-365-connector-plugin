@@ -1,28 +1,33 @@
 package jenkins.plugins.office365connector;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+
 import java.util.Arrays;
 import java.util.List;
+
 import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.model.FactDefinition;
 import jenkins.plugins.office365connector.model.Macro;
+import org.junit.After;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import org.mockito.MockedStatic;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-@PowerMockIgnore("jdk.internal.reflect.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Jenkins.class)
 public class WebhookTest {
+
+    private MockedStatic<Jenkins> staticJenkins;
+
+    @After
+    public void tearDown() {
+        if (staticJenkins != null) {
+            staticJenkins.close();
+        }
+    }
 
     @Test
     public void getUrl_ReturnsUrl() {
@@ -43,10 +48,10 @@ public class WebhookTest {
 
         // given
         String globalUrl = "globalUrl";
-        mockStatic(Jenkins.class);
+        staticJenkins = mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
-        when(Jenkins.get()).thenReturn(jenkins);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
         when(mockDescriptor.getGlobalUrl()).thenReturn(globalUrl);
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
         Webhook webhook = new Webhook("");
@@ -64,10 +69,10 @@ public class WebhookTest {
         // given
         String globalUrl = "globalUrl";
         String localUrl = "localUrl";
-        mockStatic(Jenkins.class);
+        staticJenkins = mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
-        when(Jenkins.get()).thenReturn(jenkins);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
         when(mockDescriptor.getUrl()).thenReturn(globalUrl);
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
         Webhook webhook = new Webhook(localUrl);
@@ -100,10 +105,10 @@ public class WebhookTest {
         // given
         String globalName = "globalName";
         Webhook webhook = new Webhook("someUrl");
-        mockStatic(Jenkins.class);
+        staticJenkins = mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
-        when(Jenkins.get()).thenReturn(jenkins);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
         when(mockDescriptor.getGlobalName()).thenReturn(globalName);
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
 
@@ -120,10 +125,10 @@ public class WebhookTest {
         String localName = "myName";
         Webhook webhook = new Webhook("someUrl");
         webhook.setName(localName);
-        mockStatic(Jenkins.class);
+        staticJenkins = mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
-        when(Jenkins.get()).thenReturn(jenkins);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
         when(mockDescriptor.getName()).thenReturn("globalName");
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
 
