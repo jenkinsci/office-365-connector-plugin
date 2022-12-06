@@ -8,12 +8,12 @@
                 <f:textbox/>
             </f:entry>
         <f:advanced>
-            <f:section title="Proxy Config">
+            <f:section title="Proxy Configuration">
                 <f:description>
                     This section defines the Office365Connector proxy settings that will apply to all webhook notifications. This
                     proxy configuration will be prioritized over the Jenkins global proxy config
                 </f:description>
-                <f:entry title="IP" field="ip">
+                <f:entry title="Host" field="host">
                     <f:textbox/>
                 </f:entry>
                 <f:entry title="Port" field="port">
