@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import hudson.Extension;
-import hudson.ProxyConfiguration;
 import hudson.Util;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
@@ -184,7 +183,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
         private String globalUrl;
         private String globalName;
 
-        private String ip;
+        private String host;
         private String port;
         private String username;
         private String password;
@@ -199,13 +198,23 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
             return "Webhook";
         }
 
-        public String getIp() {
-            return Util.fixNull(ip);
+        public String getHost() {
+            return Util.fixNull(host);
         }
 
         @DataBoundSetter
-        public void setIp(String ip) {
-            this.ip = Util.fixNull(ip);
+        public void setHost(String host) {
+            this.host = Util.fixNull(host);
+        }
+
+        @Nonnull
+        public String getPort() {
+            return Util.fixNull(port);
+        }
+
+        @DataBoundSetter
+        public void setPort(String port) {
+            this.port = Util.fixNull(port);
         }
 
         public String getUsername() {
@@ -224,16 +233,6 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
         @DataBoundSetter
         public void setPassword(String password) {
             this.password = Util.fixNull(password);
-        }
-
-        @Nonnull
-        public String getPort() {
-            return Util.fixNull(port);
-        }
-
-        @DataBoundSetter
-        public void setPort(String port) {
-            this.port = Util.fixNull(port);
         }
 
         public int getDefaultTimeout() {

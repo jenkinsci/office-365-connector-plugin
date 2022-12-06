@@ -119,7 +119,7 @@ public class Office365ConnectorWebhookNotifier {
                 port = Integer.parseInt(webhook.getDescriptor().getPort());
             }
 
-            ProxyConfiguration pluginProxy = new ProxyConfiguration(webhook.getDescriptor().getIp(), port, webhook.getDescriptor().getUsername(), webhook.getDescriptor().getPassword());
+            ProxyConfiguration pluginProxy = new ProxyConfiguration(webhook.getDescriptor().getHost(), port, webhook.getDescriptor().getUsername(), webhook.getDescriptor().getPassword());
             HttpWorker worker = new HttpWorker(url, data, webhook.getTimeout(), taskListener.getLogger(), pluginProxy);
             worker.submit();
         } catch (IOException | InterruptedException | RejectedExecutionException e) {
