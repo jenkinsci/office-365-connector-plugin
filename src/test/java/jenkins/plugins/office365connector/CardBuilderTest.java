@@ -17,7 +17,7 @@ import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.AbstractTest;
 import jenkins.plugins.office365connector.workflow.StepParameters;
 import mockit.internal.reflection.MethodReflection;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
