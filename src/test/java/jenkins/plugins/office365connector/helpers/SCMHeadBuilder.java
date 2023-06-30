@@ -3,7 +3,7 @@ package jenkins.plugins.office365connector.helpers;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.mixin.ChangeRequestSCMHead;
-import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang.NotImplementedException;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
