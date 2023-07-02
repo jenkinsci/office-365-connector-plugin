@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.69</version>
+        <version>4.68</version>
         <relativePath />
     </parent>
 
@@ -26,23 +26,24 @@
     <properties>
         <revision>4.19.1</revision>
         <changelist>-SNAPSHOT</changelist>
+        <jenkins.version>2.361.4</jenkins.version>
 
         <gitHubRepo>jenkinsci/office-365-connector-plugin</gitHubRepo>
 
         <jmockit.version>4.7.0</jmockit.version> <!-- last version that supports reflections -->
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.319.x</artifactId>
-                <version>1669.ve7b_a_e277dee6</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>io.jenkins.tools.bom</groupId>
+				<artifactId>bom-2.361.x</artifactId>
+				<version>2102.v854b_fec19c92</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
     <dependencies>
         <dependency>
