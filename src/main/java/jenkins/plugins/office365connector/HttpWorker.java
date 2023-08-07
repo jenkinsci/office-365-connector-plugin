@@ -13,25 +13,31 @@
  */
 package jenkins.plugins.office365connector;
 
+import hudson.ProxyConfiguration;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
-import hudson.ProxyConfiguration;
 import jenkins.model.Jenkins;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.RequestEntity;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpStatus;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 
 /**
  * Makes http post requests in a separate thread.
@@ -67,26 +73,21 @@ public class HttpWorker implements Runnable {
     public void run() {
         int tried = 0;
         boolean success = false;
-        HttpClient client = getHttpClient();
+        CloseableHttpClient client = getHttpClient();
         do {
             tried++;
-            RequestEntity requestEntity;
-            try {
-                // uncomment to log what message has been sent
-                // log("Posted JSON: %s", data);
-                requestEntity = new StringRequestEntity(data, "application/json", StandardCharsets.UTF_8.name());
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace(logger);
-                break;
-            }
+            HttpPost post = new HttpPost(url);
 
-            PostMethod post = new PostMethod(url);
-            try {
-                post.setRequestEntity(requestEntity);
-                int responseCode = client.executeMethod(post);
+            // uncomment to log what message has been sent
+            // log("Posted JSON: %s", data);
+            post.setEntity(new StringEntity(data, ContentType.APPLICATION_JSON));
+
+            try (CloseableHttpResponse httpResponse = client.execute(post)) {
+                int responseCode = httpResponse.getStatusLine().getStatusCode();
                 if (responseCode != HttpStatus.SC_OK) {
                     log("Posting data to %s may have failed. Webhook responded with status code - %s", url, responseCode);
-                    String response = post.getResponseBodyAsString();
+                    String response =
+                            EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
                     log("Message from webhook - %s", response);
 
                 } else {
@@ -95,36 +96,41 @@ public class HttpWorker implements Runnable {
             } catch (IOException e) {
                 log("Failed to post data to webhook - %s", url);
                 e.printStackTrace(logger);
-            } finally {
-                post.releaseConnection();
             }
         } while (tried < RETRIES && !success);
 
     }
 
-    private HttpClient getHttpClient() {
-        HttpClient client = new HttpClient();
+    private CloseableHttpClient getHttpClient() {
+        HttpClientBuilder builder = HttpClientBuilder.create();
         Jenkins jenkins = Jenkins.get();
         if (jenkins != null) {
             ProxyConfiguration proxy = jenkins.proxy;
             if (proxy != null) {
                 List<Pattern> noHostProxyPatterns = proxy.getNoProxyHostPatterns();
                 if (!isNoProxyHost(this.url, noHostProxyPatterns)) {
-                    client.getHostConfiguration().setProxy(proxy.name, proxy.port);
+                    builder.setProxy(new HttpHost(proxy.name, proxy.port));
                     String username = proxy.getUserName();
                     String password = proxy.getPassword();
                     // Consider it to be passed if username specified. Sufficient?
                     if (StringUtils.isNotBlank(username)) {
-                        client.getState().setProxyCredentials(AuthScope.ANY,
+                        CredentialsProvider credsProvider = new BasicCredentialsProvider();
+                        credsProvider.setCredentials(
+                                new AuthScope(proxy.name, proxy.port),
                                 new UsernamePasswordCredentials(username, password));
+                        builder.setDefaultCredentialsProvider(credsProvider);
                     }
                 }
             }
         }
-        client.getParams().setConnectionManagerTimeout(timeout);
-        client.getHttpConnectionManager().getParams().setSoTimeout(timeout);
-        client.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
-        return client;
+        RequestConfig config = RequestConfig.custom()
+                .setConnectTimeout(timeout)
+                .setSocketTimeout(timeout)
+                .setConnectionRequestTimeout(timeout)
+                .build();
+        builder.setDefaultRequestConfig(config);
+
+        return builder.build();
     }
 
     private static boolean isNoProxyHost(String host, List<Pattern> noProxyHostPatterns) {
