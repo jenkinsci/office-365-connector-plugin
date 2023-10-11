@@ -87,6 +87,34 @@ job('Example Job Name') {
     }
 }
 ```
+### DSL Pipeline Job
+
+```groovy
+pipeline('Example Job Name'){
+        // configure office365connector plugin using DSL configure for flow-definition
+        configure { project ->
+                       project / 'properties' << 'jenkins.plugins.office365connector.WebhookJobProperty' {
+                       webhooks {
+                           'jenkins.plugins.office365connector.Webhook' {
+                               name("Office 365 Team channel notifications")
+                               url("${Your webhook URL that needs to configure ( teams channel / outlook )}")
+                               startNotification(false)
+                               notifySuccess(false)
+                               notifyAborted(false)
+                               notifyNotBuilt(false)
+                               notifyUnstable(false)
+                               notifyFailure(true)
+                               notifyBackToNormal(false)
+                               notifyRepeatedFailure(false)
+                               timeout(30000)
+                           }
+                       }
+                   }
+              }
+}
+```
+
+
 
 ### Pipeline properties
 
