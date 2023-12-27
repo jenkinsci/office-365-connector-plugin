@@ -148,6 +148,10 @@
         <url>https://github.com/${gitHubRepo}</url>
         <tag>${scmTag}</tag>
     </scm>
+    <ciManagement>
+        <system>Jenkins</system>
+        <url>https://ci.jenkins.io/job/Plugins/job/office-365-connector-plugin/job/master/</url>
+    </ciManagement>
 
     <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
     <repositories>
