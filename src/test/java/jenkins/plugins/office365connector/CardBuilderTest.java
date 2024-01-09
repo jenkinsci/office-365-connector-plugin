@@ -62,7 +62,7 @@ public class CardBuilderTest extends AbstractTest {
         assertThat(card.getSections()).hasSize(1);
         assertThat(card.getThemeColor()).isEqualTo("3479BF");
         Section section = card.getSections().get(0);
-        assertThat(section.getActivityTitle()).isEqualTo("Notification from " + JOB_DISPLAY_NAME);
+        assertThat(section.getActivityTitle()).isEqualTo("Notification from " + JOB_DISPLAY_NAME + ": Started");
     }
 
     @Test
@@ -81,7 +81,7 @@ public class CardBuilderTest extends AbstractTest {
         assertThat(card.getSections()).hasSize(1);
         assertThat(card.getThemeColor()).isEqualTo(result.color.getHtmlBaseColor());
         Section section = card.getSections().get(0);
-        assertThat(section.getActivityTitle()).isEqualTo("Notification from " + JOB_DISPLAY_NAME);
+        assertThat(section.getActivityTitle()).isEqualTo("Notification from " + JOB_DISPLAY_NAME + ": Build Aborted");
     }
 
     @Test
@@ -98,7 +98,7 @@ public class CardBuilderTest extends AbstractTest {
         assertThat(card.getSections()).hasSize(1);
         assertThat(card.getThemeColor()).isEqualTo(result.color.getHtmlBaseColor());
         Section section = card.getSections().get(0);
-        assertThat(section.getActivityTitle()).isEqualTo("Notification from " + JOB_DISPLAY_NAME);
+        assertThat(section.getActivityTitle()).isEqualTo("Notification from " + JOB_DISPLAY_NAME + ": Build Failed");
     }
 
     @Test
@@ -125,7 +125,7 @@ public class CardBuilderTest extends AbstractTest {
         assertThat(card.getSections()).hasSize(1);
         assertThat(card.getThemeColor()).isEqualTo(result.color.getHtmlBaseColor());
         Section section = card.getSections().get(0);
-        assertThat(section.getActivityTitle()).isEqualTo("Notification from " + JOB_DISPLAY_NAME);
+        assertThat(section.getActivityTitle()).isEqualTo("Notification from " + JOB_DISPLAY_NAME + ": Repeated Failure");
         FactAssertion.assertThatLast(section.getFacts(), 2)
                 .hasName(FactsBuilder.NAME_FAILING_SINCE_BUILD)
                 .hasValue("build #" + previousNotFailedBuildNumber);
@@ -155,7 +155,7 @@ public class CardBuilderTest extends AbstractTest {
         assertThat(card.getSections()).hasSize(1);
         assertThat(card.getThemeColor()).isEqualTo(result.color.getHtmlBaseColor());
         Section section = card.getSections().get(0);
-        assertThat(section.getActivityTitle()).isEqualTo("Notification from " + JOB_DISPLAY_NAME);
+        assertThat(section.getActivityTitle()).isEqualTo("Notification from " + JOB_DISPLAY_NAME + ": Build Failed");
         FactAssertion.assertThatLast(section.getFacts(), 1);
         FactAssertion.assertThat(section.getFacts())
                 .hasName(FactsBuilder.NAME_STATUS)

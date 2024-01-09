@@ -48,7 +48,7 @@ public class CardBuilder {
         factsBuilder.addDevelopers();
         factsBuilder.addUserFacts(factDefinitions);
 
-        Section section = buildSection();
+        Section section = buildSection(statusName);
 
         String summary = getDisplayName() + ": Build " + getRunName();
         Card card = new Card(summary, section);
@@ -84,7 +84,7 @@ public class CardBuilder {
         factsBuilder.addDevelopers();
         factsBuilder.addUserFacts(factDefinitions);
 
-        Section section = buildSection();
+        Section section = buildSection(status);
 
         Card card = new Card(summary, section);
         card.setThemeColor(getCardThemeColor(lastResult));
@@ -104,8 +104,8 @@ public class CardBuilder {
         }
     }
 
-    private Section buildSection() {
-        String activityTitle = "Notification from " + getEscapedDisplayName();
+    private Section buildSection(String status) {
+        String activityTitle = "Notification from " + getEscapedDisplayName() + ": " + status;
         String activitySubtitle = "Latest status of build " + getRunName();
         return new Section(activityTitle, activitySubtitle, factsBuilder.collect());
     }
