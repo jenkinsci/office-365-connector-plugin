@@ -38,7 +38,7 @@
 			<dependency>
 				<groupId>io.jenkins.tools.bom</groupId>
 				<artifactId>bom-2.401.x</artifactId>
-				<version>2677.vee5a_cd0979b_a_</version>
+				<version>2747.v0842b_c87549e</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.25.0</version>
+            <version>3.25.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
