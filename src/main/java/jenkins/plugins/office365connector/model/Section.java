@@ -29,6 +29,8 @@ public class Section {
 
     private String activitySubtitle;
 
+    private String activityImage;
+
     public Section(String activityTitle, String activitySubtitle, List<Fact> factsList) {
         this.activityTitle = activityTitle;
         this.activitySubtitle = activitySubtitle;
@@ -50,5 +52,13 @@ public class Section {
 
     public String getActivitySubtitle() {
         return activitySubtitle;
+    }
+
+    public String getActivityImage() {
+        return activityImage;
+    }
+
+    public void setActivityImage(String activityImage) {
+        this.activityImage = activityImage;
     }
 }
