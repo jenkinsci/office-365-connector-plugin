@@ -13,7 +13,11 @@
  */
 package jenkins.plugins.office365connector;
 
+import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
+
+import org.apache.commons.io.IOUtils;
 
 import hudson.model.Result;
 import hudson.model.Run;
@@ -29,6 +33,9 @@ import jenkins.plugins.office365connector.workflow.StepParameters;
 public class CardBuilder {
 
     private final Run run;
+
+    private final static String IMAGE_DATA = "data:image/png;base64,%s";
+    private final static String IMAGE_LOCATION = "/jenkins/images/%s.png";
 
     private final FactsBuilder factsBuilder;
     private final ActionableBuilder potentialActionBuilder;
@@ -53,12 +60,13 @@ public class CardBuilder {
         String summary = getDisplayName() + ": Build " + getRunName();
         Card card = new Card(summary, section);
         card.setPotentialAction(potentialActionBuilder.buildActionable());
-
+        setSectionImage(card.getSections().get(0), "blue");
         return card;
     }
 
     public Card createCompletedCard(List<FactDefinition> factDefinitions) {
-        // result might be null only for ongoing job - check documentation of Run.getCompletedResult()
+        // result might be null only for ongoing job - check documentation of
+        // Run.getCompletedResult()
         // but based on issue #133 it may happen that result for completed job is null
         Result lastResult = getCompletedResult(run);
 
@@ -88,11 +96,39 @@ public class CardBuilder {
 
         Card card = new Card(summary, section);
         card.setThemeColor(getCardThemeColor(lastResult));
+        setSectionImage(card.getSections().get(0), run.getResult());
         if (run.getResult() != Result.SUCCESS) {
             card.setPotentialAction(potentialActionBuilder.buildActionable());
         }
 
         return card;
+    }
+
+    private void setSectionImage(Section section, Result lastResult) {
+        String color = "";
+        if (lastResult == Result.SUCCESS) {
+            color = "green";
+        } else if (lastResult == Result.ABORTED) {
+            color = "gray";
+        } else if (lastResult == Result.FAILURE) {
+            color = "red";
+        } else if (lastResult == Result.UNSTABLE) {
+            color = "yellow";
+        } else {
+            color = "blue";
+        }
+
+        setSectionImage(section, color);
+    }
+
+    private void setSectionImage(Section section, String color) {
+        try {
+            byte[] bytes = IOUtils
+                    .toByteArray(this.getClass().getResourceAsStream(String.format(IMAGE_LOCATION, color)));
+            section.setActivityImage(String.format(IMAGE_DATA, Base64.getEncoder().encodeToString(bytes)));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static String getCardThemeColor(Result result) {
@@ -117,8 +153,7 @@ public class CardBuilder {
     }
 
     private Run getFailingSinceBuild(Run lastNotFailedBuild) {
-        return lastNotFailedBuild != null
-                ? lastNotFailedBuild.getNextBuild() : run.getParent().getFirstBuild();
+        return lastNotFailedBuild != null ? lastNotFailedBuild.getNextBuild() : run.getParent().getFirstBuild();
     }
 
     String calculateStatus(Result lastResult, Result previousResult, boolean isRepeatedFailure) {
@@ -200,8 +235,9 @@ public class CardBuilder {
     }
 
     /**
-     * Returns escaped name of the job presented as display name with parent name such as folder.
-     * Parent is needed for multi-branch pipelines and for cases when job
+     * Returns escaped name of the job presented as display name with parent name
+     * such as folder. Parent is needed for multi-branch pipelines and for cases
+     * when job
      */
     private String getEscapedDisplayName() {
         String displayName = getDisplayName();
