@@ -84,7 +84,7 @@ public class HttpWorker implements Runnable {
 
             try (CloseableHttpResponse httpResponse = client.execute(post)) {
                 int responseCode = httpResponse.getStatusLine().getStatusCode();
-                if (responseCode != HttpStatus.SC_OK) {
+                if (responseCode >= HttpStatus.SC_BAD_REQUEST) {
                     log("Posting data to %s may have failed. Webhook responded with status code - %s", url, responseCode);
                     String response =
                             EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
