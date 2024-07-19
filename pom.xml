@@ -24,7 +24,7 @@
     <url>https://github.com/jenkinsci/office-365-connector-plugin</url>
 
     <properties>
-        <revision>4.21.4-SNAPSHOT</revision>
+        <revision>4.21.4</revision>
         <changelist>-SNAPSHOT</changelist>
         <jenkins.version>2.414.3</jenkins.version>
 
