@@ -31,6 +31,7 @@ public class Office365ConnectorSendStep extends Step {
     private String status;
     private List<FactDefinition> factDefinitions;
     private String color;
+    private boolean adaptiveCards;
 
     @DataBoundConstructor
     public Office365ConnectorSendStep(String webhookUrl) {
@@ -81,6 +82,15 @@ public class Office365ConnectorSendStep extends Step {
     @Override
     public StepExecution start(StepContext context) {
         return new Execution(this, context);
+    }
+
+    public boolean isAdaptiveCards() {
+        return adaptiveCards;
+    }
+
+    @DataBoundSetter
+    public void setAdaptiveCards(boolean adaptiveCards) {
+        this.adaptiveCards = adaptiveCards;
     }
 
     @Extension

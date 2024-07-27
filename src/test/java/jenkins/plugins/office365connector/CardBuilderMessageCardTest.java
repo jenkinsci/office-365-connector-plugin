@@ -21,7 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-public class CardBuilderTest extends AbstractTest {
+public class CardBuilderMessageCardTest extends AbstractTest {
 
     private static final String JOB_DISPLAY_NAME = "myJobDisplayName";
     private static final int BUILD_NUMBER = 7;
@@ -44,7 +44,7 @@ public class CardBuilderTest extends AbstractTest {
 
         mockDisplayURLProvider(JOB_DISPLAY_NAME, BUILD_NUMBER);
         TaskListener taskListener = mock(TaskListener.class);
-        cardBuilder = new CardBuilder(run, taskListener);
+        cardBuilder = new CardBuilder(run, taskListener, false);
     }
 
 
@@ -421,7 +421,7 @@ public class CardBuilderTest extends AbstractTest {
         String status = Result.SUCCESS.toString();
         String color = "blue";
 
-        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, Collections.emptyList(), color);
+        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, Collections.emptyList(), color, false);
 
         // then
         Card card = cardBuilder.createBuildMessageCard(stepParameters);
@@ -443,7 +443,7 @@ public class CardBuilderTest extends AbstractTest {
         String status = null;
         String color = "blue";
 
-        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, Collections.emptyList(), color);
+        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, Collections.emptyList(), color, false);
 
         // then
         Card card = cardBuilder.createBuildMessageCard(stepParameters);
@@ -464,7 +464,7 @@ public class CardBuilderTest extends AbstractTest {
         String status = Result.ABORTED.toString();
         String color = null;
 
-        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, Collections.emptyList(), color);
+        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, Collections.emptyList(), color, false);
 
         // then
         Card card = cardBuilder.createBuildMessageCard(stepParameters);
@@ -494,7 +494,7 @@ public class CardBuilderTest extends AbstractTest {
         when(run.getParent()).thenReturn(job);
         TaskListener taskListener = mock(TaskListener.class);
 
-        cardBuilder = new CardBuilder(run, taskListener);
+        cardBuilder = new CardBuilder(run, taskListener, false);
 
         // when
         String displayName = MethodReflection.invokeWithCheckedThrows(cardBuilder.getClass(), cardBuilder, "getEscapedDisplayName", new Class[]{});

@@ -19,7 +19,9 @@ import java.util.List;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
-import jenkins.plugins.office365connector.model.PotentialAction;
+import jenkins.plugins.office365connector.model.Action;
+import jenkins.plugins.office365connector.model.adaptivecard.AdaptiveCardAction;
+import jenkins.plugins.office365connector.model.messagecard.PotentialAction;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.metadata.ContributorMetadataAction;
 import jenkins.scm.api.metadata.ObjectMetadataAction;
@@ -34,14 +36,16 @@ public class ActionableBuilder {
 
     private final Run run;
     private final FactsBuilder factsBuilder;
-    private final List<PotentialAction> potentialActions = new ArrayList<>();
+    private final List<Action> potentialActions = new ArrayList<>();
+    private final boolean isAdaptiveCards;
 
-    public ActionableBuilder(Run run, FactsBuilder factsBuilder) {
+    public ActionableBuilder(Run run, FactsBuilder factsBuilder, boolean isAdaptiveCards) {
         this.run = run;
         this.factsBuilder = factsBuilder;
+        this.isAdaptiveCards = isAdaptiveCards;
     }
 
-    public List<PotentialAction> buildActionable() {
+    public List<Action> buildActionable() {
 
         pullRequestActionable();
         buildViewBuild();
@@ -56,7 +60,7 @@ public class ActionableBuilder {
         // hide action button when the build succeed
         if (run.getResult() != Result.SUCCESS) {
             String viewHeader = Messages.Office365ConnectorWebhookNotifier_ViewHeader(build);
-            potentialActions.add(new PotentialAction(viewHeader, urlToJob));
+            potentialActions.add(isAdaptiveCards ? new AdaptiveCardAction(viewHeader,urlToJob) : new PotentialAction(viewHeader, urlToJob));
         }
     }
 
@@ -76,7 +80,7 @@ public class ActionableBuilder {
             ObjectMetadataAction oma = job.getAction(ObjectMetadataAction.class);
             if (oma != null) {
                 String urlString = oma.getObjectUrl();
-                PotentialAction viewPRPotentialAction = new PotentialAction(viewHeader, urlString);
+                Action viewPRPotentialAction = isAdaptiveCards ? null : new PotentialAction(viewHeader, urlString);
                 potentialActions.add(viewPRPotentialAction);
                 factsBuilder.addFact(titleHeader, oma.getObjectDisplayName());
             }

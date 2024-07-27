@@ -28,14 +28,16 @@ public class StepParameters {
     private final String webhookUrl;
     private final String status;
     private final String color;
-    private List<FactDefinition> factDefinitions;
+    private final boolean adaptiveCards;
+    private final List<FactDefinition> factDefinitions;
 
-    public StepParameters(String message, String webhookUrl, String status, List<FactDefinition> factDefinitions, String color) {
+    public StepParameters(String message, String webhookUrl, String status, List<FactDefinition> factDefinitions, String color, boolean adaptiveCards) {
         this.message = message;
         this.webhookUrl = webhookUrl;
         this.status = status;
         this.factDefinitions = factDefinitions;
         this.color = color;
+        this.adaptiveCards = adaptiveCards;
     }
 
     public String getMessage() {
@@ -58,4 +60,7 @@ public class StepParameters {
         return color;
     }
 
+    public boolean isAdaptiveCards() {
+        return adaptiveCards;
+    }
 }
