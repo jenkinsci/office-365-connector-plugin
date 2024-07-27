@@ -25,7 +25,7 @@ public class StepParametersTest {
     @Before
     public void setUp() {
         stepParameters = new StepParameters(
-                MESSAGE, WEBHOOK_URL, STATUS, Collections.singletonList(FACT_DEFINITION), COLOR);
+                MESSAGE, WEBHOOK_URL, STATUS, Collections.singletonList(FACT_DEFINITION), COLOR, false);
     }
 
     @Test
