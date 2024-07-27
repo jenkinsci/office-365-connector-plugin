@@ -1,4 +1,4 @@
-package jenkins.plugins.office365connector.model;
+package jenkins.plugins.office365connector.model.messagecard;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -11,7 +11,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.helpers.SCMHeadBuilder;
-import jenkins.plugins.office365connector.model.PotentialAction;
+import jenkins.plugins.office365connector.model.Action;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.metadata.ContributorMetadataAction;
 import jenkins.scm.api.metadata.ObjectMetadataAction;
@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 
-public class ActionableBuilderTest {
+public class ActionablePotentialActionBuilderTest {
 
     private static final String JOB_URL = "http://localhost/job/myFirstJob/167/display/redirect";
 
@@ -43,7 +43,7 @@ public class ActionableBuilderTest {
         taskListener = mock(TaskListener.class);
 
         factsBuilder = new FactsBuilder(run, taskListener);
-        actionableBuilder = new ActionableBuilder(run, factsBuilder);
+        actionableBuilder = new ActionableBuilder(run, factsBuilder, false);
 
         DisplayURLProvider displayURLProvider = mock(DisplayURLProvider.class);
         when(displayURLProvider.getRunURL(run)).thenReturn(JOB_URL);
@@ -64,11 +64,11 @@ public class ActionableBuilderTest {
         // from @Before
 
         // when
-        List<PotentialAction> potentialActions = actionableBuilder.buildActionable();
+        List<Action> potentialActions = actionableBuilder.buildActionable();
 
         // then
         assertThat(potentialActions).hasSize(1);
-        PotentialAction potentialAction = potentialActions.get(0);
+        Action potentialAction = potentialActions.get(0);
         assertThat(potentialAction.getName()).isEqualTo("View Build");
     }
 
@@ -133,7 +133,7 @@ public class ActionableBuilderTest {
         // then
         assertThat(factsBuilder.collect()).hasSize(1);
 
-        List<PotentialAction> potentialActions = FieldReflection.getFieldValue(actionableBuilder.getClass().getDeclaredField("potentialActions"), actionableBuilder);
+        List<Action> potentialActions = FieldReflection.getFieldValue(actionableBuilder.getClass().getDeclaredField("potentialActions"), actionableBuilder);
         assertThat(potentialActions).hasSize(1);
     }
 
@@ -164,7 +164,7 @@ public class ActionableBuilderTest {
         // then
         assertThat(factsBuilder.collect()).hasSize(1);
 
-        List<PotentialAction> potentialActions = FieldReflection.getFieldValue(actionableBuilder.getClass().getDeclaredField("potentialActions"), actionableBuilder);
+        List<Action> potentialActions = FieldReflection.getFieldValue(actionableBuilder.getClass().getDeclaredField("potentialActions"), actionableBuilder);
         assertThat(potentialActions).isEmpty();
     }
 

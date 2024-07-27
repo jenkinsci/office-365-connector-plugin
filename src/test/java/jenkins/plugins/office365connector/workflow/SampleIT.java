@@ -149,7 +149,7 @@ public class SampleIT extends AbstractTest {
         // given
         StepParameters stepParameters = new StepParameters(
                 "helloMessage", ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE,
-                "funnyStatus", Collections.emptyList(), "#FF00FF");
+                "funnyStatus", Collections.emptyList(), "#FF00FF", false);
 
         when(run.getResult()).thenReturn(Result.FAILURE);
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());

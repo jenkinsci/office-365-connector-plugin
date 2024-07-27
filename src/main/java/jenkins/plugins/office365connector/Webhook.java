@@ -31,10 +31,13 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     public static final Integer DEFAULT_TIMEOUT = 30000;
+    private static final Logger log = LoggerFactory.getLogger(Webhook.class);
 
     private String name;
     private String url;
@@ -49,6 +52,8 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     private boolean notifyRepeatedFailure;
 
     private int timeout;
+
+    private boolean adaptiveCards;
 
     private List<Macro> macros = Collections.emptyList();
 
@@ -160,6 +165,15 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     public List<Macro> getMacros() {
         return Util.fixNull(macros);
+    }
+
+    @DataBoundSetter
+    public void setAdaptiveCards(final boolean adaptiveCards) {
+        this.adaptiveCards = adaptiveCards;
+    }
+
+    public boolean isAdaptiveCards() {
+        return adaptiveCards;
     }
 
     @DataBoundSetter
