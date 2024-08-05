@@ -11,7 +11,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.helpers.SCMHeadBuilder;
-import jenkins.plugins.office365connector.model.Action;
+import jenkins.plugins.office365connector.model.CardAction;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.metadata.ContributorMetadataAction;
 import jenkins.scm.api.metadata.ObjectMetadataAction;
@@ -64,11 +64,11 @@ public class ActionablePotentialActionBuilderTest {
         // from @Before
 
         // when
-        List<Action> potentialActions = actionableBuilder.buildActionable();
+        List<CardAction> potentialActions = actionableBuilder.buildActionable();
 
         // then
         assertThat(potentialActions).hasSize(1);
-        Action potentialAction = potentialActions.get(0);
+        CardAction potentialAction = potentialActions.get(0);
         assertThat(potentialAction.getName()).isEqualTo("View Build");
     }
 
@@ -133,7 +133,7 @@ public class ActionablePotentialActionBuilderTest {
         // then
         assertThat(factsBuilder.collect()).hasSize(1);
 
-        List<Action> potentialActions = FieldReflection.getFieldValue(actionableBuilder.getClass().getDeclaredField("potentialActions"), actionableBuilder);
+        List<CardAction> potentialActions = FieldReflection.getFieldValue(actionableBuilder.getClass().getDeclaredField("potentialActions"), actionableBuilder);
         assertThat(potentialActions).hasSize(1);
     }
 
@@ -164,7 +164,7 @@ public class ActionablePotentialActionBuilderTest {
         // then
         assertThat(factsBuilder.collect()).hasSize(1);
 
-        List<Action> potentialActions = FieldReflection.getFieldValue(actionableBuilder.getClass().getDeclaredField("potentialActions"), actionableBuilder);
+        List<CardAction> potentialActions = FieldReflection.getFieldValue(actionableBuilder.getClass().getDeclaredField("potentialActions"), actionableBuilder);
         assertThat(potentialActions).isEmpty();
     }
 

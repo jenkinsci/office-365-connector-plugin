@@ -17,12 +17,12 @@ import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
 import hudson.Util;
-import jenkins.plugins.office365connector.model.Action;
+import jenkins.plugins.office365connector.model.CardAction;
 
 /**
  * @author srhebbar
  */
-public class PotentialAction implements Action {
+public class PotentialAction implements CardAction {
 
     @SerializedName("@context")
     private String context = "http://schema.org";
@@ -58,8 +58,8 @@ public class PotentialAction implements Action {
     }
 
     @Override
-    public void setTarget(List<String> target) {
-        this.target = target;
+    public void setTargets(List<String> targets) {
+        this.target = targets;
     }
 
     public String getContext() {

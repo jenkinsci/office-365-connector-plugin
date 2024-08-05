@@ -2,7 +2,9 @@ package jenkins.plugins.office365connector.model.adaptivecard;
 
 import java.util.List;
 
-public class AdaptiveCardAction implements jenkins.plugins.office365connector.model.Action {
+import jenkins.plugins.office365connector.model.CardAction;
+
+public class AdaptiveCardAction implements CardAction {
 
     private String type = "Action.OpenUrl";
 
@@ -45,8 +47,8 @@ public class AdaptiveCardAction implements jenkins.plugins.office365connector.mo
     }
 
     @Override
-    public void setTarget(final List<String> target) {
-        target.stream().findFirst().ifPresent(this::setUrl);
+    public void setTargets(final List<String> targets) {
+        targets.stream().findFirst().ifPresent(this::setUrl);
     }
 
     @Override
