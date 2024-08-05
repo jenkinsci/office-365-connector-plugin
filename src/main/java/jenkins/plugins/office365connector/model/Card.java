@@ -6,7 +6,7 @@ public interface Card {
 
     public Object toPaylod();
 
-    void setAction(List<Action> actions);
+    void setAction(List<CardAction> actions);
 
     void setThemeColor(String cardThemeColor);
 

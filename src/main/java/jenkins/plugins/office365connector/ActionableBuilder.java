@@ -19,7 +19,7 @@ import java.util.List;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
-import jenkins.plugins.office365connector.model.Action;
+import jenkins.plugins.office365connector.model.CardAction;
 import jenkins.plugins.office365connector.model.adaptivecard.AdaptiveCardAction;
 import jenkins.plugins.office365connector.model.messagecard.PotentialAction;
 import jenkins.scm.api.SCMHead;
@@ -36,7 +36,7 @@ public class ActionableBuilder {
 
     private final Run run;
     private final FactsBuilder factsBuilder;
-    private final List<Action> potentialActions = new ArrayList<>();
+    private final List<CardAction> potentialActions = new ArrayList<>();
     private final boolean isAdaptiveCards;
 
     public ActionableBuilder(Run run, FactsBuilder factsBuilder, boolean isAdaptiveCards) {
@@ -45,7 +45,7 @@ public class ActionableBuilder {
         this.isAdaptiveCards = isAdaptiveCards;
     }
 
-    public List<Action> buildActionable() {
+    public List<CardAction> buildActionable() {
 
         pullRequestActionable();
         buildViewBuild();
@@ -80,7 +80,7 @@ public class ActionableBuilder {
             ObjectMetadataAction oma = job.getAction(ObjectMetadataAction.class);
             if (oma != null) {
                 String urlString = oma.getObjectUrl();
-                Action viewPRPotentialAction = isAdaptiveCards ? null : new PotentialAction(viewHeader, urlString);
+                CardAction viewPRPotentialAction = isAdaptiveCards ? new AdaptiveCardAction(viewHeader, urlString) : new PotentialAction(viewHeader, urlString);
                 potentialActions.add(viewPRPotentialAction);
                 factsBuilder.addFact(titleHeader, oma.getObjectDisplayName());
             }
