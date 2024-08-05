@@ -6,8 +6,8 @@ import java.util.List;
 import com.google.gson.annotations.SerializedName;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.Result;
-import jenkins.plugins.office365connector.model.Action;
 import jenkins.plugins.office365connector.model.Card;
+import jenkins.plugins.office365connector.model.CardAction;
 import jenkins.plugins.office365connector.model.Section;
 
 public class AdaptiveCard implements Card {
@@ -22,7 +22,7 @@ public class AdaptiveCard implements Card {
     @SerializedName("msTeams")
     private final MsTeams msteams = new MsTeams();
     private final List<AdaptiveCardElement> body;
-    private List<Action> actions;
+    private List<CardAction> actions;
 
     public AdaptiveCard(final String summary, final Section section, Result result) {
         this.body = new ArrayList<>();
@@ -69,7 +69,7 @@ public class AdaptiveCard implements Card {
         return body;
     }
 
-    public List<Action> getActions() {
+    public List<CardAction> getActions() {
         return actions;
     }
 
@@ -79,13 +79,13 @@ public class AdaptiveCard implements Card {
     }
 
     @Override
-    public void setAction(final List<Action> actions) {
+    public void setAction(final List<CardAction> actions) {
         this.actions = actions;
     }
 
     @Override
     public void setThemeColor(final String cardThemeColor) {
-
+        // intentionally empty, unused with AdaptiveCard format
     }
 
     @Override

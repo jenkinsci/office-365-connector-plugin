@@ -17,7 +17,7 @@ package jenkins.plugins.office365connector.model.messagecard;
 import java.util.Arrays;
 import java.util.List;
 
-import jenkins.plugins.office365connector.model.Action;
+import jenkins.plugins.office365connector.model.CardAction;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Section;
 
@@ -32,7 +32,7 @@ public class MessageCard implements Card {
     // even plugin needs only single 'section' connector API expects arrays
     private List<jenkins.plugins.office365connector.model.Section> sections;
 
-    private List<Action> potentialAction;
+    private List<CardAction> potentialAction;
 
     public MessageCard(String summary, Section section) {
         this.summary = summary;
@@ -55,11 +55,11 @@ public class MessageCard implements Card {
         return themeColor;
     }
 
-    public void setAction(List<Action> potentialActions) {
+    public void setAction(List<CardAction> potentialActions) {
         this.potentialAction = potentialActions;
     }
 
-    public List<Action> getAction() {
+    public List<CardAction> getAction() {
         return this.potentialAction;
     }
 

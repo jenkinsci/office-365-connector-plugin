@@ -48,7 +48,7 @@ public class PotentialActionTest {
         PotentialAction potentialAction = new PotentialAction("name", "url");
 
         // then
-        potentialAction.setTarget(target);
+        potentialAction.setTargets(target);
 
         // then
         assertThat(potentialAction.getTarget()).isEqualTo(target);
