@@ -12,11 +12,20 @@ import jenkins.plugins.office365connector.model.Macro;
  */
 public class WebhookBuilder {
 
+    public static List<Webhook> sampleWebhookWithAllStatusesAdaptiveCard() {
+        Webhook webhook = new Webhook(ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE);
+
+        enableAllStatuses(webhook);
+        webhook.setAdaptiveCards(true);
+
+        return List.of(webhook);
+    }
+
     public static List<Webhook> sampleWebhookWithAllStatuses() {
         Webhook webhook = new Webhook(ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE);
 
         enableAllStatuses(webhook);
-        return Arrays.asList(webhook);
+        return List.of(webhook);
     }
 
     public static List<Webhook> sampleMultiplyWebhookWithAllStatuses() {
@@ -41,7 +50,7 @@ public class WebhookBuilder {
 
         enableAllStatuses(webhook);
 
-        webhook.setMacros(Arrays.asList(new Macro(template, value)));
+        webhook.setMacros(List.of(new Macro(template, value)));
         return webhook;
     }
 

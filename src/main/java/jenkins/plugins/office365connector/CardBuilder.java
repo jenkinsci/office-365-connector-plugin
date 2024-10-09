@@ -21,6 +21,8 @@ import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.FactDefinition;
 import jenkins.plugins.office365connector.model.Section;
+import jenkins.plugins.office365connector.model.adaptivecard.AdaptiveCard;
+import jenkins.plugins.office365connector.model.messagecard.MessageCard;
 import jenkins.plugins.office365connector.workflow.StepParameters;
 
 /**
@@ -32,12 +34,14 @@ public class CardBuilder {
 
     private final FactsBuilder factsBuilder;
     private final ActionableBuilder potentialActionBuilder;
+    private final boolean isAdaptiveCards;
 
-    public CardBuilder(Run run, TaskListener taskListener) {
+    public CardBuilder(Run run, TaskListener taskListener, boolean isAdaptiveCards) {
         this.run = run;
+        this.isAdaptiveCards = isAdaptiveCards;
 
         factsBuilder = new FactsBuilder(run, taskListener);
-        potentialActionBuilder = new ActionableBuilder(run, factsBuilder);
+        potentialActionBuilder = new ActionableBuilder(run, factsBuilder, isAdaptiveCards);
     }
 
     public Card createStartedCard(List<FactDefinition> factDefinitions) {
@@ -51,8 +55,8 @@ public class CardBuilder {
         Section section = buildSection(statusName);
 
         String summary = getDisplayName() + ": Build " + getRunName();
-        Card card = new Card(summary, section);
-        card.setPotentialAction(potentialActionBuilder.buildActionable());
+        Card card = isAdaptiveCards ? new AdaptiveCard(summary, section, getCompletedResult(run)) : new MessageCard(summary, section);
+        card.setAction(potentialActionBuilder.buildActionable());
 
         return card;
     }
@@ -86,10 +90,10 @@ public class CardBuilder {
 
         Section section = buildSection(status);
 
-        Card card = new Card(summary, section);
+        Card card = isAdaptiveCards ? new AdaptiveCard(summary, section, getCompletedResult(run)) : new MessageCard(summary, section);
         card.setThemeColor(getCardThemeColor(lastResult));
         if (run.getResult() != Result.SUCCESS) {
-            card.setPotentialAction(potentialActionBuilder.buildActionable());
+            card.setAction(potentialActionBuilder.buildActionable());
         }
 
         return card;
@@ -188,13 +192,13 @@ public class CardBuilder {
         Section section = new Section(activityTitle, stepParameters.getMessage(), factsBuilder.collect());
 
         String summary = getDisplayName() + ": Build " + getRunName();
-        Card card = new Card(summary, section);
+        Card card = isAdaptiveCards ? new AdaptiveCard(summary, section, getCompletedResult(run)) : new MessageCard(summary, section);
 
         if (stepParameters.getColor() != null) {
             card.setThemeColor(stepParameters.getColor());
         }
 
-        card.setPotentialAction(potentialActionBuilder.buildActionable());
+        card.setAction(potentialActionBuilder.buildActionable());
 
         return card;
     }

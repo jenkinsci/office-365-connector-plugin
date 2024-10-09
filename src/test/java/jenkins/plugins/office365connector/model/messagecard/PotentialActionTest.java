@@ -1,4 +1,4 @@
-package jenkins.plugins.office365connector.model;
+package jenkins.plugins.office365connector.model.messagecard;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,7 +48,7 @@ public class PotentialActionTest {
         PotentialAction potentialAction = new PotentialAction("name", "url");
 
         // then
-        potentialAction.setTarget(target);
+        potentialAction.setTargets(target);
 
         // then
         assertThat(potentialAction.getTarget()).isEqualTo(target);

@@ -7,6 +7,9 @@
     <f:entry title="Name" field="name">
         <f:textbox default="${descriptor.globalName}"/>
     </f:entry>
+    <f:entry title="Use AdaptiveCard Format" field="adaptiveCards">
+        <f:checkbox default="false"/>
+    </f:entry>
 
     <f:advanced>
         <f:section title="Build status">
