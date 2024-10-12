@@ -1,4 +1,14 @@
 <?jelly escape-by-default='true'?>
 <div>
-    Sends jobs status notifications to Microsoft Teams and Outlook (Office 365).
+    Sends message from Jenkins job to Microsoft Teams using Power Automate workflows (previously <strike>Office 365
+    connectors</strike>).
+    This version introduces possibility to user Power Automate.
+    <b>Office 365 connectors
+        <a href="https://devblogs.microsoft.com/microsoft365dev/retirement-of-office-365-connectors-within-microsoft-teams/">
+            are retiring soon.
+        </a>
+    </b>
+    <p style="color:red">Use this new version carefully migrate and test before deploying on production.
+        New plugin version may not support with old configuration.
+    </p>
 </div>
