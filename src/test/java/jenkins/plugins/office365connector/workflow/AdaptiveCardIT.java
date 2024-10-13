@@ -92,7 +92,7 @@ public class AdaptiveCardIT extends AbstractTest {
         notifier.sendBuildCompletedNotification();
 
         // then
-        assertHasSameContent(workerData.get(0), FileUtils.getContentFile("adaptivecard_success.json"));
+        assertHasSameContent(workerData.get(0), FileUtils.getContentFile("adaptivecard-success.json"));
         assertEquals(1, workerConstruction.constructed().size());
     }
 
@@ -111,7 +111,7 @@ public class AdaptiveCardIT extends AbstractTest {
         notifier.sendBuildStepNotification(stepParameters);
 
         // then
-        assertHasSameContent(workerData.get(0), FileUtils.getContentFile("adaptivecard_step.json"));
+        assertHasSameContent(workerData.get(0), FileUtils.getContentFile("adaptivecard-step.json"));
         assertEquals(1, workerConstruction.constructed().size());
     }
 }

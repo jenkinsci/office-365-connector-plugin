@@ -16,6 +16,7 @@ package jenkins.plugins.office365connector;
 
 import java.util.Collections;
 import java.util.List;
+
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.Util;
@@ -31,13 +32,10 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     public static final Integer DEFAULT_TIMEOUT = 30000;
-    private static final Logger log = LoggerFactory.getLogger(Webhook.class);
 
     private String name;
     private String url;
@@ -61,7 +59,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     @Override
     public DescriptorImpl getDescriptor() {
-            return (DescriptorImpl) super.getDescriptor();
+        return (DescriptorImpl) super.getDescriptor();
     }
 
     @DataBoundConstructor
@@ -215,8 +213,8 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
             return FormUtils.formValidateUrl(value);
         }
 
-       public FormValidation doCheckGlobalUrl(@QueryParameter String value) {
-            if(StringUtils.isNotBlank(value)) {
+        public FormValidation doCheckGlobalUrl(@QueryParameter String value) {
+            if (StringUtils.isNotBlank(value)) {
                 return FormUtils.formValidateUrl(value);
             } else {
                 return FormValidation.ok();

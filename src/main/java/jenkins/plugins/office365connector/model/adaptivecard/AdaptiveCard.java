@@ -19,8 +19,7 @@ public class AdaptiveCard implements Card {
     private final String schema = "http://adaptivecards.io/schemas/adaptive-card.json";
     @SuppressFBWarnings(value = "SS_SHOULD_BE_STATIC")
     private final String version = "1.4";
-    @SerializedName("msTeams")
-    private final MsTeams msteams = new MsTeams();
+    private final MsTeams msTeams = new MsTeams();
     private final List<AdaptiveCardElement> body;
     private List<CardAction> actions;
 
@@ -61,8 +60,8 @@ public class AdaptiveCard implements Card {
         return version;
     }
 
-    public MsTeams getMsteams() {
-        return msteams;
+    public MsTeams getMsTeams() {
+        return msTeams;
     }
 
     public List<AdaptiveCardElement> getBody() {

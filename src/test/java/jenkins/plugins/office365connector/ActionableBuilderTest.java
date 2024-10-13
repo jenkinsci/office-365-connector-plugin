@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 
-public class ActionablePotentialActionBuilderTest {
+public class ActionableBuilderTest {
 
     private static final String JOB_URL = "http://localhost/job/myFirstJob/167/display/redirect";
 
