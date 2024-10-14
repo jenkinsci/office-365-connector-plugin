@@ -61,7 +61,7 @@ public class Office365ConnectorWebhookNotifier {
             for (Webhook webhook : webhooks) {
                 if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                     if (webhook.isStartNotification()) {
-                        CardBuilder cardBuilder = new CardBuilder(run, taskListener);
+                        CardBuilder cardBuilder = new CardBuilder(run, taskListener, webhook.isAdaptiveCards());
                         Card card = cardBuilder.createStartedCard(webhook.getFactDefinitions());
                         executeWorker(webhook, card);
                     }
@@ -76,7 +76,7 @@ public class Office365ConnectorWebhookNotifier {
         for (Webhook webhook : webhooks) {
             if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                 if (decisionMaker.isStatusMatched(webhook)) {
-                    CardBuilder cardBuilder = new CardBuilder(run, taskListener);
+                    CardBuilder cardBuilder = new CardBuilder(run, taskListener, webhook.isAdaptiveCards());
                     Card card = cardBuilder.createCompletedCard(webhook.getFactDefinitions());
                     executeWorker(webhook, card);
                 }
@@ -93,7 +93,9 @@ public class Office365ConnectorWebhookNotifier {
     }
 
     public void sendBuildStepNotification(StepParameters stepParameters) {
-        CardBuilder cardBuilder = new CardBuilder(run, taskListener);
+        Webhook webhook = new Webhook(stepParameters.getWebhookUrl());
+
+        CardBuilder cardBuilder = new CardBuilder(run, taskListener, stepParameters.isAdaptiveCards());
         Card card;
         // TODO: improve this logic as the user may send any 'status' via pipeline step
         if (StringUtils.isNotBlank(stepParameters.getMessage())) {
@@ -104,14 +106,13 @@ public class Office365ConnectorWebhookNotifier {
             card = cardBuilder.createCompletedCard(stepParameters.getFactDefinitions());
         }
 
-        Webhook webhook = new Webhook(stepParameters.getWebhookUrl());
         executeWorker(webhook, card);
     }
 
     private void executeWorker(Webhook webhook, Card card) {
         try {
             String url = run.getEnvironment(taskListener).expand(webhook.getUrl());
-            String data = gson.toJson(card);
+            String data = gson.toJson(card == null ? null : card.toPaylod());
             HttpWorker worker = new HttpWorker(url, data, webhook.getTimeout(), taskListener.getLogger());
             worker.submit();
         } catch (IOException | InterruptedException | RejectedExecutionException e) {

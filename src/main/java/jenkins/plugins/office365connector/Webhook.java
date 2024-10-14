@@ -16,6 +16,7 @@ package jenkins.plugins.office365connector;
 
 import java.util.Collections;
 import java.util.List;
+
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.Util;
@@ -50,13 +51,15 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     private int timeout;
 
+    private boolean adaptiveCards;
+
     private List<Macro> macros = Collections.emptyList();
 
     private List<FactDefinition> factDefinitions = Collections.emptyList();
 
     @Override
     public DescriptorImpl getDescriptor() {
-            return (DescriptorImpl) super.getDescriptor();
+        return (DescriptorImpl) super.getDescriptor();
     }
 
     @DataBoundConstructor
@@ -163,6 +166,15 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     }
 
     @DataBoundSetter
+    public void setAdaptiveCards(final boolean adaptiveCards) {
+        this.adaptiveCards = adaptiveCards;
+    }
+
+    public boolean isAdaptiveCards() {
+        return adaptiveCards;
+    }
+
+    @DataBoundSetter
     public void setMacros(List<Macro> macros) {
         this.macros = Util.fixNull(macros);
     }
@@ -201,8 +213,8 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
             return FormUtils.formValidateUrl(value);
         }
 
-       public FormValidation doCheckGlobalUrl(@QueryParameter String value) {
-            if(StringUtils.isNotBlank(value)) {
+        public FormValidation doCheckGlobalUrl(@QueryParameter String value) {
+            if (StringUtils.isNotBlank(value)) {
                 return FormUtils.formValidateUrl(value);
             } else {
                 return FormValidation.ok();

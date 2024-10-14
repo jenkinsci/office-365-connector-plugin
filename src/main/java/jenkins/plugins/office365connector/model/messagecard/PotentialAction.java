@@ -10,18 +10,19 @@
  * limitations under the License.
  */
 
-package jenkins.plugins.office365connector.model;
+package jenkins.plugins.office365connector.model.messagecard;
 
 import java.util.Collections;
 import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
 import hudson.Util;
+import jenkins.plugins.office365connector.model.CardAction;
 
 /**
  * @author srhebbar
  */
-public class PotentialAction {
+public class PotentialAction implements CardAction {
 
     @SerializedName("@context")
     private String context = "http://schema.org";
@@ -42,10 +43,12 @@ public class PotentialAction {
         this.target = Util.fixNull(url);
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -54,8 +57,9 @@ public class PotentialAction {
         return target;
     }
 
-    public void setTarget(List<String> target) {
-        this.target = target;
+    @Override
+    public void setTargets(List<String> targets) {
+        this.target = targets;
     }
 
     public String getContext() {

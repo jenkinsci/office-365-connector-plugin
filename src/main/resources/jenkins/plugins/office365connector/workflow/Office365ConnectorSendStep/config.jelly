@@ -13,4 +13,7 @@
     <f:entry field="color" title="Color">
         <f:textbox/>
     </f:entry>
+    <f:entry field="adaptiveCards" title="Use AdaptiveCard Format" >
+        <f:checkbox default="false"/>
+    </f:entry>
 </j:jelly>

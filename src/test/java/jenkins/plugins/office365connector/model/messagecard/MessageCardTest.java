@@ -1,15 +1,16 @@
-package jenkins.plugins.office365connector.model;
+package jenkins.plugins.office365connector.model.messagecard;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
 
+import jenkins.plugins.office365connector.model.Section;
 import org.junit.Test;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class CardTest {
+public class MessageCardTest {
 
     @Test
     public void getSummary_ReturnsSummary() {
@@ -18,10 +19,10 @@ public class CardTest {
         String summary = "mySummary";
 
         // when
-        Card card = new Card(summary, null);
+        MessageCard messageCard = new MessageCard(summary, null);
 
         // then
-        assertThat(card.getSummary()).isEqualTo(summary);
+        assertThat(messageCard.getSummary()).isEqualTo(summary);
     }
 
     @Test
@@ -31,10 +32,10 @@ public class CardTest {
         Section section = new Section("myTitle", null, null);
 
         // when
-        Card card = new Card(null, section);
+        MessageCard messageCard = new MessageCard(null, section);
 
         // then
-        assertThat(card.getSections()).hasSize(1).containsOnly(section);
+        assertThat(messageCard.getSections()).hasSize(1).containsOnly(section);
     }
 
     @Test
@@ -42,13 +43,13 @@ public class CardTest {
 
         // given
         String themeColor = "red";
-        Card card = new Card("mySummary", null);
+        MessageCard messageCard = new MessageCard("mySummary", null);
 
         // when
-        card.setThemeColor(themeColor);
+        messageCard.setThemeColor(themeColor);
 
         // then
-        assertThat(card.getThemeColor()).isEqualTo(themeColor);
+        assertThat(messageCard.getThemeColor()).isEqualTo(themeColor);
     }
 
     @Test
@@ -56,12 +57,12 @@ public class CardTest {
 
         // given
         PotentialAction action = new PotentialAction("myName", Collections.singletonList("someUrl"));
-        Card card = new Card("mySummary", null);
+        MessageCard messageCard = new MessageCard("mySummary", null);
 
         // when
-        card.setPotentialAction(Collections.singletonList(action));
+        messageCard.setAction(Collections.singletonList(action));
 
         // then
-        assertThat(card.getPotentialAction()).hasSize(1).containsOnly(action);
+        assertThat(messageCard.getAction()).hasSize(1).containsOnly(action);
     }
 }
