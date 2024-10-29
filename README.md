@@ -179,6 +179,32 @@ pipeline {
 }
 ```
 
+### Pipeline post section with Adaptive Cards
+
+```groovy
+pipeline {
+
+    agent any
+
+    stages {
+        stage('Init') {
+            steps {
+                echo 'Hello!'
+            }
+        }
+    }
+
+    post {
+        failure {
+            office365ConnectorSend webhookUrl: "https://prod.westeurope.logic.azure.com:443/workflows...",
+              message: 'Something went wrong', 
+              status: 'Failure',
+              adaptiveCards: true
+        }
+    }
+}
+````
+
 ### Global Configuration in Init Hook
 
 Jenkins has the capability to execute Groovy scripts on launch by placing them in `$JENKINS_HOME/init.groovy.d`.
