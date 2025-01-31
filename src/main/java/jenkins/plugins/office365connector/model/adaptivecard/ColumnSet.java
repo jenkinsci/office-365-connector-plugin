@@ -10,14 +10,14 @@ public class ColumnSet implements AdaptiveCardElement {
     private final String type = "ColumnSet";
     private final List<Column> columns;
     @SuppressFBWarnings(value = "SS_SHOULD_BE_STATIC")
-    private final String witdth = "stretch";
+    private final String width = "stretch";
 
     public ColumnSet(final List<Column> items) {
         this.columns = items;
     }
 
-    public String getWitdth() {
-        return witdth;
+    public String getWidth() {
+        return width;
     }
 
     public List<Column> getColumns() {
