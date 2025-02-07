@@ -60,7 +60,7 @@ public class AffectedFileBuilder {
         return (invocation -> value);
     }
 
-    private class File implements ChangeLogSet.AffectedFile {
+    private static class File implements ChangeLogSet.AffectedFile {
 
         @Override
         public String getPath() {

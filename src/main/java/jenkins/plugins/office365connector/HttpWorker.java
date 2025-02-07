@@ -111,7 +111,7 @@ public class HttpWorker implements Runnable {
                 if (!isNoProxyHost(this.url, noHostProxyPatterns)) {
                     builder.setProxy(new HttpHost(proxy.name, proxy.port));
                     String username = proxy.getUserName();
-                    String password = proxy.getPassword();
+                    String password = proxy.getSecretPassword().getPlainText();
                     // Consider it to be passed if username specified. Sufficient?
                     if (StringUtils.isNotBlank(username)) {
                         CredentialsProvider credsProvider = new BasicCredentialsProvider();

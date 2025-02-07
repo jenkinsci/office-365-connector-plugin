@@ -73,7 +73,7 @@ public class AdaptiveCard implements Card {
     }
 
     @Override
-    public Object toPaylod() {
+    public Object toPayload() {
         return new Payload(this);
     }
 

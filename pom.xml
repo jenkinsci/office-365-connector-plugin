@@ -4,14 +4,14 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.88</version>
+        <version>5.7</version>
         <relativePath />
     </parent>
 
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -27,8 +27,8 @@
         <revision>5.0.1</revision>
         <changelist>-SNAPSHOT</changelist>
         <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
-        <jenkins.baseline>2.414</jenkins.baseline>
-        <jenkins.version>${jenkins.baseline}.3</jenkins.version>
+        <jenkins.baseline>2.479</jenkins.baseline>
+        <jenkins.version>${jenkins.baseline}.1</jenkins.version>
 
         <gitHubRepo>jenkinsci/office-365-connector-plugin</gitHubRepo>
 
@@ -44,7 +44,7 @@
                      https://repo.jenkins-ci.org/artifactory/public/io/jenkins/tools/bom/
 				     https://www.jenkins.io/doc/developer/plugin-development/dependency-management/#jenkins-plugin-bom
 				-->
-                <version>2982.vdce2153031a_0</version>
+                <version>4051.v78dce3ce8b_d6</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -99,12 +99,6 @@
             <artifactId>commons-validator</artifactId>
             <version>1.7</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>findbugs-annotations</artifactId>
-            <version>3.0.1</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -143,14 +137,14 @@
             <name>Out conn</name>
             <email>outconn@microsoft.com</email>
             <organization>Microsoft Corp.</organization>
-            <organizationUrl>http://microsoft.com</organizationUrl>
+            <organizationUrl>https://microsoft.com</organizationUrl>
         </developer>
         <developer>
             <id>srhebbar</id>
             <name>Srivardhan Hebbar</name>
             <email>srhebbar@microsoft.com</email>
             <organization>Microsoft Corp.</organization>
-            <organizationUrl>http://microsoft.com</organizationUrl>
+            <organizationUrl>https://microsoft.com</organizationUrl>
         </developer>
     </developers>
 

@@ -112,7 +112,7 @@ public class Office365ConnectorWebhookNotifier {
     private void executeWorker(Webhook webhook, Card card) {
         try {
             String url = run.getEnvironment(taskListener).expand(webhook.getUrl());
-            String data = gson.toJson(card == null ? null : card.toPaylod());
+            String data = gson.toJson(card == null ? null : card.toPayload());
             HttpWorker worker = new HttpWorker(url, data, webhook.getTimeout(), taskListener.getLogger());
             worker.submit();
         } catch (IOException | InterruptedException | RejectedExecutionException e) {
