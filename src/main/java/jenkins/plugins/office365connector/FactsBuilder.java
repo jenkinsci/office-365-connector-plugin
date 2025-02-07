@@ -80,10 +80,9 @@ public class FactsBuilder {
     }
 
     public void addCommitters() {
-        if (!(run instanceof RunWithSCM)) {
+        if (!(run instanceof RunWithSCM runWithSCM)) {
             return;
         }
-        RunWithSCM runWithSCM = (RunWithSCM) run;
         Set<User> authors = runWithSCM.getCulprits();
 
         String joinedCommitters = authors.stream()
@@ -93,10 +92,9 @@ public class FactsBuilder {
     }
 
     public void addDevelopers() {
-        if (!(run instanceof RunWithSCM)) {
+        if (!(run instanceof RunWithSCM runWithSCM)) {
             return;
         }
-        RunWithSCM runWithSCM = (RunWithSCM) run;
 
         List<ChangeLogSet<ChangeLogSet.Entry>> sets = runWithSCM.getChangeSets();
 

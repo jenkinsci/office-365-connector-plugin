@@ -2,6 +2,7 @@ package jenkins.plugins.office365connector.workflow;
 
 
 import java.io.IOException;
+import java.io.Serial;
 
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -14,6 +15,7 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
  */
 public class Execution extends SynchronousNonBlockingStepExecution<Void> {
 
+    @Serial
     private static final long serialVersionUID = 8433805238008188090L;
 
     private transient final StepParameters stepParameters;

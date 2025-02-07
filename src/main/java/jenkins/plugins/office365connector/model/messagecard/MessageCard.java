@@ -64,7 +64,7 @@ public class MessageCard implements Card {
     }
 
     @Override
-    public Object toPaylod() {
+    public Object toPayload() {
         return this;
     }
 }

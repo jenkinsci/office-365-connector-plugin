@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface Card {
 
-    public Object toPaylod();
+    Object toPayload();
 
     void setAction(List<CardAction> actions);
 
