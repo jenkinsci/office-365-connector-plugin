@@ -31,7 +31,7 @@ import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 public class Webhook extends AbstractDescribableImpl<Webhook> {
 
@@ -258,7 +258,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
         }
 
         @Override
-        public boolean configure(StaplerRequest req, JSONObject formData) {
+        public boolean configure(StaplerRequest2 req, JSONObject formData) {
             req.bindJSON(this, formData);
             save();
             return true;
