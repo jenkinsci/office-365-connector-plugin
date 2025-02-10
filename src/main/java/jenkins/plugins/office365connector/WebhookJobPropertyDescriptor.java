@@ -23,7 +23,7 @@ import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.jenkinsci.Symbol;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 @Extension
 @Symbol("office365ConnectorWebhooks")
@@ -56,7 +56,7 @@ public final class WebhookJobPropertyDescriptor extends JobPropertyDescriptor {
     }
 
     @Override
-    public WebhookJobProperty newInstance(StaplerRequest req, JSONObject formData) {
+    public WebhookJobProperty newInstance(StaplerRequest2 req, JSONObject formData) {
 
         List<Webhook> webhooks = new ArrayList<>();
         if (formData != null && !formData.isNullObject()) {
@@ -75,7 +75,7 @@ public final class WebhookJobPropertyDescriptor extends JobPropertyDescriptor {
     }
 
     @Override
-    public boolean configure(StaplerRequest req, JSONObject formData) {
+    public boolean configure(StaplerRequest2 req, JSONObject formData) {
         save();
         return true;
     }

@@ -22,7 +22,7 @@ import net.sf.json.JsonConfig;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 import org.mockito.ArgumentMatchers;
 import org.mockito.MockedStatic;
 
@@ -119,7 +119,7 @@ public class WebhookJobPropertyDescriptorTest {
         WebhookJobPropertyDescriptor descriptor = new WebhookJobPropertyDescriptor();
 
         // when
-        WebhookJobProperty property = descriptor.newInstance(null, null);
+        WebhookJobProperty property = descriptor.newInstance((StaplerRequest2) null, null);
 
         // then
         assertThat(property).isNotNull();
@@ -134,7 +134,7 @@ public class WebhookJobPropertyDescriptorTest {
         JSONObject jsonObject = new JSONObject(true);
 
         // when
-        WebhookJobProperty property = descriptor.newInstance(null, jsonObject);
+        WebhookJobProperty property = descriptor.newInstance((StaplerRequest2) null, jsonObject);
 
         // then
         assertThat(property).isNotNull();
@@ -149,7 +149,7 @@ public class WebhookJobPropertyDescriptorTest {
         JSONObject jsonObject = new JSONObject();
 
         // when
-        WebhookJobProperty property = descriptor.newInstance(null, jsonObject);
+        WebhookJobProperty property = descriptor.newInstance((StaplerRequest2) null, jsonObject);
 
         // then
         assertThat(property).isNotNull();
@@ -165,7 +165,7 @@ public class WebhookJobPropertyDescriptorTest {
         jsonObject.put(KEY, Collections.emptyList());
 
         // when
-        WebhookJobProperty property = descriptor.newInstance(null, jsonObject);
+        WebhookJobProperty property = descriptor.newInstance((StaplerRequest2) null, jsonObject);
 
         // then
         assertThat(property).isNotNull();
@@ -188,7 +188,7 @@ public class WebhookJobPropertyDescriptorTest {
 
         jsonObject.putAll(map, config);
 
-        StaplerRequest request = mock(StaplerRequest.class);
+        StaplerRequest2 request = mock(StaplerRequest2.class);
         when(request.bindJSON(ArgumentMatchers.any(), (JSONObject) ArgumentMatchers.eq(jsonObject.get(KEY)))).thenReturn(webhook);
 
         // when
@@ -216,7 +216,7 @@ public class WebhookJobPropertyDescriptorTest {
 
         jsonObject.putAll(map, config);
 
-        StaplerRequest request = mock(StaplerRequest.class);
+        StaplerRequest2 request = mock(StaplerRequest2.class);
         when(request.bindJSONToList(ArgumentMatchers.any(), ArgumentMatchers.eq(jsonObject.get(KEY)))).thenReturn(webhooks);
 
         // when
@@ -236,7 +236,7 @@ public class WebhookJobPropertyDescriptorTest {
         WebhookJobPropertyDescriptor descriptor = new WebhookJobPropertyDescriptor();
 
         // when
-        boolean isConfigured = descriptor.configure(null, null);
+        boolean isConfigured = descriptor.configure((StaplerRequest2) null, null);
 
         // then
         // very naive, worth to improve

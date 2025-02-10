@@ -13,7 +13,7 @@ import jenkins.model.Jenkins;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 import org.mockito.MockedStatic;
 
 /**
@@ -102,7 +102,7 @@ public class WebhookDescriptorImplTest {
     public void configure_ReturnsTrue() {
 
         // given
-        StaplerRequest staplerRequest = mock(StaplerRequest.class);
+        StaplerRequest2 staplerRequest = mock(StaplerRequest2.class);
         when(staplerRequest.bindJSON(any(), any())).thenReturn("");
 
         // when
