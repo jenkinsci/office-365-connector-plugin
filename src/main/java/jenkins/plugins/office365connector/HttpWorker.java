@@ -20,24 +20,28 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpStatus;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 
 /**
  * Makes http post requests in a separate thread.
@@ -82,8 +86,8 @@ public class HttpWorker implements Runnable {
             // log("Posted JSON: %s", data);
             post.setEntity(new StringEntity(data, ContentType.APPLICATION_JSON));
 
-            try (CloseableHttpResponse httpResponse = client.execute(post)) {
-                int responseCode = httpResponse.getStatusLine().getStatusCode();
+            try (ClassicHttpResponse httpResponse = client.execute(post, classicHttpResponse -> classicHttpResponse)) {
+                int responseCode = httpResponse.getCode();
                 if (responseCode >= HttpStatus.SC_BAD_REQUEST) {
                     log("Posting data to %s may have failed. Webhook responded with status code - %s", url, responseCode);
                     String response =
@@ -93,7 +97,7 @@ public class HttpWorker implements Runnable {
                 } else {
                     success = true;
                 }
-            } catch (IOException e) {
+            } catch (IOException | ParseException e) {
                 log("Failed to post data to webhook - %s", url);
                 e.printStackTrace(logger);
             }
@@ -104,31 +108,38 @@ public class HttpWorker implements Runnable {
     private CloseableHttpClient getHttpClient() {
         HttpClientBuilder builder = HttpClientBuilder.create();
         Jenkins jenkins = Jenkins.get();
-        if (jenkins != null) {
-            ProxyConfiguration proxy = jenkins.proxy;
-            if (proxy != null) {
-                List<Pattern> noHostProxyPatterns = proxy.getNoProxyHostPatterns();
-                if (!isNoProxyHost(this.url, noHostProxyPatterns)) {
-                    builder.setProxy(new HttpHost(proxy.name, proxy.port));
-                    String username = proxy.getUserName();
-                    String password = proxy.getPassword();
-                    // Consider it to be passed if username specified. Sufficient?
-                    if (StringUtils.isNotBlank(username)) {
-                        CredentialsProvider credsProvider = new BasicCredentialsProvider();
-                        credsProvider.setCredentials(
-                                new AuthScope(proxy.name, proxy.port),
-                                new UsernamePasswordCredentials(username, password));
-                        builder.setDefaultCredentialsProvider(credsProvider);
-                    }
+        ProxyConfiguration proxy = jenkins.proxy;
+        if (proxy != null) {
+            List<Pattern> noHostProxyPatterns = proxy.getNoProxyHostPatterns();
+            if (!isNoProxyHost(this.url, noHostProxyPatterns)) {
+                builder.setProxy(new HttpHost(proxy.name, proxy.port));
+                String username = proxy.getUserName();
+                String password = proxy.getSecretPassword().getPlainText();
+                // Consider it to be passed if username specified. Sufficient?
+                if (StringUtils.isNotBlank(username)) {
+                    BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
+                    credsProvider.setCredentials(
+                            new AuthScope(proxy.name, proxy.port),
+                            new UsernamePasswordCredentials(username, password.toCharArray()));
+                    builder.setDefaultCredentialsProvider(credsProvider);
                 }
             }
         }
-        RequestConfig config = RequestConfig.custom()
-                .setConnectTimeout(timeout)
-                .setSocketTimeout(timeout)
-                .setConnectionRequestTimeout(timeout)
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectionRequestTimeout(timeout, TimeUnit.MILLISECONDS)
                 .build();
-        builder.setDefaultRequestConfig(config);
+
+        ConnectionConfig connectionConfig = ConnectionConfig.custom()
+                .setConnectTimeout(timeout, TimeUnit.MILLISECONDS)
+                .setSocketTimeout(timeout, TimeUnit.MILLISECONDS)
+                .build();
+
+        PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                .setDefaultConnectionConfig(connectionConfig)
+                .build();
+
+        builder.setDefaultRequestConfig(requestConfig);
+        builder.setConnectionManager(connectionManager);
 
         return builder.build();
     }

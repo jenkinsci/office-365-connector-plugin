@@ -72,6 +72,10 @@
 
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
+            <artifactId>apache-httpcomponents-client-5-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jenkins.plugins</groupId>
             <artifactId>gson-api</artifactId>
         </dependency>
         <dependency>
@@ -89,10 +93,6 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>apache-httpcomponents-client-4-api</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-validator</groupId>
