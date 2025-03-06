@@ -1,34 +1,34 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockConstruction;
-import static org.mockito.Mockito.when;
-
 import hudson.model.AbstractBuild;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
-import mockit.internal.reflection.MethodReflection;
+import jenkins.plugins.office365connector.helpers.ReflectionHelper;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class ExecutionTest extends AbstractTest {
+class ExecutionTest extends AbstractTest {
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         run = mock(AbstractBuild.class);
         AbstractBuild previousBuild = mock(AbstractBuild.class);
         when(run.getPreviousBuild()).thenReturn(previousBuild);
     }
 
     @Test
-    public void onStarted_SendNotification() throws Throwable {
+    void onStarted_SendNotification() throws Throwable {
 
         // given
         StepContext stepContext = mock(StepContext.class);
@@ -41,7 +41,7 @@ public class ExecutionTest extends AbstractTest {
 
         try (MockedConstruction<Office365ConnectorWebhookNotifier> notifierConstruction = mockConstruction(Office365ConnectorWebhookNotifier.class)) {
             // when
-            MethodReflection.invokeWithCheckedThrows(execution.getClass(), execution, "run", new Class[]{});
+            ReflectionHelper.invokeMethod(execution,"run");
 
             // then
             assertEquals(1, notifierConstruction.constructed().size());

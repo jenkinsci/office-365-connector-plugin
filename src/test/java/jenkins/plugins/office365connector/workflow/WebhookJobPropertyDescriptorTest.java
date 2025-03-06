@@ -1,17 +1,5 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.WebhookJobProperty;
@@ -19,24 +7,41 @@ import jenkins.plugins.office365connector.WebhookJobPropertyDescriptor;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
 import net.sf.json.JSONObject;
 import net.sf.json.JsonConfig;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.kohsuke.stapler.StaplerRequest2;
 import org.mockito.ArgumentMatchers;
 import org.mockito.MockedStatic;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class WebhookJobPropertyDescriptorTest {
+class WebhookJobPropertyDescriptorTest {
 
     private static final String KEY = "webhooks";
 
     private MockedStatic<Jenkins> staticJenkins;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         staticJenkins = mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         File rootDir = new File(".");
@@ -51,13 +56,13 @@ public class WebhookJobPropertyDescriptorTest {
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         staticJenkins.close();
     }
 
     @Test
-    public void isEnabled_ByDefault_ReturnsFalse() {
+    void isEnabled_ByDefault_ReturnsFalse() {
 
         // when
         WebhookJobPropertyDescriptor descriptor = new WebhookJobPropertyDescriptor();
@@ -66,12 +71,12 @@ public class WebhookJobPropertyDescriptorTest {
         boolean isEnabled = descriptor.isEnabled();
 
         // then
-        assertThat(isEnabled).isFalse();
+        assertThat(isEnabled, is(false));
     }
 
 
     @Test
-    public void isEnabled_ChecksWebhookSize() {
+    void isEnabled_ChecksWebhookSize() {
 
         // when
         WebhookJobPropertyDescriptor descriptor = new WebhookJobPropertyDescriptor();
@@ -82,11 +87,11 @@ public class WebhookJobPropertyDescriptorTest {
         boolean isEnabled = descriptor.isEnabled();
 
         // then
-        assertThat(isEnabled).isTrue();
+        assertThat(isEnabled, is(true));
     }
 
     @Test
-    public void isApplicable_ReturnsTrue() {
+    void isApplicable_ReturnsTrue() {
 
         // when
         WebhookJobPropertyDescriptor descriptor = new WebhookJobPropertyDescriptor();
@@ -95,11 +100,11 @@ public class WebhookJobPropertyDescriptorTest {
         boolean isApplicable = descriptor.isApplicable(null);
 
         // then
-        assertThat(isApplicable).isTrue();
+        assertThat(isApplicable, is(true));
     }
 
     @Test
-    public void getDisplayName_ReturnsName() {
+    void getDisplayName_ReturnsName() {
 
         // when
         WebhookJobPropertyDescriptor descriptor = new WebhookJobPropertyDescriptor();
@@ -108,12 +113,12 @@ public class WebhookJobPropertyDescriptorTest {
         String name = descriptor.getDisplayName();
 
         // then
-        assertThat(name).isEqualTo("Job Notification");
+        assertThat(name, equalTo("Job Notification"));
     }
 
 
     @Test
-    public void newInstance_OnNullObject_ReturnsJobProperty() {
+    void newInstance_OnNullObject_ReturnsJobProperty() {
 
         // when
         WebhookJobPropertyDescriptor descriptor = new WebhookJobPropertyDescriptor();
@@ -122,12 +127,12 @@ public class WebhookJobPropertyDescriptorTest {
         WebhookJobProperty property = descriptor.newInstance((StaplerRequest2) null, null);
 
         // then
-        assertThat(property).isNotNull();
-        assertThat(property.getWebhooks()).isEmpty();
+        assertThat(property, notNullValue());
+        assertThat(property.getWebhooks(), empty());
     }
 
     @Test
-    public void newInstance_OnNullForm_ReturnsJobProperty() {
+    void newInstance_OnNullForm_ReturnsJobProperty() {
 
         // when
         WebhookJobPropertyDescriptor descriptor = new WebhookJobPropertyDescriptor();
@@ -137,12 +142,12 @@ public class WebhookJobPropertyDescriptorTest {
         WebhookJobProperty property = descriptor.newInstance((StaplerRequest2) null, jsonObject);
 
         // then
-        assertThat(property).isNotNull();
-        assertThat(property.getWebhooks()).isEmpty();
+        assertThat(property, notNullValue());
+        assertThat(property.getWebhooks(), empty());
     }
 
     @Test
-    public void newInstance_OnEmptyForm_ReturnsJobProperty() {
+    void newInstance_OnEmptyForm_ReturnsJobProperty() {
 
         // when
         WebhookJobPropertyDescriptor descriptor = new WebhookJobPropertyDescriptor();
@@ -152,12 +157,12 @@ public class WebhookJobPropertyDescriptorTest {
         WebhookJobProperty property = descriptor.newInstance((StaplerRequest2) null, jsonObject);
 
         // then
-        assertThat(property).isNotNull();
-        assertThat(property.getWebhooks()).isEmpty();
+        assertThat(property, notNullValue());
+        assertThat(property.getWebhooks(), empty());
     }
 
     @Test
-    public void newInstance_OnEmptyWebhook_ReturnsJobProperty() {
+    void newInstance_OnEmptyWebhook_ReturnsJobProperty() {
 
         // when
         WebhookJobPropertyDescriptor descriptor = new WebhookJobPropertyDescriptor();
@@ -168,12 +173,12 @@ public class WebhookJobPropertyDescriptorTest {
         WebhookJobProperty property = descriptor.newInstance((StaplerRequest2) null, jsonObject);
 
         // then
-        assertThat(property).isNotNull();
-        assertThat(property.getWebhooks()).isEmpty();
+        assertThat(property, notNullValue());
+        assertThat(property.getWebhooks(), empty());
     }
 
     @Test
-    public void newInstance_OnSingleWebhook_ReturnsJobProperty() {
+    void newInstance_OnSingleWebhook_ReturnsJobProperty() {
 
         // when
         WebhookJobPropertyDescriptor descriptor = new WebhookJobPropertyDescriptor();
@@ -181,7 +186,7 @@ public class WebhookJobPropertyDescriptorTest {
         Webhook webhook = new Webhook("myUrl");
 
         // Excluding "descriptor" to avoid infinite loop in jsonObject.put()
-        Map map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put(KEY, webhook);
         JsonConfig config = new JsonConfig();
         config.setExcludes(new String[]{"descriptor"});
@@ -195,21 +200,21 @@ public class WebhookJobPropertyDescriptorTest {
         WebhookJobProperty property = descriptor.newInstance(request, jsonObject);
 
         // then
-        assertThat(property).isNotNull();
-        assertThat(property.getWebhooks()).containsExactly(webhook);
+        assertThat(property, notNullValue());
+        assertThat(property.getWebhooks(), contains(webhook));
     }
 
     @Test
-    public void newInstance_OnArrayWebhook_ReturnsJobProperty() {
+    void newInstance_OnArrayWebhook_ReturnsJobProperty() {
 
         // when
         WebhookJobPropertyDescriptor descriptor = new WebhookJobPropertyDescriptor();
         JSONObject jsonObject = new JSONObject();
         Webhook webhook = new Webhook("myUrl");
-        List<Object> webhooks = Arrays.asList(webhook);
+        List<Object> webhooks = List.of(webhook);
 
         // Excluding "descriptor" to avoid infinite loop in jsonObject.put()
-        Map map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put(KEY, webhooks);
         JsonConfig config = new JsonConfig();
         config.setExcludes(new String[]{"descriptor"});
@@ -223,14 +228,13 @@ public class WebhookJobPropertyDescriptorTest {
         WebhookJobProperty property = descriptor.newInstance(request, jsonObject);
 
         // then
-        assertThat(property).isNotNull();
-        assertThat(property.getWebhooks())
-                .hasSameSizeAs(webhooks)
-                .containsExactly(webhook);
+        assertThat(property, notNullValue());
+        assertThat(property.getWebhooks(), hasSize(webhooks.size()));
+        assertThat(property.getWebhooks(), contains(webhook));
     }
 
     @Test
-    public void configure_ReturnsTrue() {
+    void configure_ReturnsTrue() {
 
         // when
         WebhookJobPropertyDescriptor descriptor = new WebhookJobPropertyDescriptor();
@@ -240,6 +244,6 @@ public class WebhookJobPropertyDescriptorTest {
 
         // then
         // very naive, worth to improve
-        assertThat(isConfigured).isTrue();
+        assertThat(isConfigured, is(true));
     }
 }

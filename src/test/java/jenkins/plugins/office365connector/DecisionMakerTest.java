@@ -1,38 +1,41 @@
 package jenkins.plugins.office365connector;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.util.Arrays;
-
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
+import jenkins.plugins.office365connector.helpers.ReflectionHelper;
 import jenkins.plugins.office365connector.model.Macro;
 import jenkins.plugins.office365connector.workflow.AbstractTest;
-import mockit.internal.reflection.FieldReflection;
-import mockit.internal.reflection.MethodReflection;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
-public class DecisionMakerTest extends AbstractTest {
+import java.io.File;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+
+class DecisionMakerTest extends AbstractTest {
 
     private MockedStatic<Jenkins> staticJenkins;
 
-    @Before
-    public void setup() throws Exception {
+    @BeforeEach
+    void setup() {
         Webhook.DescriptorImpl mockDescriptor = mock(Webhook.DescriptorImpl.class);
         when(mockDescriptor.getName()).thenReturn("test");
 
@@ -42,13 +45,13 @@ public class DecisionMakerTest extends AbstractTest {
         when(mockJenkins.getDescriptorOrDie(any())).thenReturn(mockDescriptor);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         staticJenkins.close();
     }
 
     @Test
-    public void DecisionMaker_OnEmptyPreviousBuild_StoresParameters() throws Exception {
+    void DecisionMaker_OnEmptyPreviousBuild_StoresParameters() {
 
         // given
         AbstractBuild run = mock(AbstractBuild.class);
@@ -58,13 +61,13 @@ public class DecisionMakerTest extends AbstractTest {
         DecisionMaker decisionMaker = new DecisionMaker(run, taskListener);
 
         // then
-        assertThat((Run) FieldReflection.getFieldValue(decisionMaker.getClass().getDeclaredField("run"), decisionMaker)).isSameAs(run);
-        assertThat((TaskListener) FieldReflection.getFieldValue(decisionMaker.getClass().getDeclaredField("taskListener"), decisionMaker)).isSameAs(taskListener);
-        assertThat((Result) FieldReflection.getFieldValue(decisionMaker.getClass().getDeclaredField("previousResult"), decisionMaker)).isEqualTo(Result.SUCCESS);
+        assertThat(ReflectionHelper.getField(decisionMaker,"run"), sameInstance(run));
+        assertThat(ReflectionHelper.getField(decisionMaker, "taskListener"), sameInstance(taskListener));
+        assertThat(ReflectionHelper.getField(decisionMaker, "previousResult"), equalTo(Result.SUCCESS));
     }
 
     @Test
-    public void DecisionMaker_OnPreviousBuild_StoresParameters() throws Exception {
+    void DecisionMaker_OnPreviousBuild_StoresParameters() {
 
         // given
         AbstractBuild run = mock(AbstractBuild.class);
@@ -78,13 +81,13 @@ public class DecisionMakerTest extends AbstractTest {
         DecisionMaker decisionMaker = new DecisionMaker(run, taskListener);
 
         // then
-        assertThat((Run) FieldReflection.getFieldValue(decisionMaker.getClass().getDeclaredField("run"), decisionMaker)).isSameAs(run);
-        assertThat((TaskListener) FieldReflection.getFieldValue(decisionMaker.getClass().getDeclaredField("taskListener"), decisionMaker)).isSameAs(taskListener);
-        assertThat((Result) FieldReflection.getFieldValue(decisionMaker.getClass().getDeclaredField("previousResult"), decisionMaker)).isEqualTo(previousResult);
+        assertThat(ReflectionHelper.getField(decisionMaker,"run"), sameInstance(run));
+        assertThat(ReflectionHelper.getField(decisionMaker, "taskListener"), sameInstance(taskListener));
+        assertThat(ReflectionHelper.getField(decisionMaker, "previousResult"), equalTo(previousResult));
     }
 
     @Test
-    public void isAtLeastOneRuleMatched_OnEmptyMacro_ReturnsTrue() {
+    void isAtLeastOneRuleMatched_OnEmptyMacro_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker();
@@ -94,11 +97,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean matched = decisionMaker.isAtLeastOneRuleMatched(webhook);
 
         // then
-        assertThat(matched).isTrue();
+        assertThat(matched, is(true));
     }
 
     @Test
-    public void isAtLeastOneRuleMatched_OnMatchedMacro_ReturnsTrue() {
+    void isAtLeastOneRuleMatched_OnMatchedMacro_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker();
@@ -107,7 +110,7 @@ public class DecisionMakerTest extends AbstractTest {
         String template = "one";
         String value = template;
         Macro macro = new Macro(template, value);
-        webhook.setMacros(Arrays.asList(macro));
+        webhook.setMacros(List.of(macro));
 
         mockTokenMacro(value);
 
@@ -115,11 +118,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean matched = decisionMaker.isAtLeastOneRuleMatched(webhook);
 
         // then
-        assertThat(matched).isTrue();
+        assertThat(matched, is(true));
     }
 
     @Test
-    public void isAtLeastOneRuleMatched_OnMismatchedMacro_ReturnsTrue() {
+    void isAtLeastOneRuleMatched_OnMismatchedMacro_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker();
@@ -128,7 +131,7 @@ public class DecisionMakerTest extends AbstractTest {
         String template = "one";
         String value = "two";
         Macro macro = new Macro(template, value);
-        webhook.setMacros(Arrays.asList(macro));
+        webhook.setMacros(List.of(macro));
 
         mockTokenMacro(template);
 
@@ -136,12 +139,12 @@ public class DecisionMakerTest extends AbstractTest {
         boolean matched = decisionMaker.isAtLeastOneRuleMatched(webhook);
 
         // then
-        assertThat(matched).isFalse();
+        assertThat(matched, is(false));
     }
 
 
     @Test
-    public void isStatusMatched_OnNotifyAndResultAborted_ReturnsTrue() {
+    void isStatusMatched_OnNotifyAndResultAborted_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.ABORTED);
@@ -152,11 +155,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isTrue();
+        assertThat(statusMatched, is(true));
     }
 
     @Test
-    public void isStatusMatched_OnNotifyAborted_ReturnsTrue() {
+    void isStatusMatched_OnNotifyAborted_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker();
@@ -167,11 +170,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
     @Test
-    public void isStatusMatched_OnResultAborted_ReturnsTrue() {
+    void isStatusMatched_OnResultAborted_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.ABORTED);
@@ -181,12 +184,12 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
 
     @Test
-    public void isStatusMatched_OnNotifyAndResultFailure_ReturnsTrue() {
+    void isStatusMatched_OnNotifyAndResultFailure_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.FAILURE);
@@ -197,11 +200,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isTrue();
+        assertThat(statusMatched, is(true));
     }
 
     @Test
-    public void isStatusMatched_OnNotifyAndResultFailureAndPreviousFailure_ReturnsFalse() {
+    void isStatusMatched_OnNotifyAndResultFailureAndPreviousFailure_ReturnsFalse() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.FAILURE, Result.FAILURE);
@@ -212,11 +215,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
     @Test
-    public void isStatusMatched_OnNotifyFailure_ReturnsTrue() {
+    void isStatusMatched_OnNotifyFailure_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker();
@@ -227,11 +230,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
     @Test
-    public void isStatusMatched_OnResultFailure_ReturnsTrue() {
+    void isStatusMatched_OnResultFailure_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.FAILURE);
@@ -241,11 +244,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
     @Test
-    public void isStatusMatched_OnResultFailureAndPreviousFailure_ReturnsTrue() {
+    void isStatusMatched_OnResultFailureAndPreviousFailure_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.FAILURE, Result.FAILURE);
@@ -255,12 +258,12 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
 
     @Test
-    public void isStatusMatched_OnNotifyAndResultRepeatedFailure_ReturnsTrue() {
+    void isStatusMatched_OnNotifyAndResultRepeatedFailure_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.FAILURE);
@@ -271,11 +274,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
     @Test
-    public void isStatusMatched_OnOnNotifyAndResultRepeatedFailureAndPreviousFailure_ReturnsFalse() {
+    void isStatusMatched_OnOnNotifyAndResultRepeatedFailureAndPreviousFailure_ReturnsFalse() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.FAILURE, Result.FAILURE);
@@ -286,11 +289,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isTrue();
+        assertThat(statusMatched, is(true));
     }
 
     @Test
-    public void isStatusMatched_OnNotifyRepeatedFailure_ReturnsTrue() {
+    void isStatusMatched_OnNotifyRepeatedFailure_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker();
@@ -301,11 +304,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
     @Test
-    public void isStatusMatched_OnResultRepeatedFailureAndPreviousFailure_ReturnsFalse() {
+    void isStatusMatched_OnResultRepeatedFailureAndPreviousFailure_ReturnsFalse() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.FAILURE, Result.FAILURE);
@@ -315,12 +318,12 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
 
     @Test
-    public void isStatusMatched_OnNotifyAndResultNotBuild_ReturnsTrue() {
+    void isStatusMatched_OnNotifyAndResultNotBuild_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.NOT_BUILT);
@@ -331,11 +334,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isTrue();
+        assertThat(statusMatched, is(true));
     }
 
     @Test
-    public void isStatusMatched_OnNotifyNotBuild_ReturnsTrue() {
+    void isStatusMatched_OnNotifyNotBuild_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker();
@@ -346,11 +349,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
     @Test
-    public void isStatusMatched_OnResultNotBuild_ReturnsTrue() {
+    void isStatusMatched_OnResultNotBuild_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.NOT_BUILT);
@@ -360,12 +363,12 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
 
     @Test
-    public void isStatusMatched_OnNotifyBackToNormalAndResultSuccess_ReturnsFalse() {
+    void isStatusMatched_OnNotifyBackToNormalAndResultSuccess_ReturnsFalse() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.SUCCESS);
@@ -376,11 +379,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
     @Test
-    public void isStatusMatched_OnNotifyBackToNormalAndResultFailure_ReturnsFalse() {
+    void isStatusMatched_OnNotifyBackToNormalAndResultFailure_ReturnsFalse() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.FAILURE);
@@ -391,11 +394,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
     @Test
-    public void isStatusMatched_OnNotifyBackToNormalAndResultFailureAndPreviousFailure_ReturnsFalse() {
+    void isStatusMatched_OnNotifyBackToNormalAndResultFailureAndPreviousFailure_ReturnsFalse() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.SUCCESS, Result.FAILURE);
@@ -406,11 +409,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isTrue();
+        assertThat(statusMatched, is(true));
     }
 
     @Test
-    public void isStatusMatched_OnNotifyBackToNormalAndResultFailureAndPreviousUnstable_ReturnsFalse() {
+    void isStatusMatched_OnNotifyBackToNormalAndResultFailureAndPreviousUnstable_ReturnsFalse() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.SUCCESS, Result.UNSTABLE);
@@ -421,11 +424,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isTrue();
+        assertThat(statusMatched, is(true));
     }
 
     @Test
-    public void isStatusMatched_OnNotifyBackToNormalAndResultFailureAndPreviousNotBuild_ReturnsFalse() {
+    void isStatusMatched_OnNotifyBackToNormalAndResultFailureAndPreviousNotBuild_ReturnsFalse() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.SUCCESS, Result.NOT_BUILT);
@@ -436,11 +439,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
     @Test
-    public void isStatusMatched_OnNotifyBackToNormalAndResultFailureAndPreviousAborted_ReturnsFalse() {
+    void isStatusMatched_OnNotifyBackToNormalAndResultFailureAndPreviousAborted_ReturnsFalse() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.SUCCESS, Result.ABORTED);
@@ -451,12 +454,12 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
 
     @Test
-    public void isStatusMatched_OnNotifyAndResultSuccess_ReturnsTrue() {
+    void isStatusMatched_OnNotifyAndResultSuccess_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.SUCCESS);
@@ -467,11 +470,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isTrue();
+        assertThat(statusMatched, is(true));
     }
 
     @Test
-    public void isStatusMatched_OnNotifySuccess_ReturnsTrue() {
+    void isStatusMatched_OnNotifySuccess_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker();
@@ -482,11 +485,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
     @Test
-    public void isStatusMatched_OnResultSuccess_ReturnsTrue() {
+    void isStatusMatched_OnResultSuccess_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.SUCCESS);
@@ -496,12 +499,12 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
 
     @Test
-    public void isStatusMatched_OnNotifyAndResultUnstable_ReturnsTrue() {
+    void isStatusMatched_OnNotifyAndResultUnstable_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.UNSTABLE);
@@ -512,11 +515,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isTrue();
+        assertThat(statusMatched, is(true));
     }
 
     @Test
-    public void isStatusMatched_OnNotifyUnstable_ReturnsTrue() {
+    void isStatusMatched_OnNotifyUnstable_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker();
@@ -527,11 +530,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
     @Test
-    public void isStatusMatched_OnResultUnstable_ReturnsTrue() {
+    void isStatusMatched_OnResultUnstable_ReturnsTrue() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker(Result.UNSTABLE);
@@ -541,12 +544,12 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
 
     @Test
-    public void isStatusMatched_OnUndefinedResult_ReturnsFalse() {
+    void isStatusMatched_OnUndefinedResult_ReturnsFalse() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker();
@@ -556,11 +559,11 @@ public class DecisionMakerTest extends AbstractTest {
         boolean statusMatched = decisionMaker.isStatusMatched(webhook);
 
         // then
-        assertThat(statusMatched).isFalse();
+        assertThat(statusMatched, is(false));
     }
 
     @Test
-    public void evaluateMacro_OnInvalidMacro_ThrowsException() {
+    void evaluateMacro_OnInvalidMacro_ThrowsException() {
 
         // given
         DecisionMaker decisionMaker = buildSampleDecisionMaker();
@@ -569,9 +572,10 @@ public class DecisionMakerTest extends AbstractTest {
             tokenMacroStatic.when(() -> TokenMacro.expandAll(any(), any(), any(), any())).thenThrow(new MacroEvaluationException("ups!"));
 
             // when & then
-            assertThatThrownBy(() -> MethodReflection.invokeWithCheckedThrows(decisionMaker.getClass(), decisionMaker, "evaluateMacro", new Class[]{String.class}, "anyTemplate"))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasCauseExactlyInstanceOf(MacroEvaluationException.class);
+            IllegalArgumentException ex = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> ReflectionHelper.invokeMethod(decisionMaker,"evaluateMacro", "anyTemplate"));
+            assertThat(ex.getCause(), instanceOf(MacroEvaluationException.class));
         }
     }
 

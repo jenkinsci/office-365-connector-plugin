@@ -1,35 +1,39 @@
 package jenkins.plugins.office365connector;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
+import jenkins.plugins.office365connector.helpers.ReflectionHelper;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.workflow.AbstractTest;
 import jenkins.plugins.office365connector.workflow.StepParameters;
-import mockit.internal.reflection.MethodReflection;
 import org.apache.commons.lang.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class CardBuilderMessageCardTest extends AbstractTest {
+import java.util.Collections;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+class CardBuilderMessageCardTest extends AbstractTest {
 
     private static final String JOB_DISPLAY_NAME = "myJobDisplayName";
     private static final int BUILD_NUMBER = 7;
 
     private CardBuilder cardBuilder;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() {
         Jenkins jenkinsMock = mock(Jenkins.class);
         when(jenkinsMock.getFullDisplayName()).thenReturn(StringUtils.EMPTY);
 
@@ -49,7 +53,7 @@ public class CardBuilderMessageCardTest extends AbstractTest {
 
 
     @Test
-    public void createStartedCard_ReturnsCard() {
+    void createStartedCard_ReturnsCard() {
 
         // given
         // from @Before
@@ -58,15 +62,15 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         Card card = cardBuilder.createStartedCard(Collections.emptyList());
 
         // then
-        assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER);
-        assertThat(card.getSections()).hasSize(1);
-        assertThat(card.getThemeColor()).isEqualTo("3479BF");
+        assertThat(card.getSummary(), equalTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER));
+        assertThat(card.getSections(), hasSize(1));
+        assertThat(card.getThemeColor(), equalTo("3479BF"));
         Section section = card.getSections().get(0);
-        assertThat(section.getActivityTitle()).isEqualTo("Notification from " + JOB_DISPLAY_NAME + ": Started");
+        assertThat(section.getActivityTitle(), equalTo("Notification from " + JOB_DISPLAY_NAME + ": Started"));
     }
 
     @Test
-    public void createCompletedCard_OnAborted_ReturnsCard() {
+    void createCompletedCard_OnAborted_ReturnsCard() {
 
         // given
         String status = "Aborted";
@@ -77,15 +81,15 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         Card card = cardBuilder.createCompletedCard(Collections.emptyList());
 
         // then
-        assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER + " " + status);
-        assertThat(card.getSections()).hasSize(1);
-        assertThat(card.getThemeColor()).isEqualTo(result.color.getHtmlBaseColor());
+        assertThat(card.getSummary(), equalTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER + " " + status));
+        assertThat(card.getSections(), hasSize(1));
+        assertThat(card.getThemeColor(), equalTo(result.color.getHtmlBaseColor()));
         Section section = card.getSections().get(0);
-        assertThat(section.getActivityTitle()).isEqualTo("Notification from " + JOB_DISPLAY_NAME + ": Build Aborted");
+        assertThat(section.getActivityTitle(), equalTo("Notification from " + JOB_DISPLAY_NAME + ": Build Aborted"));
     }
 
     @Test
-    public void createCompletedCard_OnFirstFailure_ReturnsCard() {
+    void createCompletedCard_OnFirstFailure_ReturnsCard() {
 
         // given
         Result result = Result.FAILURE;
@@ -95,14 +99,14 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         Card card = cardBuilder.createCompletedCard(Collections.emptyList());
 
         // then
-        assertThat(card.getSections()).hasSize(1);
-        assertThat(card.getThemeColor()).isEqualTo(result.color.getHtmlBaseColor());
+        assertThat(card.getSections(), hasSize(1));
+        assertThat(card.getThemeColor(), equalTo(result.color.getHtmlBaseColor()));
         Section section = card.getSections().get(0);
-        assertThat(section.getActivityTitle()).isEqualTo("Notification from " + JOB_DISPLAY_NAME + ": Build Failed");
+        assertThat(section.getActivityTitle(), equalTo("Notification from " + JOB_DISPLAY_NAME + ": Build Failed"));
     }
 
     @Test
-    public void createCompletedCard_OnSecondFailure_AddsFailingSinceFact() {
+    void createCompletedCard_OnSecondFailure_AddsFailingSinceFact() {
 
         // given
         Result result = Result.FAILURE;
@@ -122,17 +126,17 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         Card card = cardBuilder.createCompletedCard(Collections.emptyList());
 
         // then
-        assertThat(card.getSections()).hasSize(1);
-        assertThat(card.getThemeColor()).isEqualTo(result.color.getHtmlBaseColor());
+        assertThat(card.getSections(), hasSize(1));
+        assertThat(card.getThemeColor(), equalTo(result.color.getHtmlBaseColor()));
         Section section = card.getSections().get(0);
-        assertThat(section.getActivityTitle()).isEqualTo("Notification from " + JOB_DISPLAY_NAME + ": Repeated Failure");
+        assertThat(section.getActivityTitle(), equalTo("Notification from " + JOB_DISPLAY_NAME + ": Repeated Failure"));
         FactAssertion.assertThatLast(section.getFacts(), 2)
                 .hasName(FactsBuilder.NAME_FAILING_SINCE_BUILD)
                 .hasValue("build #" + previousNotFailedBuildNumber);
     }
 
     @Test
-    public void createCompletedCard_OnFirstFailure_SkipsFailingSinceFact() {
+    void createCompletedCard_OnFirstFailure_SkipsFailingSinceFact() {
 
         // given
         Result result = Result.FAILURE;
@@ -152,10 +156,10 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         Card card = cardBuilder.createCompletedCard(Collections.emptyList());
 
         // then
-        assertThat(card.getSections()).hasSize(1);
-        assertThat(card.getThemeColor()).isEqualTo(result.color.getHtmlBaseColor());
+        assertThat(card.getSections(), hasSize(1));
+        assertThat(card.getThemeColor(), equalTo(result.color.getHtmlBaseColor()));
         Section section = card.getSections().get(0);
-        assertThat(section.getActivityTitle()).isEqualTo("Notification from " + JOB_DISPLAY_NAME + ": Build Failed");
+        assertThat(section.getActivityTitle(), equalTo("Notification from " + JOB_DISPLAY_NAME + ": Build Failed"));
         FactAssertion.assertThatLast(section.getFacts(), 1);
         FactAssertion.assertThat(section.getFacts())
                 .hasName(FactsBuilder.NAME_STATUS)
@@ -164,7 +168,7 @@ public class CardBuilderMessageCardTest extends AbstractTest {
 
 
     @Test
-    public void calculateStatus_OnSuccess_ReturnsBackToNormal() {
+    void calculateStatus_OnSuccess_ReturnsBackToNormal() {
 
         // given
         Result lastResult = Result.SUCCESS;
@@ -176,12 +180,12 @@ public class CardBuilderMessageCardTest extends AbstractTest {
             String status = cardBuilder.calculateStatus(lastResult, previousResult, isRepeatedFailure);
 
             // then
-            assertThat(status).isEqualTo("Back to Normal");
+            assertThat(status, equalTo("Back to Normal"));
         }
     }
 
     @Test
-    public void calculateStatus_OnSuccess_ReturnsSuccess() {
+    void calculateStatus_OnSuccess_ReturnsSuccess() {
 
         // given
         Result lastResult = Result.SUCCESS;
@@ -193,12 +197,12 @@ public class CardBuilderMessageCardTest extends AbstractTest {
             String status = cardBuilder.calculateStatus(lastResult, previousResult, isRepeatedFailure);
 
             // then
-            assertThat(status).isEqualTo("Build Success");
+            assertThat(status, equalTo("Build Success"));
         }
     }
 
     @Test
-    public void calculateStatus_OnFailure_ReturnsBuildFailure() {
+    void calculateStatus_OnFailure_ReturnsBuildFailure() {
 
         // given
         Result lastResult = Result.FAILURE;
@@ -209,11 +213,11 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         String status = cardBuilder.calculateStatus(lastResult, previousResult, isRepeatedFailure);
 
         // then
-        assertThat(status).isEqualTo("Build Failed");
+        assertThat(status, equalTo("Build Failed"));
     }
 
     @Test
-    public void calculateStatus_OnSuccessWithRepeatedFailure_ReturnsRepeatedFailure() {
+    void calculateStatus_OnSuccessWithRepeatedFailure_ReturnsRepeatedFailure() {
 
         // given
         Result lastResult = Result.FAILURE;
@@ -224,11 +228,11 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         String status = cardBuilder.calculateStatus(lastResult, previousResult, isRepeatedFailure);
 
         // then
-        assertThat(status).isEqualTo("Repeated Failure");
+        assertThat(status, equalTo("Repeated Failure"));
     }
 
     @Test
-    public void calculateStatus_OnAborted_ReturnsAborted() {
+    void calculateStatus_OnAborted_ReturnsAborted() {
 
         // given
         Result lastResult = Result.ABORTED;
@@ -239,11 +243,11 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         String status = cardBuilder.calculateStatus(lastResult, previousResult, isRepeatedFailure);
 
         // then
-        assertThat(status).isEqualTo("Build Aborted");
+        assertThat(status, equalTo("Build Aborted"));
     }
 
     @Test
-    public void calculateStatus_OnUnstable_ReturnsUnstable() {
+    void calculateStatus_OnUnstable_ReturnsUnstable() {
 
         // given
         Result lastResult = Result.UNSTABLE;
@@ -254,11 +258,11 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         String status = cardBuilder.calculateStatus(lastResult, previousResult, isRepeatedFailure);
 
         // then
-        assertThat(status).isEqualTo("Build Unstable");
+        assertThat(status, equalTo("Build Unstable"));
     }
 
     @Test
-    public void calculateStatus_OnUnsupportedResult_ReturnsResultName() {
+    void calculateStatus_OnUnsupportedResult_ReturnsResultName() {
 
         // given
         Result lastResult = Result.NOT_BUILT;
@@ -269,12 +273,12 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         String status = cardBuilder.calculateStatus(lastResult, previousResult, isRepeatedFailure);
 
         // then
-        assertThat(status).isEqualTo(lastResult.toString());
+        assertThat(status, equalTo(lastResult.toString()));
     }
 
 
     @Test
-    public void calculateSummary_OnSuccess_ReturnsBackToNormal() {
+    void calculateSummary_OnSuccess_ReturnsBackToNormal() {
 
         // given
         Result lastResult = Result.SUCCESS;
@@ -286,12 +290,12 @@ public class CardBuilderMessageCardTest extends AbstractTest {
             String status = cardBuilder.calculateSummary(lastResult, previousResult, isRepeatedFailure);
 
             // then
-            assertThat(status).isEqualTo("Back to Normal");
+            assertThat(status, equalTo("Back to Normal"));
         }
     }
 
     @Test
-    public void calculateSummary_OnSuccess_ReturnsSuccess() {
+    void calculateSummary_OnSuccess_ReturnsSuccess() {
 
         // given
         Result lastResult = Result.SUCCESS;
@@ -303,12 +307,12 @@ public class CardBuilderMessageCardTest extends AbstractTest {
             String status = cardBuilder.calculateSummary(lastResult, previousResult, isRepeatedFailure);
 
             // then
-            assertThat(status).isEqualTo("Success");
+            assertThat(status, equalTo("Success"));
         }
     }
 
     @Test
-    public void calculateSummary_OnFailure_ReturnsBuildFailure() {
+    void calculateSummary_OnFailure_ReturnsBuildFailure() {
 
         // given
         Result lastResult = Result.FAILURE;
@@ -319,11 +323,11 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         String status = cardBuilder.calculateSummary(lastResult, previousResult, isRepeatedFailure);
 
         // then
-        assertThat(status).isEqualTo("Failed");
+        assertThat(status, equalTo("Failed"));
     }
 
     @Test
-    public void calculateSummary_OnSuccessWithRepeatedFailure_ReturnsRepeatedFailure() {
+    void calculateSummary_OnSuccessWithRepeatedFailure_ReturnsRepeatedFailure() {
 
         // given
         Result lastResult = Result.FAILURE;
@@ -334,11 +338,11 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         String status = cardBuilder.calculateSummary(lastResult, previousResult, isRepeatedFailure);
 
         // then
-        assertThat(status).isEqualTo("Repeated Failure");
+        assertThat(status, equalTo("Repeated Failure"));
     }
 
     @Test
-    public void calculateSummary_OnAborted_ReturnsAborted() {
+    void calculateSummary_OnAborted_ReturnsAborted() {
 
         // given
         Result lastResult = Result.ABORTED;
@@ -349,11 +353,11 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         String status = cardBuilder.calculateSummary(lastResult, previousResult, isRepeatedFailure);
 
         // then
-        assertThat(status).isEqualTo("Aborted");
+        assertThat(status, equalTo("Aborted"));
     }
 
     @Test
-    public void calculateSummary_OnUnstable_ReturnsUnstable() {
+    void calculateSummary_OnUnstable_ReturnsUnstable() {
 
         // given
         Result lastResult = Result.UNSTABLE;
@@ -364,11 +368,11 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         String status = cardBuilder.calculateSummary(lastResult, previousResult, isRepeatedFailure);
 
         // then
-        assertThat(status).isEqualTo("Unstable");
+        assertThat(status, equalTo("Unstable"));
     }
 
     @Test
-    public void calculateSummary_OnUnsupportedResult_ReturnsResultName() {
+    void calculateSummary_OnUnsupportedResult_ReturnsResultName() {
 
         // given
         Result lastResult = Result.NOT_BUILT;
@@ -379,12 +383,12 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         String status = cardBuilder.calculateSummary(lastResult, previousResult, isRepeatedFailure);
 
         // then
-        assertThat(status).isEqualTo(lastResult.toString());
+        assertThat(status, equalTo(lastResult.toString()));
     }
 
 
     @Test
-    public void getCompletedResult_ReturnsSuccess() throws Throwable {
+    void getCompletedResult_ReturnsSuccess() {
 
         // given
         final Result result = Result.UNSTABLE;
@@ -392,28 +396,28 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         when(run.getResult()).thenReturn(result);
 
         // when
-        Result completedResult = MethodReflection.invokeWithCheckedThrows(cardBuilder.getClass(), cardBuilder, "getCompletedResult", new Class[]{Run.class}, run);
+        Result completedResult = ReflectionHelper.invokeMethod(cardBuilder,"getCompletedResult", run);
 
         // then
-        assertThat(completedResult).isEqualTo(result);
+        assertThat(completedResult, equalTo(result));
     }
 
     @Test
-    public void getCompletedResult_OnNullRun_ReturnsSuccess() throws Throwable {
+    void getCompletedResult_OnNullRun_ReturnsSuccess() {
 
         // given
         Run run = mock(Run.class);
 
         // when
-        Result completedResult = MethodReflection.invokeWithCheckedThrows(cardBuilder.getClass(), cardBuilder, "getCompletedResult", new Class[]{Run.class}, run);
+        Result completedResult = ReflectionHelper.invokeMethod(cardBuilder,"getCompletedResult", run);
 
         // then
-        assertThat(completedResult).isEqualTo(Result.SUCCESS);
+        assertThat(completedResult, equalTo(Result.SUCCESS));
     }
 
 
     @Test
-    public void createBuildMessageCard_ReturnsCard() {
+    void createBuildMessageCard_ReturnsCard() {
 
         // given
         String message = "myMessage";
@@ -427,15 +431,15 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         Card card = cardBuilder.createBuildMessageCard(stepParameters);
 
         // then
-        assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER);
-        assertThat(card.getSections()).hasSize(1);
-        assertThat(card.getThemeColor()).isEqualTo(color);
+        assertThat(card.getSummary(), equalTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER));
+        assertThat(card.getSections(), hasSize(1));
+        assertThat(card.getThemeColor(), equalTo(color));
         FactAssertion.assertThat(card.getSections().get(0).getFacts())
                 .hasName(FactsBuilder.NAME_STATUS).hasValue(status);
     }
 
     @Test
-    public void createBuildMessageCard_OnMissingStatus_ReturnsCard() {
+    void createBuildMessageCard_OnMissingStatus_ReturnsCard() {
 
         // given
         String message = "myMessage";
@@ -449,14 +453,14 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         Card card = cardBuilder.createBuildMessageCard(stepParameters);
 
         // then
-        assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER);
-        assertThat(card.getSections()).hasSize(1);
-        assertThat(card.getThemeColor()).isEqualTo(color);
-        assertThat(card.getSections().get(0).getFacts()).isEmpty();
+        assertThat(card.getSummary(), equalTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER));
+        assertThat(card.getSections(), hasSize(1));
+        assertThat(card.getThemeColor(), equalTo(color));
+        assertThat(card.getSections().get(0).getFacts(), empty());
     }
 
     @Test
-    public void createBuildMessageCard_OnMissingColor_ReturnsCard() {
+    void createBuildMessageCard_OnMissingColor_ReturnsCard() {
 
         // given
         String message = "myMessage";
@@ -470,15 +474,15 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         Card card = cardBuilder.createBuildMessageCard(stepParameters);
 
         // then
-        assertThat(card.getSummary()).isEqualTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER);
-        assertThat(card.getSections()).hasSize(1);
-        assertThat(card.getThemeColor()).isEqualTo("3479BF");
+        assertThat(card.getSummary(), equalTo(JOB_DISPLAY_NAME + ": Build #" + BUILD_NUMBER));
+        assertThat(card.getSections(), hasSize(1));
+        assertThat(card.getThemeColor(), equalTo("3479BF"));
         FactAssertion.assertThat(card.getSections().get(0).getFacts())
                 .hasName(FactsBuilder.NAME_STATUS).hasValue(status);
     }
 
     @Test
-    public void getEscapedDisplayName_OnNameWithSpecialCharacters_EscapesSpecialCharacters() throws Throwable {
+    void getEscapedDisplayName_OnNameWithSpecialCharacters_EscapesSpecialCharacters() {
 
         // given
         final String specialDisplayName = "this_is_my-very#special *job*";
@@ -497,74 +501,74 @@ public class CardBuilderMessageCardTest extends AbstractTest {
         cardBuilder = new CardBuilder(run, taskListener, false);
 
         // when
-        String displayName = MethodReflection.invokeWithCheckedThrows(cardBuilder.getClass(), cardBuilder, "getEscapedDisplayName", new Class[]{});
+        String displayName = ReflectionHelper.invokeMethod(cardBuilder,"getEscapedDisplayName");
 
         // then
-        assertThat(displayName).isEqualTo("this\\_is\\_my\\-very\\#special \\*job\\*");
+        assertThat(displayName, equalTo("this\\_is\\_my\\-very\\#special \\*job\\*"));
     }
 
     @Test
-    public void getCardThemeColor_OnSuccessResult_ReturnsGreen() throws Throwable {
+    void getCardThemeColor_OnSuccessResult_ReturnsGreen() {
         // given
         Result successResult = Result.SUCCESS;
         String greenColorString = "#00FF00";
 
         // when
-        String themeColor = MethodReflection.invokeWithCheckedThrows(cardBuilder.getClass(), cardBuilder, "getCardThemeColor", new Class[]{Result.class}, successResult);
+        String themeColor = ReflectionHelper.invokeMethod(cardBuilder,"getCardThemeColor", successResult);
 
         // then
-        assertThat(themeColor).isEqualToIgnoringCase(greenColorString);
+        assertThat(themeColor, equalToIgnoringCase(greenColorString));
     }
 
     @Test
-    public void getCardThemeColor_OnAbortedResult_ReturnsBallColor() throws Throwable {
+    void getCardThemeColor_OnAbortedResult_ReturnsBallColor() {
         // given
         Result abortedResult = Result.ABORTED;
         String ballColorString = Result.ABORTED.color.getHtmlBaseColor();
 
         // when
-        String themeColor = MethodReflection.invokeWithCheckedThrows(cardBuilder.getClass(), cardBuilder, "getCardThemeColor", new Class[]{Result.class}, abortedResult);
+        String themeColor = ReflectionHelper.invokeMethod(cardBuilder,"getCardThemeColor", abortedResult);
 
         // then
-        assertThat(themeColor).isEqualToIgnoringCase(ballColorString);
+        assertThat(themeColor, equalToIgnoringCase(ballColorString));
     }
 
     @Test
-    public void getCardThemeColor_OnFailureResult_ReturnsBallColor() throws Throwable {
+    void getCardThemeColor_OnFailureResult_ReturnsBallColor() {
         // given
         Result failureResult = Result.FAILURE;
         String ballColorString = Result.FAILURE.color.getHtmlBaseColor();
 
         // when
-        String themeColor = MethodReflection.invokeWithCheckedThrows(cardBuilder.getClass(), cardBuilder, "getCardThemeColor", new Class[]{Result.class}, failureResult);
+        String themeColor = ReflectionHelper.invokeMethod(cardBuilder,"getCardThemeColor", failureResult);
 
         // then
-        assertThat(themeColor).isEqualToIgnoringCase(ballColorString);
+        assertThat(themeColor, equalToIgnoringCase(ballColorString));
     }
 
     @Test
-    public void getCardThemeColor_OnNotBuiltResult_ReturnsBallColor() throws Throwable {
+    void getCardThemeColor_OnNotBuiltResult_ReturnsBallColor() {
         // given
         Result notBuiltResult = Result.NOT_BUILT;
         String ballColorString = Result.NOT_BUILT.color.getHtmlBaseColor();
 
         // when
-        String themeColor = MethodReflection.invokeWithCheckedThrows(cardBuilder.getClass(), cardBuilder, "getCardThemeColor", new Class[]{Result.class}, notBuiltResult);
+        String themeColor = ReflectionHelper.invokeMethod(cardBuilder,"getCardThemeColor", notBuiltResult);
 
         // then
-        assertThat(themeColor).isEqualToIgnoringCase(ballColorString);
+        assertThat(themeColor, equalToIgnoringCase(ballColorString));
     }
 
     @Test
-    public void getCardThemeColor_OnUnstableResult_ReturnsBallColor() throws Throwable {
+    void getCardThemeColor_OnUnstableResult_ReturnsBallColor() {
         // given
         Result unstableResult = Result.UNSTABLE;
         String ballColorString = Result.UNSTABLE.color.getHtmlBaseColor();
 
         // when
-        String themeColor = MethodReflection.invokeWithCheckedThrows(cardBuilder.getClass(), cardBuilder, "getCardThemeColor", new Class[]{Result.class}, unstableResult);
+        String themeColor = ReflectionHelper.invokeMethod(cardBuilder,"getCardThemeColor", unstableResult);
 
         // then
-        assertThat(themeColor).isEqualToIgnoringCase(ballColorString);
+        assertThat(themeColor, equalToIgnoringCase(ballColorString));
     }
 }

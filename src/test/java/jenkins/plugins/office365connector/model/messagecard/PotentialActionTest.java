@@ -1,19 +1,20 @@
 package jenkins.plugins.office365connector.model.messagecard;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class PotentialActionTest {
+class PotentialActionTest {
 
     @Test
-    public void getName_ReturnsName() {
+    void getName_ReturnsName() {
 
         // given
         final String name = "myName";
@@ -23,25 +24,25 @@ public class PotentialActionTest {
         String returnedName = potentialAction.getName();
 
         // then
-        assertThat(returnedName).isEqualTo(name);
+        assertThat(returnedName, equalTo(name));
     }
 
     @Test
-    public void setName_ChangesName() {
+    void setName_ChangesName() {
 
         // given
         final String name = "myName";
-        PotentialAction potentialAction = new PotentialAction("yourName", Arrays.asList("url"));
+        PotentialAction potentialAction = new PotentialAction("yourName", List.of("url"));
 
         // then
         potentialAction.setName(name);
 
         // then
-        assertThat(potentialAction.getName()).isEqualTo(name);
+        assertThat(potentialAction.getName(), equalTo(name));
     }
 
     @Test
-    public void getTarget_ReturnsTarget() {
+    void getTarget_ReturnsTarget() {
 
         // given
         final List<String> target = Arrays.asList("targetOne", "target2");
@@ -51,11 +52,11 @@ public class PotentialActionTest {
         potentialAction.setTargets(target);
 
         // then
-        assertThat(potentialAction.getTarget()).isEqualTo(target);
+        assertThat(potentialAction.getTarget(), equalTo(target));
     }
 
     @Test
-    public void getContext_ReturnsContext() {
+    void getContext_ReturnsContext() {
 
         // given
         final String context = "myContext";
@@ -65,11 +66,11 @@ public class PotentialActionTest {
         potentialAction.setContext(context);
 
         // then
-        assertThat(potentialAction.getContext()).isEqualTo(context);
+        assertThat(potentialAction.getContext(), equalTo(context));
     }
 
     @Test
-    public void getType_ReturnsType() {
+    void getType_ReturnsType() {
 
         // given
         final String type = "myType";
@@ -79,6 +80,6 @@ public class PotentialActionTest {
         potentialAction.setType(type);
 
         // then
-        assertThat(potentialAction.getType()).isEqualTo(type);
+        assertThat(potentialAction.getType(), equalTo(type));
     }
 }

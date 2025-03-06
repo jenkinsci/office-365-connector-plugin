@@ -1,14 +1,15 @@
 package jenkins.plugins.office365connector.helpers;
 
-import static org.mockito.Mockito.mock;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import hudson.model.Run;
+import hudson.scm.ChangeLogSet;
+import hudson.scm.RepositoryBrowser;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import hudson.model.Run;
-import hudson.scm.ChangeLogSet;
-import hudson.scm.RepositoryBrowser;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
@@ -28,7 +29,7 @@ public class ChangeLogSetBuilder extends ChangeLogSet {
     }
 
     @Override
-    public Iterator iterator() {
+    public @NonNull Iterator iterator() {
         return entries.iterator();
     }
 }

@@ -1,19 +1,22 @@
 package jenkins.plugins.office365connector.model.messagecard;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import jenkins.plugins.office365connector.model.Section;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
-import jenkins.plugins.office365connector.model.Section;
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class MessageCardTest {
+class MessageCardTest {
 
     @Test
-    public void getSummary_ReturnsSummary() {
+    void getSummary_ReturnsSummary() {
 
         // given
         String summary = "mySummary";
@@ -22,11 +25,11 @@ public class MessageCardTest {
         MessageCard messageCard = new MessageCard(summary, null);
 
         // then
-        assertThat(messageCard.getSummary()).isEqualTo(summary);
+        assertThat(messageCard.getSummary(), equalTo(summary));
     }
 
     @Test
-    public void getSections_ReturnsSection() {
+    void getSections_ReturnsSection() {
 
         // given
         Section section = new Section("myTitle", null, null);
@@ -35,11 +38,12 @@ public class MessageCardTest {
         MessageCard messageCard = new MessageCard(null, section);
 
         // then
-        assertThat(messageCard.getSections()).hasSize(1).containsOnly(section);
+        assertThat(messageCard.getSections(), hasSize(1));
+        assertThat(messageCard.getSections(), contains(section));
     }
 
     @Test
-    public void getThemeColor_ReturnsThemeColor() {
+    void getThemeColor_ReturnsThemeColor() {
 
         // given
         String themeColor = "red";
@@ -49,11 +53,11 @@ public class MessageCardTest {
         messageCard.setThemeColor(themeColor);
 
         // then
-        assertThat(messageCard.getThemeColor()).isEqualTo(themeColor);
+        assertThat(messageCard.getThemeColor(), equalTo(themeColor));
     }
 
     @Test
-    public void getPotentialAction_ReturnsPotentialActions() {
+    void getPotentialAction_ReturnsPotentialActions() {
 
         // given
         PotentialAction action = new PotentialAction("myName", Collections.singletonList("someUrl"));
@@ -63,6 +67,7 @@ public class MessageCardTest {
         messageCard.setAction(Collections.singletonList(action));
 
         // then
-        assertThat(messageCard.getAction()).hasSize(1).containsOnly(action);
+        assertThat(messageCard.getAction(), hasSize(1));
+        assertThat(messageCard.getAction(), contains(action));
     }
 }

@@ -1,49 +1,36 @@
 package jenkins.plugins.office365connector.utils;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Arrays;
-import java.util.Collection;
-
 import hudson.util.FormValidation;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
-public class FormUtilsTest {
+import java.util.stream.Stream;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+class FormUtilsTest {
 
     private static final FormValidation.Kind OK = FormValidation.Kind.OK;
 
     private static final FormValidation.Kind ERROR = FormValidation.Kind.ERROR;
 
-    @Parameter()
-    public String input;
-
-    @Parameter(value = 1)
-    public FormValidation.Kind expectedKind;
-
-    @Parameter(value = 2)
-    public boolean expectedBoolean;
-
-    @Parameters
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {"", ERROR, false},
-                {"demo", ERROR, false},
-                {"hpp://demo", ERROR, false},
-                {"http://demo", ERROR, false},
+    static Stream<Object[]> data() {
+        return Stream.of(
+                new Object[] {"", ERROR, false},
+                new Object[] {"demo", ERROR, false},
+                new Object[] {"hpp://demo", ERROR, false},
+                new Object[] {"http://demo", ERROR, false},
                 /* Still need to figure a way out with this*/// { "$$$$$demo", ERROR, false },
-                {"$", ERROR, false},
-                {"$demo", OK, true},
-                {"https://demo.com", OK, true},
-        });
+                new Object[] {"$", ERROR, false},
+                new Object[] {"$demo", OK, true},
+                new Object[] {"https://demo.com", OK, true}
+        );
     }
 
-    @Test
-    public void isUrlValid_ValidatesUrl() {
+    @ParameterizedTest
+    @MethodSource("data")
+    void isUrlValid_ValidatesUrl(String input, FormValidation.Kind expectedKind, boolean expectedBoolean) {
 
         // given
         FormValidation formValidation = FormUtils.formValidateUrl(input);
@@ -53,7 +40,7 @@ public class FormUtilsTest {
         boolean output = FormUtils.isUrlValid(input);
 
         // then
-        assertThat(kind).isEqualTo(expectedKind);
-        assertThat(output).isEqualTo(expectedBoolean);
+        assertThat(kind, equalTo(expectedKind));
+        assertThat(output, equalTo(expectedBoolean));
     }
 }

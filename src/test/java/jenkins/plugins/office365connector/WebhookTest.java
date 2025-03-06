@@ -1,36 +1,40 @@
 package jenkins.plugins.office365connector;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import jenkins.model.Jenkins;
+import jenkins.plugins.office365connector.model.FactDefinition;
+import jenkins.plugins.office365connector.model.Macro;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-import java.util.List;
-
-import jenkins.model.Jenkins;
-import jenkins.plugins.office365connector.model.FactDefinition;
-import jenkins.plugins.office365connector.model.Macro;
-import org.junit.After;
-import org.junit.Test;
-import org.mockito.MockedStatic;
-
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class WebhookTest {
+class WebhookTest {
 
     private MockedStatic<Jenkins> staticJenkins;
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         if (staticJenkins != null) {
             staticJenkins.close();
         }
     }
 
     @Test
-    public void getUrl_ReturnsUrl() {
+    void getUrl_ReturnsUrl() {
 
         // given
         String url = "myUrl";
@@ -40,11 +44,11 @@ public class WebhookTest {
         String actualUrl = webhook.getUrl();
 
         // then
-        assertThat(actualUrl).isEqualTo(url);
+        assertThat(actualUrl, equalTo(url));
     }
 
     @Test
-    public void getUrl_WithEmptyLocalUrlReturnsGlobalUrl() {
+    void getUrl_WithEmptyLocalUrlReturnsGlobalUrl() {
 
         // given
         String globalUrl = "globalUrl";
@@ -60,11 +64,11 @@ public class WebhookTest {
         String actualUrl = webhook.getUrl();
 
         // then
-        assertThat(actualUrl).isEqualTo(globalUrl);
+        assertThat(actualUrl, equalTo(globalUrl));
     }
 
     @Test
-    public void getUrl_ReturnsLocalUrlAndNotGlobal() {
+    void getUrl_ReturnsLocalUrlAndNotGlobal() {
 
         // given
         String globalUrl = "globalUrl";
@@ -81,11 +85,11 @@ public class WebhookTest {
         String actualUrl = webhook.getUrl();
 
         // then
-        assertThat(actualUrl).isEqualTo(localUrl);
+        assertThat(actualUrl, equalTo(localUrl));
     }
 
     @Test
-    public void getName_ReturnsName() {
+    void getName_ReturnsName() {
 
         // given
         String name = "myName";
@@ -96,11 +100,11 @@ public class WebhookTest {
         String actualName = webhook.getName();
 
         // then
-        assertThat(actualName).isEqualTo(name);
+        assertThat(actualName, equalTo(name));
     }
 
     @Test
-    public void getName_WithEmptyLocalNameReturnsGlobalName() {
+    void getName_WithEmptyLocalNameReturnsGlobalName() {
 
         // given
         String globalName = "globalName";
@@ -115,11 +119,11 @@ public class WebhookTest {
         // when
         String actualName = webhook.getName();
         // then
-        assertThat(actualName).isEqualTo(globalName);
+        assertThat(actualName, equalTo(globalName));
     }
 
     @Test
-    public void getName_ReturnsLocalNameAndNotGlobal() {
+    void getName_ReturnsLocalNameAndNotGlobal() {
 
         // given
         String localName = "myName";
@@ -136,11 +140,11 @@ public class WebhookTest {
         String actualName = webhook.getName();
 
         // then
-        assertThat(actualName).isEqualTo(localName);
+        assertThat(actualName, equalTo(localName));
     }
 
     @Test
-    public void isNotifySuccess_CheckSuccessNotification() {
+    void isNotifySuccess_CheckSuccessNotification() {
 
         // given
         Webhook webhook = new Webhook("someUrl");
@@ -150,11 +154,11 @@ public class WebhookTest {
         boolean result = webhook.isNotifySuccess();
 
         // then
-        assertThat(result).isTrue();
+        assertThat(result, is(true));
     }
 
     @Test
-    public void isStartNotification_CheckStartNotification() {
+    void isStartNotification_CheckStartNotification() {
 
         // given
         Webhook webhook = new Webhook("someUrl");
@@ -164,11 +168,11 @@ public class WebhookTest {
         boolean result = webhook.isStartNotification();
 
         // then
-        assertThat(result).isTrue();
+        assertThat(result, is(true));
     }
 
     @Test
-    public void isNotifyAborted_CheckAbortedNotification() {
+    void isNotifyAborted_CheckAbortedNotification() {
 
         // given
         Webhook webhook = new Webhook("someUrl");
@@ -178,11 +182,11 @@ public class WebhookTest {
         boolean result = webhook.isNotifyAborted();
 
         // then
-        assertThat(result).isTrue();
+        assertThat(result, is(true));
     }
 
     @Test
-    public void isNotifyNotBuilt_CheckNotBuiltNotification() {
+    void isNotifyNotBuilt_CheckNotBuiltNotification() {
 
         // given
         Webhook webhook = new Webhook("someUrl");
@@ -192,11 +196,11 @@ public class WebhookTest {
         boolean result = webhook.isNotifyNotBuilt();
 
         // then
-        assertThat(result).isTrue();
+        assertThat(result, is(true));
     }
 
     @Test
-    public void isNotifyUnstable_CheckUnstableNotification() {
+    void isNotifyUnstable_CheckUnstableNotification() {
 
         // given
         Webhook webhook = new Webhook("someUrl");
@@ -206,11 +210,11 @@ public class WebhookTest {
         boolean result = webhook.isNotifyUnstable();
 
         // then
-        assertThat(result).isTrue();
+        assertThat(result, is(true));
     }
 
     @Test
-    public void isNotifyFailure_CheckFailureNotification() {
+    void isNotifyFailure_CheckFailureNotification() {
 
         // given
         Webhook webhook = new Webhook("someUrl");
@@ -220,11 +224,11 @@ public class WebhookTest {
         boolean result = webhook.isNotifyFailure();
 
         // then
-        assertThat(result).isTrue();
+        assertThat(result, is(true));
     }
 
     @Test
-    public void isNotifyBackToNormal_CheckBackToNormalNotification() {
+    void isNotifyBackToNormal_CheckBackToNormalNotification() {
 
         // given
         Webhook webhook = new Webhook("someUrl");
@@ -234,11 +238,11 @@ public class WebhookTest {
         boolean result = webhook.isNotifyBackToNormal();
 
         // then
-        assertThat(result).isTrue();
+        assertThat(result, is(true));
     }
 
     @Test
-    public void isNotifyRepeatedFailure_CheckRepeatedFailureNotification() {
+    void isNotifyRepeatedFailure_CheckRepeatedFailureNotification() {
 
         // given
         Webhook webhook = new Webhook("someUrl");
@@ -248,11 +252,11 @@ public class WebhookTest {
         boolean result = webhook.isNotifyRepeatedFailure();
 
         // then
-        assertThat(result).isTrue();
+        assertThat(result, is(true));
     }
 
     @Test
-    public void getTimeout_ReturnsTimeout() {
+    void getTimeout_ReturnsTimeout() {
 
         // given
         Webhook webhook = new Webhook("someUrl");
@@ -263,11 +267,11 @@ public class WebhookTest {
         int actualTimeout = webhook.getTimeout();
 
         // then
-        assertThat(actualTimeout).isEqualTo(timeout);
+        assertThat(actualTimeout, equalTo(timeout));
     }
 
     @Test
-    public void getTimeout_ReturnsDefaultTimeout() {
+    void getTimeout_ReturnsDefaultTimeout() {
 
         // given
         Webhook webhook = new Webhook("someUrl");
@@ -276,26 +280,27 @@ public class WebhookTest {
         int actualTimeout = webhook.getTimeout();
 
         // then
-        assertThat(actualTimeout).isEqualTo(Webhook.DEFAULT_TIMEOUT);
+        assertThat(actualTimeout, equalTo(Webhook.DEFAULT_TIMEOUT));
     }
 
     @Test
-    public void getMacros_ReturnsMacros() {
+    void getMacros_ReturnsMacros() {
 
         // given
         Webhook webhook = new Webhook("someUrl");
         Macro macro = new Macro("myTemplate", "yourValue");
-        webhook.setMacros(Arrays.asList(macro));
+        webhook.setMacros(List.of(macro));
 
         // when
         List<Macro> macros = webhook.getMacros();
 
         // then
-        assertThat(macros).hasSize(1).containsOnly(macro);
+        assertThat(macros, hasSize(1));
+        assertThat(macros, contains(macro));
     }
 
     @Test
-    public void getMacros_ReturnEmptyList() {
+    void getMacros_ReturnEmptyList() {
 
         // given
         Webhook webhook = new Webhook("someUrl");
@@ -304,26 +309,26 @@ public class WebhookTest {
         List<Macro> macros = webhook.getMacros();
 
         // then
-        assertThat(macros).isEmpty();
+        assertThat(macros, empty());
     }
 
     @Test
-    public void getFactDefinitions_ReturnsFactDefinitions() {
+    void getFactDefinitions_ReturnsFactDefinitions() {
 
         // given
         Webhook webhook = new Webhook("someUrl");
         FactDefinition factDefinition = new FactDefinition("name", "myTemplate");
-        webhook.setFactDefinitions(Arrays.asList(factDefinition));
+        webhook.setFactDefinitions(List.of(factDefinition));
 
         // when
         List<FactDefinition> returnedFactDefinitions = webhook.getFactDefinitions();
 
         // then
-        assertThat(returnedFactDefinitions).containsOnly(factDefinition);
+        assertThat(returnedFactDefinitions, contains(factDefinition));
     }
 
     @Test
-    public void getFactDefinitions_OnNullValue_ReturnsEmptyFactDefinitions() {
+    void getFactDefinitions_OnNullValue_ReturnsEmptyFactDefinitions() {
 
         // given
         Webhook webhook = new Webhook("someUrl");
@@ -334,6 +339,6 @@ public class WebhookTest {
         List<FactDefinition> returnedFactDefinitions = webhook.getFactDefinitions();
 
         // then
-        assertThat(returnedFactDefinitions).isEmpty();
+        assertThat(returnedFactDefinitions, empty());
     }
 }

@@ -11,7 +11,7 @@
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -31,8 +31,6 @@
         <jenkins.version>${jenkins.baseline}.1</jenkins.version>
 
         <gitHubRepo>jenkinsci/office-365-connector-plugin</gitHubRepo>
-
-        <jmockit.version>4.7.0</jmockit.version> <!-- last version that supports reflections -->
     </properties>
 
     <dependencyManagement>
@@ -55,18 +53,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>3.27.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jmockit</groupId>
-            <artifactId>jmockit</artifactId>
-            <version>1.49</version>
             <scope>test</scope>
         </dependency>
 
@@ -98,12 +84,6 @@
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
             <version>1.9.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>findbugs-annotations</artifactId>
-            <version>3.0.1</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 

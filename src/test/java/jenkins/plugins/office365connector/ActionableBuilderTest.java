@@ -1,30 +1,32 @@
 package jenkins.plugins.office365connector;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
-
-import java.util.List;
-
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.TaskListener;
+import jenkins.plugins.office365connector.helpers.ReflectionHelper;
 import jenkins.plugins.office365connector.helpers.SCMHeadBuilder;
 import jenkins.plugins.office365connector.model.CardAction;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.metadata.ContributorMetadataAction;
 import jenkins.scm.api.metadata.ObjectMetadataAction;
-import mockit.internal.reflection.FieldReflection;
-import mockit.internal.reflection.MethodReflection;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
-public class ActionableBuilderTest {
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+
+class ActionableBuilderTest {
 
     private static final String JOB_URL = "http://localhost/job/myFirstJob/167/display/redirect";
 
@@ -37,8 +39,8 @@ public class ActionableBuilderTest {
 
     private MockedStatic<DisplayURLProvider> displayUrlProviderStatic;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         run = mock(AbstractBuild.class);
         taskListener = mock(TaskListener.class);
 
@@ -52,13 +54,13 @@ public class ActionableBuilderTest {
         displayUrlProviderStatic.when(DisplayURLProvider::get).thenReturn(displayURLProvider);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         displayUrlProviderStatic.close();
     }
 
     @Test
-    public void buildActionable_OnEmptyAction_ReturnsEmptyList() {
+    void buildActionable_OnEmptyAction_ReturnsEmptyList() {
 
         // given
         // from @Before
@@ -67,26 +69,26 @@ public class ActionableBuilderTest {
         List<CardAction> potentialActions = actionableBuilder.buildActionable();
 
         // then
-        assertThat(potentialActions).hasSize(1);
+        assertThat(potentialActions, hasSize(1));
         CardAction potentialAction = potentialActions.get(0);
-        assertThat(potentialAction.getName()).isEqualTo("View Build");
+        assertThat(potentialAction.getName(), equalTo("View Build"));
     }
 
     @Test
-    public void pullRequestActionable_OnNoSCM_DoesNotAddFact() throws Throwable {
+    void pullRequestActionable_OnNoSCM_DoesNotAddFact() {
 
         // given
         // from @Before
 
         // when
-        MethodReflection.invokeWithCheckedThrows(actionableBuilder.getClass(), actionableBuilder, "pullRequestActionable", new Class[]{});
+        ReflectionHelper.invokeMethod(actionableBuilder, "pullRequestActionable");
 
         // then
-        assertThat(factsBuilder.collect()).isEmpty();
+        assertThat(factsBuilder.collect(), empty());
     }
 
     @Test
-    public void pullRequestActionable_OnPureChangeRequestSCMHead_DoesNotAddFact() throws Throwable {
+    void pullRequestActionable_OnPureChangeRequestSCMHead_DoesNotAddFact() {
 
         // given
         // from @Before
@@ -101,15 +103,15 @@ public class ActionableBuilderTest {
             when(job.getAction(ObjectMetadataAction.class)).thenReturn(null);
 
             // when
-            MethodReflection.invokeWithCheckedThrows(actionableBuilder.getClass(), actionableBuilder, "pullRequestActionable", new Class[]{});
+            ReflectionHelper.invokeMethod(actionableBuilder, "pullRequestActionable");
         }
 
         // then
-        assertThat(factsBuilder.collect()).isEmpty();
+        assertThat(factsBuilder.collect(), empty());
     }
 
     @Test
-    public void pullRequestActionable_OnContributorMetadataAction_AddsFact() throws Throwable {
+    void pullRequestActionable_OnContributorMetadataAction_AddsFact() {
 
         // given
         // from @Before
@@ -127,18 +129,18 @@ public class ActionableBuilderTest {
             when(job.getAction(ObjectMetadataAction.class)).thenReturn(objectMetadataAction);
 
             // when
-            MethodReflection.invokeWithCheckedThrows(actionableBuilder.getClass(), actionableBuilder, "pullRequestActionable", new Class[]{});
+            ReflectionHelper.invokeMethod(actionableBuilder, "pullRequestActionable");
         }
 
         // then
-        assertThat(factsBuilder.collect()).hasSize(1);
+        assertThat(factsBuilder.collect(), hasSize(1));
 
-        List<CardAction> potentialActions = FieldReflection.getFieldValue(actionableBuilder.getClass().getDeclaredField("potentialActions"), actionableBuilder);
-        assertThat(potentialActions).hasSize(1);
+        List<CardAction> potentialActions = ReflectionHelper.getField(actionableBuilder,"potentialActions");
+        assertThat(potentialActions, hasSize(1));
     }
 
     @Test
-    public void pullRequestActionable_OnObjectMetadataAction_DoesNotAddFact() throws Throwable {
+    void pullRequestActionable_OnObjectMetadataAction_DoesNotAddFact() {
 
         // given
         // from @Before
@@ -157,19 +159,19 @@ public class ActionableBuilderTest {
             when(job.getAction(ContributorMetadataAction.class)).thenReturn(contributorMetadataAction);
 
             // when
-            MethodReflection.invokeWithCheckedThrows(actionableBuilder.getClass(), actionableBuilder, "pullRequestActionable", new Class[]{});
+            ReflectionHelper.invokeMethod(actionableBuilder, "pullRequestActionable");
         }
 
 
         // then
-        assertThat(factsBuilder.collect()).hasSize(1);
+        assertThat(factsBuilder.collect(), hasSize(1));
 
-        List<CardAction> potentialActions = FieldReflection.getFieldValue(actionableBuilder.getClass().getDeclaredField("potentialActions"), actionableBuilder);
-        assertThat(potentialActions).isEmpty();
+        List<CardAction> potentialActions = ReflectionHelper.getField(actionableBuilder,"potentialActions");
+        assertThat(potentialActions, empty());
     }
 
     @Test
-    public void pullRequestActionable_OnEmptyContributor_AdddFact() throws Throwable {
+    void pullRequestActionable_OnEmptyContributor_AdddFact() {
 
         // given
         // from @Before
@@ -188,7 +190,7 @@ public class ActionableBuilderTest {
             when(job.getAction(ContributorMetadataAction.class)).thenReturn(contributorMetadataAction);
 
             // when
-            MethodReflection.invokeWithCheckedThrows(actionableBuilder.getClass(), actionableBuilder, "pullRequestActionable", new Class[]{});
+            ReflectionHelper.invokeMethod(actionableBuilder, "pullRequestActionable");
         }
 
         // then
@@ -201,7 +203,7 @@ public class ActionableBuilderTest {
     }
 
     @Test
-    public void pullRequestActionable_OnEmptyContributorDisplayName_AdddFact() throws Throwable {
+    void pullRequestActionable_OnEmptyContributorDisplayName_AdddFact() {
 
         // given
         // from @Before
@@ -220,7 +222,7 @@ public class ActionableBuilderTest {
             when(job.getAction(ContributorMetadataAction.class)).thenReturn(contributorMetadataAction);
 
             // when
-            MethodReflection.invokeWithCheckedThrows(actionableBuilder.getClass(), actionableBuilder, "pullRequestActionable", new Class[]{});
+            ReflectionHelper.invokeMethod(actionableBuilder, "pullRequestActionable");
         }
 
         // then

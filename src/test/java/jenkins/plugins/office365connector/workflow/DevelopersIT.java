@@ -1,29 +1,29 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.List;
-
 import hudson.model.AbstractBuild;
 import hudson.model.Job;
 import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.FileUtils;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class DevelopersIT extends AbstractTest {
+class DevelopersIT extends AbstractTest {
 
     private static final String JOB_NAME = "simple job";
     private static final int BUILD_NUMBER = 1;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         mockListener();
 
         run = mockRun();
@@ -54,7 +54,7 @@ public class DevelopersIT extends AbstractTest {
 
 
     @Test
-    public void validateStartedRequest_WithManyDevelopers() {
+    void validateStartedRequest_WithManyDevelopers() {
 
         // given
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());

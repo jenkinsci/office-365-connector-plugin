@@ -1,17 +1,5 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockConstruction;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
@@ -30,10 +18,22 @@ import jenkins.plugins.office365connector.helpers.WebhookBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.mockito.ArgumentMatchers;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
+
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
@@ -48,8 +48,8 @@ public abstract class AbstractTest {
     private MockedStatic<TokenMacro> tokenMacroStatic;
     private MockedStatic<FilePath> filePathStatic;
 
-    @After
-    public void closeMocks() {
+    @AfterEach
+    void closeMocks() {
         if (workerConstruction != null) {
             workerConstruction.close();
         }
@@ -79,7 +79,7 @@ public abstract class AbstractTest {
         when(run.getPreviousNotFailedBuild()).thenReturn(lastNotFailedBuild);
     }
 
-    public static BuildListener mockListener() {
+    protected static BuildListener mockListener() {
         BuildListener listener = mock(BuildListener.class);
 
         PrintStream stream = mock(PrintStream.class);
@@ -127,7 +127,7 @@ public abstract class AbstractTest {
     protected void mockCause(String causeMessage) {
         Cause cause = mock(Cause.class);
         when(cause.getShortDescription()).thenReturn(causeMessage);
-        when(run.getCauses()).thenReturn(Arrays.asList(cause));
+        when(run.getCauses()).thenReturn(List.of(cause));
     }
 
     protected void mockProperty(Job job) {
@@ -160,6 +160,6 @@ public abstract class AbstractTest {
 
     // compares files without worrying about EOL
     protected void assertHasSameContent(String value, String expected) {
-        assertThat(StringUtils.normalizeSpace(value)).isEqualTo(StringUtils.normalizeSpace(expected));
+        assertThat(StringUtils.normalizeSpace(value), equalTo(StringUtils.normalizeSpace(expected)));
     }
 }

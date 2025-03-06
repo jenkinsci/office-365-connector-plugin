@@ -1,35 +1,37 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import jenkins.plugins.office365connector.model.FactDefinition;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.List;
 
-import jenkins.plugins.office365connector.model.FactDefinition;
-import org.junit.Before;
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class StepParametersTest {
+class StepParametersTest {
 
-    private final static String MESSAGE = "myMessage";
-    private final static String WEBHOOK_URL = "www.my.host";
-    private final static String STATUS = "myStatus";
-    private final static FactDefinition FACT_DEFINITION = new FactDefinition("I'm", "developer");
-    private final static String COLOR = "myColor";
+    private static final String MESSAGE = "myMessage";
+    private static final String WEBHOOK_URL = "www.my.host";
+    private static final String STATUS = "myStatus";
+    private static final FactDefinition FACT_DEFINITION = new FactDefinition("I'm", "developer");
+    private static final String COLOR = "myColor";
 
     private StepParameters stepParameters;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         stepParameters = new StepParameters(
                 MESSAGE, WEBHOOK_URL, STATUS, Collections.singletonList(FACT_DEFINITION), COLOR, false);
     }
 
     @Test
-    public void getMessage_ReturnsMessage() {
+    void getMessage_ReturnsMessage() {
 
         // given from @Before
 
@@ -37,11 +39,11 @@ public class StepParametersTest {
         String message = stepParameters.getMessage();
 
         // then
-        assertThat(message).isEqualTo(MESSAGE);
+        assertThat(message, equalTo(MESSAGE));
     }
 
     @Test
-    public void getUrl_ReturnsUrl() {
+    void getUrl_ReturnsUrl() {
 
         // given from @Before
 
@@ -49,11 +51,11 @@ public class StepParametersTest {
         String url = stepParameters.getWebhookUrl();
 
         // then
-        assertThat(url).isEqualTo(WEBHOOK_URL);
+        assertThat(url, equalTo(WEBHOOK_URL));
     }
 
     @Test
-    public void getStatus_ReturnsStatus() {
+    void getStatus_ReturnsStatus() {
 
         // given from @Before
 
@@ -61,11 +63,11 @@ public class StepParametersTest {
         String status = stepParameters.getStatus();
 
         // then
-        assertThat(status).isEqualTo(STATUS);
+        assertThat(status, equalTo(STATUS));
     }
 
     @Test
-    public void getFactDefinitions_ReturnsFactDefinitions() {
+    void getFactDefinitions_ReturnsFactDefinitions() {
 
         // given from @Before
 
@@ -73,11 +75,11 @@ public class StepParametersTest {
         List<FactDefinition> factDefinitions = stepParameters.getFactDefinitions();
 
         // then
-        assertThat(factDefinitions).containsOnly(FACT_DEFINITION);
+        assertThat(factDefinitions, contains(FACT_DEFINITION));
     }
 
     @Test
-    public void getColor_ReturnsColor() {
+    void getColor_ReturnsColor() {
 
         // given from @Before
 
@@ -85,6 +87,6 @@ public class StepParametersTest {
         String color = stepParameters.getColor();
 
         // then
-        assertThat(color).isEqualTo(COLOR);
+        assertThat(color, equalTo(COLOR));
     }
 }

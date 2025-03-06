@@ -1,28 +1,30 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockConstruction;
-
-import java.util.Collections;
-import java.util.List;
-
 import hudson.model.AbstractBuild;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.WebhookJobProperty;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
+
+import java.util.Collections;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class WebhookJobPropertyTest extends AbstractTest {
+class WebhookJobPropertyTest extends AbstractTest {
 
     @Test
-    public void getWebhooks_ReturnsHook() {
+    void getWebhooks_ReturnsHook() {
 
         // when
         List<Webhook> webhooks = WebhookBuilder.sampleWebhookWithAllStatuses();
@@ -32,14 +34,13 @@ public class WebhookJobPropertyTest extends AbstractTest {
         List<Webhook> extractedWebhooks = property.getWebhooks();
 
         // then
-        assertThat(extractedWebhooks)
-                .hasSameSizeAs(webhooks)
-                .containsAll(webhooks);
+        assertThat(extractedWebhooks, hasSize(webhooks.size()));
+        assertThat(extractedWebhooks, equalTo(webhooks));
 
     }
 
     @Test
-    public void prebuild_SendNotification() {
+    void prebuild_SendNotification() {
 
         // given
         run = mock(AbstractBuild.class);

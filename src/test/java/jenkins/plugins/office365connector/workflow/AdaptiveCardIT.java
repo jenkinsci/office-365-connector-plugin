@@ -1,12 +1,5 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
-
-import java.util.Collections;
-import java.util.List;
-
 import hudson.model.AbstractBuild;
 import hudson.model.Job;
 import hudson.model.Result;
@@ -18,15 +11,23 @@ import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Markus Helbig (markush81@github)
  */
-public class AdaptiveCardIT extends AbstractTest {
+class AdaptiveCardIT extends AbstractTest {
 
     private static final String JOB_NAME = "myFirst_Job_";
     private static final String CAUSE_DESCRIPTION = "Started by John";
@@ -35,8 +36,8 @@ public class AdaptiveCardIT extends AbstractTest {
 
     private MockedStatic<Jenkins> staticJenkins;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         staticJenkins = mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         mockListener();
@@ -57,8 +58,8 @@ public class AdaptiveCardIT extends AbstractTest {
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         staticJenkins.close();
     }
 
@@ -82,7 +83,7 @@ public class AdaptiveCardIT extends AbstractTest {
 
 
     @Test
-    public void testAdaptiveCardStarted() {
+    void testAdaptiveCardStarted() {
 
         // given
         when(run.getResult()).thenReturn(Result.SUCCESS);
@@ -97,7 +98,7 @@ public class AdaptiveCardIT extends AbstractTest {
     }
 
     @Test
-    public void testAdaptiveCardStep() {
+    void testAdaptiveCardStep() {
 
         // given
         StepParameters stepParameters = new StepParameters(

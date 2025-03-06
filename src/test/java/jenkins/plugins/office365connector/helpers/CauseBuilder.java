@@ -1,9 +1,9 @@
 package jenkins.plugins.office365connector.helpers;
 
+import hudson.model.Cause;
+
 import java.util.Arrays;
 import java.util.List;
-
-import hudson.model.Cause;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)

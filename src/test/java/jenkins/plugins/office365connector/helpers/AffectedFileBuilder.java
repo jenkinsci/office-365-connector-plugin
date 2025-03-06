@@ -1,17 +1,17 @@
 package jenkins.plugins.office365connector.helpers;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import hudson.model.AbstractBuild;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.EditType;
 import org.mockito.stubbing.Answer;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
@@ -25,7 +25,7 @@ public class AffectedFileBuilder {
 
         when(entryMike.getAffectedFiles()).thenAnswer(createAnswer(Arrays.asList(new File(), new File())));
 
-        return Arrays.asList(new ChangeLogSetBuilder(run, entryMike));
+        return List.of(new ChangeLogSetBuilder(run, entryMike));
     }
 
     public List<ChangeLogSet> sampleChangeLogs(AbstractBuild run) {
@@ -37,7 +37,7 @@ public class AffectedFileBuilder {
         when(entryPeter.getAffectedFiles()).thenAnswer(createAnswer(Collections.emptyList()));
         when(entryAnn.getAffectedFiles()).thenAnswer(createAnswer(Collections.emptyList()));
 
-        return Arrays.asList(new ChangeLogSetBuilder(run, entryPeter, entryGeorge, entryAnn));
+        return List.of(new ChangeLogSetBuilder(run, entryPeter, entryGeorge, entryAnn));
     }
 
     private ChangeLogSet.Entry mockEntry(String userName) {
@@ -60,7 +60,7 @@ public class AffectedFileBuilder {
         return (invocation -> value);
     }
 
-    private class File implements ChangeLogSet.AffectedFile {
+    private static class File implements ChangeLogSet.AffectedFile {
 
         @Override
         public String getPath() {

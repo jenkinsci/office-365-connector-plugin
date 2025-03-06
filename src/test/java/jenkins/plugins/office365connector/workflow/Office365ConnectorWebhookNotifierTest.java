@@ -1,16 +1,5 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockConstruction;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.List;
-
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Job;
@@ -22,26 +11,38 @@ import jenkins.plugins.office365connector.DecisionMaker;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.WebhookJobProperty;
+import jenkins.plugins.office365connector.helpers.ReflectionHelper;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
-import mockit.internal.reflection.FieldReflection;
-import mockit.internal.reflection.MethodReflection;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
+
+import java.util.Collections;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
+class Office365ConnectorWebhookNotifierTest extends AbstractTest {
 
     private TaskListener taskListener;
     private Job job;
     private MockedStatic<Jenkins> staticJenkins;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() {
         taskListener = mockListener();
 
         run = mock(AbstractBuild.class);
@@ -61,13 +62,13 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
         when(jenkins.getDescriptorOrDie(any())).thenReturn(mockDescriptor);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         staticJenkins.close();
     }
 
     @Test
-    public void Office365ConnectorWebhookNotifier_InitializeJob() throws Exception {
+    void Office365ConnectorWebhookNotifier_InitializeJob() {
 
         // given
         // from @Before
@@ -76,11 +77,11 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
 
         // then
-        assertThat((Job) FieldReflection.getFieldValue(notifier.getClass().getDeclaredField("job"), notifier)).isSameAs(job);
+        assertThat(ReflectionHelper.getField(notifier, "job"), sameInstance(job));
     }
 
     @Test
-    public void sendBuildStartedNotification_OnEmptyWebhooks_SkipsProcessing() throws Exception {
+    void sendBuildStartedNotification_OnEmptyWebhooks_SkipsProcessing() throws Exception {
 
         // given
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
@@ -95,7 +96,7 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
     }
 
     @Test
-    public void sendBuildStartedNotification_OnNoBuild_SkipsProcessing() throws Exception {
+    void sendBuildStartedNotification_OnNoBuild_SkipsProcessing() throws Exception {
 
         // given
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
@@ -110,7 +111,7 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
     }
 
     @Test
-    public void sendBuildStartedNotification_OnWebhook_SendsNotification() {
+    void sendBuildStartedNotification_OnWebhook_SendsNotification() {
 
         // given
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
@@ -126,7 +127,7 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
     }
 
     @Test
-    public void sendBuildCompletedNotification_OnEmptyWebhooks_SkipsProcessing() throws Exception {
+    void sendBuildCompletedNotification_OnEmptyWebhooks_SkipsProcessing() throws Exception {
 
         // given
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
@@ -141,7 +142,7 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
     }
 
     @Test
-    public void sendBuildCompletedNotification_OnWebhook_SendsNotification() {
+    void sendBuildCompletedNotification_OnWebhook_SendsNotification() {
         // given
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
         setWebhookToJob(WebhookBuilder.sampleWebhookWithAllStatuses());
@@ -155,10 +156,10 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
         }
     }
 
-    private void injectFakeDecisionMaker(Office365ConnectorWebhookNotifier notifier) throws NoSuchFieldException {
+    private void injectFakeDecisionMaker(Office365ConnectorWebhookNotifier notifier) {
         DecisionMaker decisionMaker = mock(DecisionMaker.class);
         when(decisionMaker.isAtLeastOneRuleMatched(any())).thenThrow(new IllegalStateException());
-        FieldReflection.setFieldValue(notifier.getClass().getDeclaredField("decisionMaker"), notifier, decisionMaker);
+        ReflectionHelper.setField(notifier, "decisionMaker", decisionMaker);
     }
 
     private void setWebhookToJob(List<Webhook> webhooks) {
@@ -167,7 +168,7 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
     }
 
     @Test
-    public void extractWebhooks_OnMissingProperty_ReturnsEmptyWebhooks() throws Throwable {
+    void extractWebhooks_OnMissingProperty_ReturnsEmptyWebhooks() {
 
         // given
         Job job = mock(Job.class);
@@ -175,14 +176,14 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
 
         // when
-        List<Webhook> webhooks = MethodReflection.invokeWithCheckedThrows(notifier.getClass(), notifier, "extractWebhooks", new Class[]{Job.class}, job);
+        List<Webhook> webhooks = ReflectionHelper.invokeMethod(notifier,"extractWebhooks", job);
 
         // then
-        assertThat(webhooks).isEmpty();
+        assertThat(webhooks, empty());
     }
 
     @Test
-    public void extractWebhooks_OnMissingWebhooks_ReturnsEmptyWebhooks() throws Throwable {
+    void extractWebhooks_OnMissingWebhooks_ReturnsEmptyWebhooks() {
 
         // given
         Job job = mock(Job.class);
@@ -192,9 +193,9 @@ public class Office365ConnectorWebhookNotifierTest extends AbstractTest {
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
 
         // when
-        List<Webhook> webhooks = MethodReflection.invokeWithCheckedThrows(notifier.getClass(), notifier, "extractWebhooks", new Class[]{Job.class}, job);
+        List<Webhook> webhooks = ReflectionHelper.invokeMethod(notifier,"extractWebhooks", job);
 
         // then
-        assertThat(webhooks).isEmpty();
+        assertThat(webhooks, empty());
     }
 }

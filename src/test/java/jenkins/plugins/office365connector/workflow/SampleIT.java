@@ -1,14 +1,5 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.List;
-
 import hudson.model.AbstractBuild;
 import hudson.model.Job;
 import hudson.model.Result;
@@ -20,15 +11,26 @@ import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+
+import java.util.Collections;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class SampleIT extends AbstractTest {
+class SampleIT extends AbstractTest {
 
     private static final String JOB_NAME = "myFirst_Job_";
     private static final String CAUSE_DESCRIPTION = "Started by John";
@@ -37,8 +39,8 @@ public class SampleIT extends AbstractTest {
 
     private MockedStatic<Jenkins> staticJenkins;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         staticJenkins = mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         mockListener();
@@ -59,8 +61,8 @@ public class SampleIT extends AbstractTest {
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         staticJenkins.close();
     }
 
@@ -84,7 +86,7 @@ public class SampleIT extends AbstractTest {
 
 
     @Test
-    public void sendBuildStartedNotification_SendsProperData() {
+    void sendBuildStartedNotification_SendsProperData() {
 
         // given
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
@@ -98,7 +100,7 @@ public class SampleIT extends AbstractTest {
     }
 
     @Test
-    public void sendBuildStartedNotification_OnMultiplyWebhook_SendsSameData() {
+    void sendBuildStartedNotification_OnMultiplyWebhook_SendsSameData() {
 
         // given
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
@@ -108,13 +110,13 @@ public class SampleIT extends AbstractTest {
         notifier.sendBuildStartedNotification(true);
 
         // then
-        assertThat(workerData).hasSize(2);
-        assertThat(workerData.get(0)).isEqualTo(workerData.get(1));
+        assertThat(workerData, hasSize(2));
+        assertThat(workerData.get(0), equalTo(workerData.get(1)));
         assertEquals(2, workerConstruction.constructed().size());
     }
 
     @Test
-    public void sendBuildCompletedNotification_OnSuccess_SendsProperData() {
+    void sendBuildCompletedNotification_OnSuccess_SendsProperData() {
 
         // given
         when(run.getResult()).thenReturn(Result.SUCCESS);
@@ -129,7 +131,7 @@ public class SampleIT extends AbstractTest {
     }
 
     @Test
-    public void sendBuildCompletedNotification_OnFailed_SendsProperData() {
+    void sendBuildCompletedNotification_OnFailed_SendsProperData() {
 
         // given
         when(run.getResult()).thenReturn(Result.FAILURE);
@@ -144,7 +146,7 @@ public class SampleIT extends AbstractTest {
     }
 
     @Test
-    public void sendBuildStepNotification_SendsProperData() {
+    void sendBuildStepNotification_SendsProperData() {
 
         // given
         StepParameters stepParameters = new StepParameters(
@@ -163,7 +165,7 @@ public class SampleIT extends AbstractTest {
     }
 
     @Test
-    public void validateCompletedRequest_OnRepeatedFailure_SendsProperData() {
+    void validateCompletedRequest_OnRepeatedFailure_SendsProperData() {
 
         // given
         mockResult(Result.FAILURE);
@@ -178,7 +180,7 @@ public class SampleIT extends AbstractTest {
     }
 
     @Test
-    public void validateCompletedRequest_OnMultiplyWebhook_SendsSameData() {
+    void validateCompletedRequest_OnMultiplyWebhook_SendsSameData() {
 
         // given
         mockResult(Result.FAILURE);
@@ -189,8 +191,8 @@ public class SampleIT extends AbstractTest {
         notifier.sendBuildCompletedNotification();
 
         // then
-        assertThat(workerData).hasSize(2);
-        assertThat(workerData.get(0)).isEqualTo(workerData.get(1));
+        assertThat(workerData, hasSize(2));
+        assertThat(workerData.get(0), equalTo(workerData.get(1)));
         assertEquals(2, workerConstruction.constructed().size());
     }
 }

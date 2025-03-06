@@ -1,12 +1,12 @@
 package jenkins.plugins.office365connector;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-
-import org.apache.commons.io.IOUtils;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)

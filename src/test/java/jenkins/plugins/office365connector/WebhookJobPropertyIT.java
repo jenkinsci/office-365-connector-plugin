@@ -1,20 +1,20 @@
 package jenkins.plugins.office365connector;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import hudson.model.Cause;
 import hudson.model.FreeStyleProject;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class WebhookJobPropertyIT {
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.not;
 
-    @Rule
-    public JenkinsRule rule = new JenkinsRule();
+@WithJenkins
+class WebhookJobPropertyIT {
 
     @Test
-    public void testDataCompatibility() throws Exception {
+    void testDataCompatibility(JenkinsRule rule) throws Exception {
 
         // given
         FreeStyleProject foo = (FreeStyleProject) rule.jenkins.createProjectFromXML(
@@ -24,7 +24,7 @@ public class WebhookJobPropertyIT {
 
         // when
         WebhookJobProperty webhookJobProperty = foo.getProperty(WebhookJobProperty.class);
-        assertThat(webhookJobProperty.getWebhooks()).isNotEmpty();
+        assertThat(webhookJobProperty.getWebhooks(), not(empty()));
 
         // then
         rule.assertBuildStatusSuccess(foo.scheduleBuild2(0, new Cause.UserIdCause()).get());

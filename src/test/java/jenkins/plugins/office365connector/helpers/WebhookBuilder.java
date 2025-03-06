@@ -1,11 +1,11 @@
 package jenkins.plugins.office365connector.helpers;
 
+import jenkins.plugins.office365connector.Webhook;
+import jenkins.plugins.office365connector.model.Macro;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import jenkins.plugins.office365connector.Webhook;
-import jenkins.plugins.office365connector.model.Macro;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
