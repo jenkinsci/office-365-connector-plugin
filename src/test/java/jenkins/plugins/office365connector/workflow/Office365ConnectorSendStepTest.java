@@ -1,27 +1,31 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
 import hudson.util.FormValidation;
+import jenkins.plugins.office365connector.helpers.ReflectionHelper;
 import jenkins.plugins.office365connector.model.FactDefinition;
-import mockit.internal.reflection.FieldReflection;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Set;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.blankString;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class Office365ConnectorSendStepTest {
+class Office365ConnectorSendStepTest {
 
     @Test
-    public void Office365ConnectorSendStep_SavesWebhook() {
+    void Office365ConnectorSendStep_SavesWebhook() {
 
         // given
         String webhook = "someString";
@@ -29,11 +33,11 @@ public class Office365ConnectorSendStepTest {
         // when
         Office365ConnectorSendStep step = new Office365ConnectorSendStep(webhook);
 
-        assertThat(step.getWebhookUrl()).isEqualTo(webhook);
+        assertThat(step.getWebhookUrl(), equalTo(webhook));
     }
 
     @Test
-    public void Office365ConnectorSendStep_TrimsWebhook() {
+    void Office365ConnectorSendStep_TrimsWebhook() {
 
         // given
         String webhook = " some string ";
@@ -41,11 +45,11 @@ public class Office365ConnectorSendStepTest {
         // when
         Office365ConnectorSendStep step = new Office365ConnectorSendStep(webhook);
 
-        assertThat(step.getWebhookUrl()).isEqualTo(webhook.trim());
+        assertThat(step.getWebhookUrl(), equalTo(webhook.trim()));
     }
 
     @Test
-    public void getMessage_ReturnsMessage() {
+    void getMessage_ReturnsMessage() {
 
         // given
         String message = "Hello!";
@@ -56,11 +60,11 @@ public class Office365ConnectorSendStepTest {
         String returnedMessage = step.getMessage();
 
         // then
-        assertThat(returnedMessage).isEqualTo(message);
+        assertThat(returnedMessage, equalTo(message));
     }
 
     @Test
-    public void getMessage_OnBlankMessage_ReturnsTrimmedMessage() {
+    void getMessage_OnBlankMessage_ReturnsTrimmedMessage() {
 
         // given
         String message = " Hello!  ";
@@ -71,11 +75,11 @@ public class Office365ConnectorSendStepTest {
         String returnedMessage = step.getMessage();
 
         // then
-        assertThat(returnedMessage).isEqualTo(message.trim());
+        assertThat(returnedMessage, equalTo(message.trim()));
     }
 
     @Test
-    public void getStatus_ReturnsStatus() {
+    void getStatus_ReturnsStatus() {
 
         // given
         String status = "FAILED";
@@ -86,11 +90,11 @@ public class Office365ConnectorSendStepTest {
         String returnedStatus = step.getStatus();
 
         // then
-        assertThat(returnedStatus).isEqualTo(status);
+        assertThat(returnedStatus, equalTo(status));
     }
 
     @Test
-    public void getStatus_OnBlankStatus_ReturnsTrimmedStatus() {
+    void getStatus_OnBlankStatus_ReturnsTrimmedStatus() {
 
         // given
         String status = "FAILED ";
@@ -101,11 +105,11 @@ public class Office365ConnectorSendStepTest {
         String returnedStatus = step.getStatus();
 
         // then
-        assertThat(returnedStatus).isEqualTo(status.trim());
+        assertThat(returnedStatus, equalTo(status.trim()));
     }
 
     @Test
-    public void getColor_ReturnsColor() {
+    void getColor_ReturnsColor() {
 
         // given
         String color = "#FF00BB";
@@ -116,26 +120,26 @@ public class Office365ConnectorSendStepTest {
         String returnedColor = step.getColor();
 
         // then
-        assertThat(returnedColor).isEqualTo(color);
+        assertThat(returnedColor, equalTo(color));
     }
 
     @Test
-    public void getFactDefinitions_ReturnsFactDefinitions() {
+    void getFactDefinitions_ReturnsFactDefinitions() {
 
         // given
         Office365ConnectorSendStep step = new Office365ConnectorSendStep(null);
         FactDefinition factDefinition = new FactDefinition("name", "theTemplate");
-        step.setFactDefinitions(Arrays.asList(factDefinition));
+        step.setFactDefinitions(List.of(factDefinition));
 
         // when
         List<FactDefinition> returnedFactDefinitions = step.getFactDefinitions();
 
         // then
-        assertThat(returnedFactDefinitions).containsOnly(factDefinition);
+        assertThat(returnedFactDefinitions, contains(factDefinition));
     }
 
     @Test
-    public void getColor_OnBlankColor_ReturnsTrimmedColor() {
+    void getColor_OnBlankColor_ReturnsTrimmedColor() {
 
         // given
         String color = "black ";
@@ -146,11 +150,11 @@ public class Office365ConnectorSendStepTest {
         String returnedColor = step.getColor();
 
         // then
-        assertThat(returnedColor).isEqualTo(color.trim());
+        assertThat(returnedColor, equalTo(color.trim()));
     }
 
     @Test
-    public void start_CreatesExecution() throws Exception {
+    void start_CreatesExecution() {
 
         // given
         String message = "Hi there.";
@@ -162,13 +166,13 @@ public class Office365ConnectorSendStepTest {
         StepExecution execution = step.start(stepContext);
 
         // then
-        assertThat(execution.getContext()).isEqualTo(stepContext);
-        StepParameters stepParameters = FieldReflection.getFieldValue(execution.getClass().getDeclaredField("stepParameters"), execution);
-        assertThat(stepParameters.getMessage()).isEqualTo(message);
+        assertThat(execution.getContext(), equalTo(stepContext));
+        StepParameters stepParameters = ReflectionHelper.getField(execution, "stepParameters");
+        assertThat(stepParameters.getMessage(), equalTo(message));
     }
 
     @Test
-    public void getRequiredContext_ReturnsContext() {
+    void getRequiredContext_ReturnsContext() {
 
         // given
         StepDescriptor descriptor = new Office365ConnectorSendStep.DescriptorImpl();
@@ -177,11 +181,11 @@ public class Office365ConnectorSendStepTest {
         Set<? extends Class<?>> context = descriptor.getRequiredContext();
 
         // then
-        assertThat(context).hasSize(2);
+        assertThat(context, hasSize(2));
     }
 
     @Test
-    public void getFunctionName_ReturnsFunctionName() {
+    void getFunctionName_ReturnsFunctionName() {
 
         // given
         StepDescriptor descriptor = new Office365ConnectorSendStep.DescriptorImpl();
@@ -190,11 +194,11 @@ public class Office365ConnectorSendStepTest {
         String functionName = descriptor.getFunctionName();
 
         // then
-        assertThat(functionName).isEqualTo("office365ConnectorSend");
+        assertThat(functionName, equalTo("office365ConnectorSend"));
     }
 
     @Test
-    public void getDisplayName_DoesNotReturnFunctionName() {
+    void getDisplayName_DoesNotReturnFunctionName() {
 
         // given
         StepDescriptor descriptor = new Office365ConnectorSendStep.DescriptorImpl();
@@ -204,12 +208,12 @@ public class Office365ConnectorSendStepTest {
         String functionName = descriptor.getFunctionName();
 
         // then
-        assertThat(displayName).isNotBlank();
-        assertThat(displayName).isNotEqualTo(functionName);
+        assertThat(displayName, not(blankString()));
+        assertThat(displayName, not(equalTo(functionName)));
     }
 
     @Test
-    public void doCheckUrl_ValidatesUrl() {
+    void doCheckUrl_ValidatesUrl() {
 
         // given
         String validUrl = "http://myJenkins.abc";
@@ -219,11 +223,11 @@ public class Office365ConnectorSendStepTest {
         FormValidation result = descriptor.doCheckWebhookUrl(validUrl);
 
         // then
-        assertThat(result).isEqualTo(FormValidation.ok());
+        assertThat(result, equalTo(FormValidation.ok()));
     }
 
     @Test
-    public void doCheckUrl_OnInvalidUrl_ValidatesUrl() {
+    void doCheckUrl_OnInvalidUrl_ValidatesUrl() {
 
         // given
         String validUrl = "-myJenkins.abc";
@@ -233,6 +237,6 @@ public class Office365ConnectorSendStepTest {
         FormValidation result = descriptor.doCheckWebhookUrl(validUrl);
 
         // then
-        assertThat(result.kind).isEqualTo(FormValidation.Kind.ERROR);
+        assertThat(result.kind, equalTo(FormValidation.Kind.ERROR));
     }
 }

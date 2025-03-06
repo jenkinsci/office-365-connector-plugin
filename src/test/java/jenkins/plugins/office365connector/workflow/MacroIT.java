@@ -1,13 +1,5 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.util.List;
-
 import hudson.model.AbstractBuild;
 import hudson.model.Job;
 import hudson.scm.ChangeLogSet;
@@ -17,23 +9,31 @@ import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.WebhookJobProperty;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+
+import java.io.File;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class MacroIT extends AbstractTest {
+class MacroIT extends AbstractTest {
 
     private static final String JOB_NAME = "simple job";
     private static final int BUILD_NUMBER = 1;
 
     private MockedStatic<Jenkins> staticJenkins;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         staticJenkins = mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
 
@@ -55,8 +55,8 @@ public class MacroIT extends AbstractTest {
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         staticJenkins.close();
     }
 
@@ -100,7 +100,7 @@ public class MacroIT extends AbstractTest {
     }
 
     @Test
-    public void validateStartedRequest_WithMismatchedMacros_CreatesNoRequest() {
+    void validateStartedRequest_WithMismatchedMacros_CreatesNoRequest() {
 
         // given
         mockPropertyWithMismatchedMacros(1);
@@ -114,7 +114,7 @@ public class MacroIT extends AbstractTest {
     }
 
     @Test
-    public void validateStartedRequest_WithMatchedMacros_CreatesRequests() {
+    void validateStartedRequest_WithMatchedMacros_CreatesRequests() {
 
         // given
         int repeated = 15;
@@ -129,7 +129,7 @@ public class MacroIT extends AbstractTest {
     }
 
     @Test
-    public void validateStartedRequest_WithDifferentMacros_CreatesRequests() {
+    void validateStartedRequest_WithDifferentMacros_CreatesRequests() {
 
         // given
         int repeated = 15;

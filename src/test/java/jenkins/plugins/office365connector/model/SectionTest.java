@@ -1,23 +1,25 @@
 package jenkins.plugins.office365connector.model;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class SectionTest {
+class SectionTest {
 
     private static final String ACTIVITY_TITLE = "myActivityTitle";
     private static final String ACTIVITY_SUBTITLE = "myActivitySubtitle";
     private static final List<Fact> FACTS = Arrays.asList(new Fact("firstName", "firstValue"), new Fact("secondName", "secondValue"));
 
     @Test
-    public void getMarkdown_ReturnsTrue() {
+    void getMarkdown_ReturnsTrue() {
 
         // given
         Section section = new Section(ACTIVITY_TITLE, ACTIVITY_SUBTITLE, FACTS);
@@ -26,11 +28,11 @@ public class SectionTest {
         boolean markdown = section.getMarkdown();
 
         // then
-        assertThat(markdown).isTrue();
+        assertThat(markdown, is(true));
     }
 
     @Test
-    public void getActivityTitle_ReturnsActivityTitle() {
+    void getActivityTitle_ReturnsActivityTitle() {
 
         // given
         Section section = new Section(ACTIVITY_TITLE, ACTIVITY_SUBTITLE, FACTS);
@@ -39,11 +41,11 @@ public class SectionTest {
         String activityTitle = section.getActivityTitle();
 
         // then
-        assertThat(activityTitle).isEqualTo(ACTIVITY_TITLE);
+        assertThat(activityTitle, equalTo(ACTIVITY_TITLE));
     }
 
     @Test
-    public void getFacts_ReturnsFacts() {
+    void getFacts_ReturnsFacts() {
 
         // given
         Section section = new Section(ACTIVITY_TITLE, ACTIVITY_SUBTITLE, FACTS);
@@ -52,11 +54,11 @@ public class SectionTest {
         List<Fact> facts = section.getFacts();
 
         // then
-        assertThat(facts).isEqualTo(FACTS);
+        assertThat(facts, equalTo(FACTS));
     }
 
     @Test
-    public void getActivitySubtitle_ReturnsActivitySubtitle() {
+    void getActivitySubtitle_ReturnsActivitySubtitle() {
 
         // given
         Section section = new Section(ACTIVITY_TITLE, ACTIVITY_SUBTITLE, FACTS);
@@ -65,6 +67,6 @@ public class SectionTest {
         String activitySubtitle = section.getActivitySubtitle();
 
         // then
-        assertThat(activitySubtitle).isEqualTo(ACTIVITY_SUBTITLE);
+        assertThat(activitySubtitle, equalTo(ACTIVITY_SUBTITLE));
     }
 }

@@ -1,5 +1,6 @@
 package jenkins.plugins.office365connector.helpers;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.model.Run;
 import org.jenkinsci.plugins.displayurlapi.ClassicDisplayURLProvider;
 
@@ -10,9 +11,9 @@ public class ClassicDisplayURLProviderBuilder extends ClassicDisplayURLProvider 
 
     public static final String LOCALHOST_URL_TEMPLATE = "http://localhost/job/%s/%s/display/redirect";
 
-    private int jobNumber;
-    private String jobName;
-    private String generatedUrl;
+    private final int jobNumber;
+    private final String jobName;
+    private final String generatedUrl;
 
     public ClassicDisplayURLProviderBuilder(String jobName, int jobNumber) {
         this.jobName = jobName;
@@ -28,6 +29,7 @@ public class ClassicDisplayURLProviderBuilder extends ClassicDisplayURLProvider 
         generatedUrl = String.format(urlTemplate, pureJobName, jobNumber);
     }
 
+    @NonNull
     @Override
     public String getRunURL(Run run) {
         return generatedUrl;

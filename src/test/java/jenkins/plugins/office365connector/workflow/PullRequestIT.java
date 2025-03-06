@@ -1,14 +1,5 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Job;
@@ -24,15 +15,22 @@ import jenkins.plugins.office365connector.helpers.SCMHeadBuilder;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.metadata.ContributorMetadataAction;
 import jenkins.scm.api.metadata.ObjectMetadataAction;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+
+import java.util.HashSet;
+import java.util.List;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class PullRequestIT extends AbstractTest {
+class PullRequestIT extends AbstractTest {
 
     private static final String JOB_NAME = "hook » PR-1";
     private static final int BUILD_NUMBER = 3;
@@ -42,8 +40,8 @@ public class PullRequestIT extends AbstractTest {
     private MockedStatic<Jenkins> staticJenkins;
     private MockedStatic<SCMHead.HeadByItem> headByItem;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         staticJenkins = mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         mockListener();
@@ -67,8 +65,8 @@ public class PullRequestIT extends AbstractTest {
         when(jenkins.getDescriptorOrDie(Webhook.class)).thenReturn(mockDescriptor);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         headByItem.close();
         staticJenkins.close();
     }
@@ -90,7 +88,7 @@ public class PullRequestIT extends AbstractTest {
         User user = AffectedFileBuilder.mockUser(USER_NAME);
         when(user.getFullName()).thenReturn(USER_NAME);
 
-        when(run.getCulprits()).thenReturn(new HashSet(Arrays.asList(user)));
+        when(run.getCulprits()).thenReturn(new HashSet<>(List.of(user)));
     }
 
     private void mockGetChangeSets() {
@@ -117,7 +115,7 @@ public class PullRequestIT extends AbstractTest {
     }
 
     @Test
-    public void validateRepeatedFailure_WithPullRequest() {
+    void validateRepeatedFailure_WithPullRequest() {
 
         // given
         mockResult(Result.FAILURE);
@@ -131,7 +129,7 @@ public class PullRequestIT extends AbstractTest {
     }
 
     @Test
-    public void validateBackToNormal_WithoutActions() {
+    void validateBackToNormal_WithoutActions() {
 
         // given
         mockResult(Result.SUCCESS);
