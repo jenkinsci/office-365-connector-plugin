@@ -10,7 +10,7 @@ import org.apache.commons.lang.NotImplementedException;
  */
 public class SCMHeadBuilder extends SCMHead implements ChangeRequestSCMHead {
 
-    private String name;
+    private final String name;
 
     public SCMHeadBuilder(@NonNull String name) {
         super(name);

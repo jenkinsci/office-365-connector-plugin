@@ -1,32 +1,34 @@
 package jenkins.plugins.office365connector;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import hudson.util.FormValidation;
+import jenkins.model.Jenkins;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.mockito.MockedStatic;
+
+import java.io.File;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
-
-import hudson.util.FormValidation;
-import jenkins.model.Jenkins;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.kohsuke.stapler.StaplerRequest2;
-import org.mockito.MockedStatic;
-
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class WebhookDescriptorImplTest {
+class WebhookDescriptorImplTest {
 
     private final WebhookStub.DescriptorImplStub descriptor = new WebhookStub.DescriptorImplStub();
 
     private MockedStatic<Jenkins> staticJenkins;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         staticJenkins = mockStatic(Jenkins.class);
         Jenkins jenkins = mock(Jenkins.class);
         File rootDir = new File(".");
@@ -34,33 +36,33 @@ public class WebhookDescriptorImplTest {
         staticJenkins.when(Jenkins::get).thenReturn(jenkins);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         staticJenkins.close();
     }
 
     @Test
-    public void getDisplayName_ReturnsName() {
+    void getDisplayName_ReturnsName() {
 
         // given & when
         String displayName = descriptor.getDisplayName();
 
         // then
-        assertThat(displayName).isEqualTo("Webhook");
+        assertThat(displayName, equalTo("Webhook"));
     }
 
     @Test
-    public void getDefaultTimeout_ReturnsDefaultTimeout() {
+    void getDefaultTimeout_ReturnsDefaultTimeout() {
 
         // given & when
         int timeout = descriptor.getDefaultTimeout();
 
         // then
-        assertThat(timeout).isEqualTo(Webhook.DEFAULT_TIMEOUT);
+        assertThat(timeout, equalTo(Webhook.DEFAULT_TIMEOUT));
     }
 
     @Test
-    public void doCheckUrl_ValidatesUrl() {
+    void doCheckUrl_ValidatesUrl() {
 
         // given
         String validUrl = "http://myJenkins.abc";
@@ -69,11 +71,11 @@ public class WebhookDescriptorImplTest {
         FormValidation result = descriptor.doCheckUrl(validUrl);
 
         // then
-        assertThat(result).isEqualTo(FormValidation.ok());
+        assertThat(result, equalTo(FormValidation.ok()));
     }
 
     @Test
-    public void getName_ReturnsName() {
+    void getName_ReturnsName() {
 
         // given
         String name = "test";
@@ -82,11 +84,11 @@ public class WebhookDescriptorImplTest {
         descriptor.setName(name);
 
         // then
-        assertThat(descriptor.getName()).isEqualTo(name);
+        assertThat(descriptor.getName(), equalTo(name));
     }
 
     @Test
-    public void getUrl_ReturnsUrl() {
+    void getUrl_ReturnsUrl() {
 
         // given
         String url = "test.com";
@@ -95,11 +97,11 @@ public class WebhookDescriptorImplTest {
         descriptor.setUrl(url);
 
         // then
-        assertThat(descriptor.getUrl()).isEqualTo(url);
+        assertThat(descriptor.getUrl(), equalTo(url));
     }
 
     @Test
-    public void configure_ReturnsTrue() {
+    void configure_ReturnsTrue() {
 
         // given
         StaplerRequest2 staplerRequest = mock(StaplerRequest2.class);
@@ -109,11 +111,11 @@ public class WebhookDescriptorImplTest {
         boolean isConfigured = descriptor.configure(staplerRequest, null);
 
         // then
-        assertThat(isConfigured).isTrue();
+        assertThat(isConfigured, is(true));
     }
 
     @Test
-    public void doCheckGlobalUrl_ValidatesUrl() {
+    void doCheckGlobalUrl_ValidatesUrl() {
 
         // given
         String validUrl = "http://myJenkins.abc";
@@ -122,11 +124,11 @@ public class WebhookDescriptorImplTest {
         FormValidation result = descriptor.doCheckGlobalUrl(validUrl);
 
         // then
-        assertThat(result).isEqualTo(FormValidation.ok());
+        assertThat(result, equalTo(FormValidation.ok()));
     }
 
     @Test
-    public void doCheckGlobalUrl_ValidatesUrl_WhenBlank() {
+    void doCheckGlobalUrl_ValidatesUrl_WhenBlank() {
 
         // given
         String validUrl = "";
@@ -135,6 +137,6 @@ public class WebhookDescriptorImplTest {
         FormValidation result = descriptor.doCheckGlobalUrl(validUrl);
 
         // then
-        assertThat(result).isEqualTo(FormValidation.ok());
+        assertThat(result, equalTo(FormValidation.ok()));
     }
 }

@@ -1,17 +1,19 @@
 package jenkins.plugins.office365connector.model;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import hudson.model.Descriptor;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.equalTo;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class MacroTest {
+class MacroTest {
 
     @Test
-    public void newMacro_StoresPassedValues() {
+    void newMacro_StoresPassedValues() {
 
         // given
         String template = "Michael";
@@ -21,12 +23,12 @@ public class MacroTest {
         Macro macro = new Macro(template, value);
 
         // then
-        assertThat(macro.getTemplate()).isEqualTo(template);
-        assertThat(macro.getValue()).isEqualTo(value);
+        assertThat(macro.getTemplate(), equalTo(template));
+        assertThat(macro.getValue(), equalTo(value));
     }
 
     @Test
-    public void newMacro_OnNullValue_StoresEmptyString() {
+    void newMacro_OnNullValue_StoresEmptyString() {
 
         // given
         String template = null;
@@ -36,12 +38,12 @@ public class MacroTest {
         Macro macro = new Macro(template, value);
 
         // then
-        assertThat(macro.getTemplate()).isEmpty();
-        assertThat(macro.getValue()).isEmpty();
+        assertThat(macro.getTemplate(), emptyString());
+        assertThat(macro.getValue(), emptyString());
     }
 
     @Test
-    public void getDisplayName_ReturnsName() {
+    void getDisplayName_ReturnsName() {
 
         // given
         Descriptor<Macro> descriptor = new Macro.DescriptorImpl();
@@ -50,6 +52,6 @@ public class MacroTest {
         String name = descriptor.getDisplayName();
 
         // then
-        assertThat(name).isEqualTo("Macro");
+        assertThat(name, equalTo("Macro"));
     }
 }

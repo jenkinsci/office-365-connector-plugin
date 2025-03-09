@@ -1,27 +1,27 @@
 package jenkins.plugins.office365connector.workflow;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockConstruction;
-
 import hudson.model.AbstractBuild;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class Office365ConnectorBuildListenerTest extends AbstractTest {
+class Office365ConnectorBuildListenerTest extends AbstractTest {
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         run = mock(AbstractBuild.class);
     }
 
     @Test
-    public void onStarted_SendNotification() {
+    void onStarted_SendNotification() {
 
         // given
         Office365ConnectorBuildListener listener = new Office365ConnectorBuildListener();
@@ -36,7 +36,7 @@ public class Office365ConnectorBuildListenerTest extends AbstractTest {
     }
 
     @Test
-    public void onCompleted_SendNotification() {
+    void onCompleted_SendNotification() {
 
         // given
         Office365ConnectorBuildListener listener = new Office365ConnectorBuildListener();

@@ -1,16 +1,18 @@
 package jenkins.plugins.office365connector.model;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
-public class FactDefinitionTest {
+class FactDefinitionTest {
 
     @Test
-    public void FactDefinition_TrimsNullValues() {
+    void FactDefinition_TrimsNullValues() {
 
         // given
         FactDefinition factDefinition = new FactDefinition(null, null);
@@ -20,12 +22,12 @@ public class FactDefinitionTest {
         String template = factDefinition.getTemplate();
 
         // then
-        assertThat(name).isNotNull();
-        assertThat(template).isNotNull();
+        assertThat(name, notNullValue());
+        assertThat(template, notNullValue());
     }
 
     @Test
-    public void setName_SetsName() {
+    void setName_SetsName() {
 
         // given
         String name = "superName";
@@ -35,11 +37,11 @@ public class FactDefinitionTest {
         factDefinition.setName(name);
 
         // then
-        assertThat(factDefinition.getName()).isEqualTo(name);
+        assertThat(factDefinition.getName(), equalTo(name));
     }
 
     @Test
-    public void setTemplate_SetsTemplate() {
+    void setTemplate_SetsTemplate() {
 
         // given
         String temaplate = "coolTemplate";
@@ -49,11 +51,11 @@ public class FactDefinitionTest {
         factDefinition.setTemplate(temaplate);
 
         // then
-        assertThat(factDefinition.getTemplate()).isEqualTo(temaplate);
+        assertThat(factDefinition.getTemplate(), equalTo(temaplate));
     }
 
     @Test
-    public void getDisplayName_ReturnsName() {
+    void getDisplayName_ReturnsName() {
 
         // given
         FactDefinition.DescriptorImpl descriptor = new FactDefinition.DescriptorImpl();
@@ -62,6 +64,6 @@ public class FactDefinitionTest {
         String name = descriptor.getDisplayName();
 
         // then
-        assertThat(name).isEqualTo("FactDefinition");
+        assertThat(name, equalTo("FactDefinition"));
     }
 }
