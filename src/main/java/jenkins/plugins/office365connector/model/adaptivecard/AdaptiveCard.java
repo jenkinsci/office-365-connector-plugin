@@ -12,7 +12,6 @@ import jenkins.plugins.office365connector.model.Section;
 
 public class AdaptiveCard implements Card {
 
-    @SuppressFBWarnings(value = "SS_SHOULD_BE_STATIC")
     private String type = "AdaptiveCard";
     @SuppressFBWarnings(value = "SS_SHOULD_BE_STATIC")
     @SerializedName("$schema")
