@@ -31,6 +31,7 @@
         <jenkins.version>${jenkins.baseline}.3</jenkins.version>
 
         <gitHubRepo>jenkinsci/office-365-connector-plugin</gitHubRepo>
+		<ban-junit4-imports.skip>false</ban-junit4-imports.skip>
     </properties>
 
     <dependencyManagement>
