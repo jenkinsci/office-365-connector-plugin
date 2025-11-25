@@ -203,7 +203,6 @@ public class CardBuilder {
         }
 
         if (stepParameters.getMentions() != null && !stepParameters.getMentions().isEmpty()){
-            Map<String, Object> msteams = new HashMap<>();
             List<Map<String, Object>> entities = new ArrayList<>();
 
             for (Mention mention : stepParameters.getMentions()) {
@@ -218,7 +217,6 @@ public class CardBuilder {
                 entity.put("mentioned", mentioned);
                 entities.add(entity);
             }
-            msteams.put("entities", entities);
             if (card instanceof AdaptiveCard) {
                 ((AdaptiveCard) card).getMsTeams().setEntities(entities);
             }
