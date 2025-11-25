@@ -11,6 +11,7 @@ import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.plugins.office365connector.model.FactDefinition;
+import jenkins.plugins.office365connector.model.Mention;
 import jenkins.plugins.office365connector.utils.FormUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.workflow.steps.Step;
@@ -30,6 +31,7 @@ public class Office365ConnectorSendStep extends Step {
     private String message;
     private String status;
     private List<FactDefinition> factDefinitions;
+    private List<Mention> mentions;
     private String color;
     private boolean adaptiveCards;
 
@@ -72,6 +74,15 @@ public class Office365ConnectorSendStep extends Step {
 
     public List<FactDefinition> getFactDefinitions() {
         return factDefinitions;
+    }
+
+    @DataBoundSetter
+    public void setMentions(List<Mention> mentions){
+        this.mentions = mentions;
+    }
+
+    public List<Mention> getMentions(){
+        return mentions;
     }
 
     @DataBoundSetter

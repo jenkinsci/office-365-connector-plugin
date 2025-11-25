@@ -14,12 +14,17 @@
 package jenkins.plugins.office365connector;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+
 
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.FactDefinition;
+import jenkins.plugins.office365connector.model.Mention;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.model.adaptivecard.AdaptiveCard;
 import jenkins.plugins.office365connector.model.messagecard.MessageCard;
@@ -196,6 +201,28 @@ public class CardBuilder {
 
         if (stepParameters.getColor() != null) {
             card.setThemeColor(stepParameters.getColor());
+        }
+
+        if (stepParameters.getMentions() != null && !stepParameters.getMentions().isEmpty()){
+            Map<String, Object> msteams = new HashMap<>();
+            List<Map<String, Object>> entities = new ArrayList<>();
+
+            for (Mention mention : stepParameters.getMentions()) {
+                Map<String, Object> entity = new HashMap<>();
+                entity.put("type", "mention");
+                entity.put("text", "<at>" + mention.getName() + "</at>");
+
+                Map<String, Object> mentioned = new HashMap<>();
+                mentioned.put("id", mention.getId()); //UPN or Entra Object ID
+                mentioned.put("name", mention.getName());
+
+                entity.put("mentioned", mentioned);
+                entities.add(entity);
+            }
+            msteams.put("entities", entities);
+            if (card instanceof AdaptiveCard) {
+                ((AdaptiveCard) card).getMsTeams().setEntities(entities);
+            }
         }
 
         card.setAction(potentialActionBuilder.buildActionable());
