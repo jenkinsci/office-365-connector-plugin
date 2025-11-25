@@ -44,14 +44,10 @@ public class StepParameters {
         this.mentions = mentions;
     }
 
-    
     // Overloading constructor for backward compatibility
-    public StepParameters(String message, String webhookUrl, String status,
-                      List<FactDefinition> factDefinitions, String color,
-                      boolean adaptiveCards) {
+    public StepParameters(String message, String webhookUrl, String status, List<FactDefinition> factDefinitions, String color, boolean adaptiveCards) {
         this(message, webhookUrl, status, factDefinitions, color, adaptiveCards, new ArrayList<>());
-                      }
-
+    }
 
     public String getMessage() {
         return message;

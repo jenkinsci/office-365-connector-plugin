@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
 
-
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
