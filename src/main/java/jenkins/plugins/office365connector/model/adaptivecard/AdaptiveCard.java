@@ -18,7 +18,7 @@ public class AdaptiveCard implements Card {
     private final String schema = "http://adaptivecards.io/schemas/adaptive-card.json";
     @SuppressFBWarnings(value = "SS_SHOULD_BE_STATIC")
     private final String version = "1.4";
-    @SerializedName("msteams")
+    @SerializedName("msTeams")
     private final MsTeams msTeams = new MsTeams();
     private final List<AdaptiveCardElement> body;
     private List<CardAction> actions;
