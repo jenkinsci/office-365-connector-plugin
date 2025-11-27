@@ -1,0 +1,73 @@
+
+{
+  "type": "message",
+  "attachments": [
+    {
+      "contentType": "application/vnd.microsoft.card.adaptive",
+      "content": {
+        "type": "AdaptiveCard",
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "version": "1.4",
+        "msteams": {
+          "width": "Full",
+          "entities": [
+            {
+              "text": "<at>Testing tester</at>",
+              "type": "mention",
+              "mentioned": {
+                "name": "testing tester",
+                "id": "testing.tester@example.com"
+              }
+            }
+          ]
+        },
+        "body": [
+          {
+            "text": "Build Notification with Mentions",
+            "weight": "bolder",
+            "size": "large",
+            "color": "good",
+            "type": "TextBlock",
+            "wrap": true
+          },
+          {
+            "type": "ColumnSet",
+            "columns": [
+              {
+                "type": "Column",
+                "items": [
+                  {
+                    "text": "Notification from Jenkins",
+                    "weight": "bolder",
+                    "size": "default",
+                    "color": "default",
+                    "type": "TextBlock",
+                    "wrap": true
+                  },
+                  {
+                    "text": "Hello <at>Testing Testor</at>, this is a test notification with mentions!",
+                    "weight": "default",
+                    "size": "default",
+                    "color": "default",
+                    "type": "TextBlock",
+                    "wrap": true
+                  }
+                ]
+              }
+            ],
+            "width": "stretch"
+          },
+          {
+            "facts": [
+              {
+                "title": "Status",
+                "value": "Success"
+              }
+            ],
+            "type": "FactSet"
+          }
+        ]
+      }
+    }
+  ]
+}
