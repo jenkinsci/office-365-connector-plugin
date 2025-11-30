@@ -200,25 +200,19 @@ class SampleIT extends AbstractTest {
     void sendBuildStepNotification_WithMentions_SendsProperData() {
 
         // given
-        List<Mention> mentions = List.of(
-                new Mention("test@tester.com", "test tester")
-        );
-
         StepParameters stepParameters = new StepParameters(
-                "Hi, <at>test tester</at> Build completed", ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE,
-                "funnyStatus", Collections.emptyList(),"#FF00FF", true, mentions 
+                "HelloMessage", ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE,
+                "funnyStatus", Collections.emptyList(),"#FF00FF", true 
         );
 
         when(run.getResult()).thenReturn(Result.SUCCESS);
-        Office365ConnectorWebhookNotifier notifier =
-                new Office365ConnectorWebhookNotifier(run, mockListener());
+        Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
 
         // when
         notifier.sendBuildStepNotification(stepParameters);
 
         // then
-        assertHasSameContent(workerData.get(0),
-                FileUtils.getContentFile("adaptivecard-mention.json"));
+        assertHasSameContent(workerData.get(0), FileUtils.getContentFile("adaptivecard-mention.json"));
         assertEquals(1, workerConstruction.constructed().size());
     }
 
