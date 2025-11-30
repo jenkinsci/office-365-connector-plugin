@@ -7,7 +7,7 @@
         "type": "AdaptiveCard",
         "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
         "version": "1.4",
-        "msteams": {
+        "msTeams": {
           "width": "Full",
           "entities": [
             {
@@ -44,7 +44,7 @@
                     "wrap": true
                   },
                   {
-                    "text": "Hello <at>Testing Testor</at>, this is a test notification with mentions!",
+                    "text": "Hello <at>Testing Tester</at>, this is a test notification with mentions!",
                     "weight": "default",
                     "size": "default",
                     "color": "default",
