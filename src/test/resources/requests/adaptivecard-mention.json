@@ -14,7 +14,7 @@
               "text": "<at>Testing tester</at>",
               "type": "mention",
               "mentioned": {
-                "name": "testing tester",
+                "name": "Testing tester",
                 "id": "testing.tester@example.com"
               }
             }
@@ -22,7 +22,7 @@
         },
         "body": [
           {
-            "text": "Build Notification with Mentions",
+            "text": "myFirst_Job_: Build #167",
             "weight": "bolder",
             "size": "large",
             "color": "good",
@@ -36,7 +36,7 @@
                 "type": "Column",
                 "items": [
                   {
-                    "text": "Notification from Jenkins",
+                    "text": "Notification from myFirst_Job_",
                     "weight": "bolder",
                     "size": "default",
                     "color": "default",
@@ -44,7 +44,7 @@
                     "wrap": true
                   },
                   {
-                    "text": "Hello <at>Testing Tester</at>, this is a test notification with mentions!",
+                    "text": "Hello <at>Testing tester</at>, this is a test notification with mentions!",
                     "weight": "default",
                     "size": "default",
                     "color": "default",
@@ -65,7 +65,8 @@
             ],
             "type": "FactSet"
           }
-        ]
+        ],
+        "actions": []
       }
     }
   ]
