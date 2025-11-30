@@ -11,7 +11,7 @@
           "width": "Full",
           "entities": [
             {
-              "text": "<at>Testing tester</at>",
+              "text": "\u003cat\u003eTesting tester\u003c/at\u003e",
               "type": "mention",
               "mentioned": {
                 "name": "Testing tester",
@@ -36,7 +36,7 @@
                 "type": "Column",
                 "items": [
                   {
-                    "text": "Notification from myFirst_Job_",
+                    "text": "Notification from myFirst\\_Job\\_",
                     "weight": "bolder",
                     "size": "default",
                     "color": "default",
@@ -44,7 +44,7 @@
                     "wrap": true
                   },
                   {
-                    "text": "Hello <at>Testing tester</at>, this is a test notification with mentions!",
+                    "text": "Hello \u003cat\u003eTesting tester\u003c/at\u003e, this is a test notification with mentions!",
                     "weight": "default",
                     "size": "default",
                     "color": "default",
