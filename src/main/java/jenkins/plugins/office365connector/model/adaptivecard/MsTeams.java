@@ -12,7 +12,7 @@ public class MsTeams {
     private String width = "Full";
 
     @SerializedName("entities")
-    private List<Mention> mentions = new ArrayList<>();
+    private List<Mention> mentions;
 
     public String getWidth() {
         return width;
