@@ -15,8 +15,8 @@ import org.kohsuke.stapler.DataBoundSetter;
  * @author Ammar Zain (AmmarOFA@github)
  */
 public class Mentioned {
-    private String id = "";
     private String name = "";
+    private String id = "";
 
     @DataBoundConstructor
     public Mentioned() {

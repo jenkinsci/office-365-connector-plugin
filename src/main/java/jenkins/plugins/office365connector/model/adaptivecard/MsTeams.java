@@ -19,7 +19,7 @@ public class MsTeams {
     }
 
     public List<Mention> getMentions() {
-        return mentions;
+        return (mentions == null || mentions.isEmpty()) ? null : mentions;
     }
 
     public void setMentions(List<Mention> mentions) {
