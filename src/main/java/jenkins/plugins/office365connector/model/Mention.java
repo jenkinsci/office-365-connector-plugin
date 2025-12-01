@@ -10,8 +10,8 @@ import org.kohsuke.stapler.DataBoundSetter;
  * @author Ammar Zain (AmmarOFA@github)
  */
 public class Mention {
-    private final String type = "mention"; // always included in JSON
     private String text;       
+    private final String type = "mention"; // always included in JSON
     private Mentioned mentioned;  
 
     @DataBoundConstructor
