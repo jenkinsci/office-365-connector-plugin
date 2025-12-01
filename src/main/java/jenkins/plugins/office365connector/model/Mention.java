@@ -1,31 +1,53 @@
 package jenkins.plugins.office365connector.model;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
-
-import hudson.Extension;
 import hudson.Util;
-import hudson.model.AbstractDescribableImpl;
-import hudson.model.Descriptor;
+
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 /**
+ * Outer entity for adaptive card mentions
  * @author Ammar Zain (AmmarOFA@github)
  */
 public class Mention {
-    private final String id;
-    private final String name;
+    private final String type = "mention"; // always included in JSON
+    private String text;       
+    private Mentioned mentioned;  
 
     @DataBoundConstructor
-    public Mention(String id, String name) {
-        this.id = Util.fixNull(id);
-        this.name = Util.fixNull(name);
+    public Mention() {
+        // Empty constructor for databinding
     }
 
-    public String getId() {
-        return id;
+    public String getText() {
+        return text;
     }
 
-    public String getName() {
-        return name;
+    public String getType(){
+        return type;
+    }
+
+    @DataBoundSetter
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public Mentioned getMentioned() {
+        return mentioned;
+    }
+
+    @DataBoundSetter
+    public void setMentioned(Mentioned mentioned) {
+        this.mentioned = mentioned;
+    }
+
+    /**
+     * Factory method: create a Mention from a Mentioned object.
+     */
+    public static Mention fromMentioned(Mentioned mentioned) {
+        Mention mention = new Mention();
+        mention.setMentioned(mentioned);
+        mention.setText("<at>" + mentioned.getName() + "</at>");
+        return mention;
     }
 }

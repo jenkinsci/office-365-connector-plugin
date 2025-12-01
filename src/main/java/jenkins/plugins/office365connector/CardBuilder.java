@@ -17,12 +17,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.FactDefinition;
+import jenkins.plugins.office365connector.model.Mentioned;
 import jenkins.plugins.office365connector.model.Mention;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.model.adaptivecard.AdaptiveCard;
@@ -205,22 +207,12 @@ public class CardBuilder {
         }
 
         if (!CollectionUtils.isEmpty(stepParameters.getMentions())) {
-            List<Map<String, Object>> entities = new ArrayList<>();
+            List<Mention> adaptiveMentions = stepParameters.getMentions().stream()
+                .map(Mention::fromMentioned)
+                .collect(Collectors.toList());
 
-            for (Mention mention : stepParameters.getMentions()) {
-                Map<String, Object> entity = new HashMap<>();
-                entity.put("type", "mention");
-                entity.put("text", "<at>" + mention.getName() + "</at>");
-
-                Map<String, Object> mentioned = new HashMap<>();
-                mentioned.put("id", mention.getId()); //UPN or Entra Object ID
-                mentioned.put("name", mention.getName());
-
-                entity.put("mentioned", mentioned);
-                entities.add(entity);
-            }
             if (card instanceof AdaptiveCard) {
-                ((AdaptiveCard) card).getMsTeams().setEntities(entities);
+                ((AdaptiveCard) card).getMsTeams().setMentions(adaptiveMentions);
             }
         }
 

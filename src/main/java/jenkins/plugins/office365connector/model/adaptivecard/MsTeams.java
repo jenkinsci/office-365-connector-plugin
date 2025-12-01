@@ -1,22 +1,28 @@
 package jenkins.plugins.office365connector.model.adaptivecard;
 
 import java.util.List;
-import java.util.Map;
+import java.util.ArrayList;
+
+import com.google.gson.annotations.SerializedName;
+
+import jenkins.plugins.office365connector.model.Mention;
 
 public class MsTeams {
 
     private String width = "Full";
-    private List<Map<String, Object>> entities; 
+
+    @SerializedName("entities")
+    private List<Mention> mentions = new ArrayList<>();
 
     public String getWidth() {
         return width;
     }
 
-    public List<Map<String, Object>> getEntities() {
-        return entities;
+    public List<Mention> getMentions() {
+        return mentions;
     }
 
-    public void setEntities(List<Map<String, Object>> entities) {
-        this.entities = entities;
+    public void setMentions(List<Mention> mentions) {
+        this.mentions = mentions;
     }
 }

@@ -11,7 +11,7 @@ import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
-import jenkins.plugins.office365connector.model.Mention;
+import jenkins.plugins.office365connector.model.Mentioned;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -201,11 +201,16 @@ class SampleIT extends AbstractTest {
     void sendBuildStepNotification_WithMentions_SendsProperData() {
 
         // given
-        List<Mention> mentions = List.of(new Mention("testing.tester@example.com", "Testing tester"));
+        Mentioned mentioned = new Mentioned();
+        mentioned.setId("testing.tester@example.com");
+        mentioned.setName("Testing tester");
+
         StepParameters stepParameters = new StepParameters(
                 "Hello <at>Testing tester</at>, this is a test notification with mentions!", ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE,
-                "Success", Collections.emptyList(),"#FF00FF", true, mentions
+                "Success", Collections.emptyList(),"#FF00FF", true
         );
+
+        stepParameters.setMentions(List.of(mentioned));
 
         when(run.getResult()).thenReturn(Result.SUCCESS);
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());

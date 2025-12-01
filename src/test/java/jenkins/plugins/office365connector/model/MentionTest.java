@@ -1,72 +1,67 @@
-
 package jenkins.plugins.office365connector.model;
 
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 
 /**
+ * Strict tests for Mention class (outer entity for Adaptive Card mentions).
  * @author Ammar Zain (AmmarOFA@github)
  */
 class MentionTest {
 
     @Test
-    void Mention_Constructor_SetsFields() {
-
-        // given
-        String id = "tester.testing@test.com";
-        String name = "tester testing";
-
-        // when
-        Mention mention = new Mention(id, name);
+    void defaultConstructor_FieldsAreNull() {
+        // given / when
+        Mention mention = new Mention();
 
         // then
-        assertThat(mention.getId(), equalTo(id));
-        assertThat(mention.getName(), equalTo(name));
+        assertThat(mention.getText(), equalTo(null));
+        assertThat(mention.getMentioned(), equalTo(null));
     }
 
     @Test
-    void Mention_Constructor_AllowsNullValues() {
-
+    void setText_SetsExactText() {
         // given
-        Mention mention = new Mention(null, null);
+        Mention mention = new Mention();
 
         // when
-        String id = mention.getId();
-        String name = mention.getName();
+        mention.setText("<at>Tester Testing</at>");
 
         // then
-        assertThat(id, notNullValue()); // Should not throw NullPointerException
-        assertThat(name, notNullValue());
+        assertThat(mention.getText(), equalTo("<at>Tester Testing</at>"));
     }
 
     @Test
-    void getId_ReturnsId() {
-
+    void setMentioned_SetsExactMentioned() {
         // given
-        String id = "test.id@example.com";
-        Mention mention = new Mention(id, "Test Name");
+        Mention mention = new Mention();
+        Mentioned mentioned = new Mentioned();
+        mentioned.setId("tester.testing@test.com");
+        mentioned.setName("Tester Testing");
 
         // when
-        String actualId = mention.getId();
+        mention.setMentioned(mentioned);
 
         // then
-        assertThat(actualId, equalTo(id));
+        assertThat(mention.getMentioned(), equalTo(mentioned));
+        assertThat(mention.getMentioned().getId(), equalTo("tester.testing@test.com"));
+        assertThat(mention.getMentioned().getName(), equalTo("Tester Testing"));
     }
 
     @Test
-    void getName_ReturnsName() {
-
+    void fromMentioned_CreatesMentionWithExactValues() {
         // given
-        String name = "Test Name";
-        Mention mention = new Mention("test.id@example.com", name);
+        Mentioned mentioned = new Mentioned();
+        mentioned.setId("tester.testing@test.com");
+        mentioned.setName("Tester Testing");
 
         // when
-        String actualName = mention.getName();
+        Mention mention = Mention.fromMentioned(mentioned);
 
         // then
-        assertThat(actualName, equalTo(name));
+        assertThat(mention.getMentioned(), equalTo(mentioned));
+        assertThat(mention.getText(), equalTo("<at>Tester Testing</at>"));
     }
 }
