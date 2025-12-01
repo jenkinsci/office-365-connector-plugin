@@ -29,6 +29,8 @@ import jenkins.plugins.office365connector.model.adaptivecard.AdaptiveCard;
 import jenkins.plugins.office365connector.model.messagecard.MessageCard;
 import jenkins.plugins.office365connector.workflow.StepParameters;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
@@ -202,7 +204,7 @@ public class CardBuilder {
             card.setThemeColor(stepParameters.getColor());
         }
 
-        if (stepParameters.getMentions() != null && !stepParameters.getMentions().isEmpty()){
+        if (!CollectionUtils.isEmpty(stepParameters.getMentions())) {
             List<Map<String, Object>> entities = new ArrayList<>();
 
             for (Mention mention : stepParameters.getMentions()) {
