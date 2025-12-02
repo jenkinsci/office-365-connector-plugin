@@ -2,6 +2,8 @@ package jenkins.plugins.office365connector.model;
 
 import hudson.Util;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -11,6 +13,7 @@ import org.kohsuke.stapler.DataBoundSetter;
  */
 public class Mention {
     private String text;       
+    @SuppressFBWarnings(value = "SS_SHOULD_BE_STATIC")
     private final String type = "mention"; // always included in JSON
     private Mentioned mentioned;  
 
