@@ -19,6 +19,7 @@ import org.mockito.MockedStatic;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.ArrayList;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -201,16 +202,26 @@ class SampleIT extends AbstractTest {
     void sendBuildStepNotification_WithMentions_SendsProperData() {
 
         // given
-        Mentioned mentioned = new Mentioned();
-        mentioned.setId("testing.tester@example.com");
-        mentioned.setName("Testing tester");
+        List<Mentioned> mentioned = new ArrayList<>();
+
+        // First user
+        Mentioned user1 = new Mentioned();
+        user1.setId("testing.tester@example.com");
+        user1.setName("Testing tester");
+        mentioned.add(user1);
+
+        // Second user
+        Mentioned user2 = new Mentioned();
+        user2.setId("second.user@example.com");
+        user2.setName("Second User");
+        mentioned.add(user2);
 
         StepParameters stepParameters = new StepParameters(
-                "Hello <at>Testing tester</at>, this is a test notification with mentions!", ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE,
+                "Hello <at>Testing tester</at> and <at>Second User</at>, this is a test notification with multiple mentions!", ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE,
                 "Success", Collections.emptyList(),"#FF00FF", true
         );
 
-        stepParameters.setMentions(List.of(mentioned));
+        stepParameters.setMentions(mentioned);
 
         when(run.getResult()).thenReturn(Result.SUCCESS);
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());

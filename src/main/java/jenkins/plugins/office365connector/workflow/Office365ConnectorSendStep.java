@@ -77,11 +77,11 @@ public class Office365ConnectorSendStep extends Step {
     }
 
     @DataBoundSetter
-    public void setMentions(List<Mentioned> mentions){
+    public void setMentions(List<Mentioned> mentions) {
         this.mentions = mentions;
     }
 
-    public List<Mentioned> getMentions(){
+    public List<Mentioned> getMentions() {
         return mentions;
     }
 

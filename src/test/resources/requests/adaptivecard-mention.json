@@ -17,6 +17,14 @@
                 "name": "Testing tester",
                 "id": "testing.tester@example.com"
               }
+            },
+            {
+              "text": "\u003cat\u003eSecond User\u003c/at\u003e",
+              "type": "mention",
+              "mentioned": {
+                "name": "Second User",
+                "id": "second.user@example.com"
+              }
             }
           ]
         },
@@ -44,7 +52,7 @@
                     "wrap": true
                   },
                   {
-                    "text": "Hello \u003cat\u003eTesting tester\u003c/at\u003e, this is a test notification with mentions!",
+                    "text": "Hello \u003cat\u003eTesting tester\u003c/at\u003e and \u003cat\u003eSecond User\u003c/at\u003e, this is a test notification with multiple mentions!",
                     "weight": "default",
                     "size": "default",
                     "color": "default",
