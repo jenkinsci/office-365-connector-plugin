@@ -18,6 +18,8 @@ package jenkins.plugins.office365connector.workflow;
 import java.util.List;
 import java.util.ArrayList;
 
+import hudson.Util;
+
 import org.kohsuke.stapler.DataBoundSetter;
 
 import jenkins.plugins.office365connector.model.FactDefinition;
@@ -75,8 +77,6 @@ public class StepParameters {
 
     @DataBoundSetter
     public void setMentions(List<Mentioned> mentions) {
-        if (mentions != null) {
-            this.mentions = mentions;
-        }
+        this.mentions = Util.fixNull(mentions);
     }
 }

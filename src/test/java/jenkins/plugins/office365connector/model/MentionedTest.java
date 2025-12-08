@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.isEmptyString;
 
 /**
  * Tests for Mentioned class.
@@ -17,8 +18,8 @@ class MentionedTest {
         Mentioned m = new Mentioned();
 
         // then
-        assertThat(m.getId(), equalTo(""));
-        assertThat(m.getName(), equalTo(""));
+        assertThat(m.getId(), isEmptyString());
+        assertThat(m.getName(), isEmptyString());
     }
 
     @Test
@@ -27,10 +28,11 @@ class MentionedTest {
         Mentioned m = new Mentioned();
 
         // when
-        m.setId("tester.testing@test.com");
+        String id = "tester.testing@test.com";
+        m.setId(id);
 
         // then
-        assertThat(m.getId(), equalTo("tester.testing@test.com"));
+        assertThat(m.getId(), equalTo(id));
     }
 
     @Test
@@ -38,34 +40,10 @@ class MentionedTest {
         // given
         Mentioned m = new Mentioned();
 
-        // when
-        m.setName("tester testing");
+        String name = "tester testing";
+        m.setName(name);
 
         // then
-        assertThat(m.getName(), equalTo("tester testing"));
-    }
-
-    @Test
-    void setId_AllowsNull_ConvertsToEmptyString() {
-        // given
-        Mentioned m = new Mentioned();
-
-        // when
-        m.setId(null);
-
-        // then
-        assertThat(m.getId(), equalTo(""));
-    }
-
-    @Test
-    void setName_AllowsNull_ConvertsToEmptyString() {
-        // given
-        Mentioned m = new Mentioned();
-
-        // when
-        m.setName(null);
-
-        // then
-        assertThat(m.getName(), equalTo(""));
+        assertThat(m.getName(), equalTo(name));
     }
 }

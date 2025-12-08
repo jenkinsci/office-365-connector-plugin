@@ -26,7 +26,7 @@ public class Mention {
         return text;
     }
 
-    public String getType(){
+    public String getType() {
         return type;
     }
 
@@ -50,7 +50,11 @@ public class Mention {
     public static Mention fromMentioned(Mentioned mentioned) {
         Mention mention = new Mention();
         mention.setMentioned(mentioned);
-        mention.setText("<at>" + mentioned.getName() + "</at>");
+        mention.setText(makeUsernameClickable(mentioned.getName()));
         return mention;
+    }
+
+    private static String makeUsernameClickable(String username) {
+        return "<at>" + username + "</at>";
     }
 }

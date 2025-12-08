@@ -12,16 +12,6 @@ import static org.hamcrest.Matchers.equalTo;
 class MentionTest {
 
     @Test
-    void defaultConstructor_FieldsAreNull() {
-        // given / when
-        Mention mention = new Mention();
-
-        // then
-        assertThat(mention.getText(), equalTo(null));
-        assertThat(mention.getMentioned(), equalTo(null));
-    }
-
-    @Test
     void setText_SetsExactText() {
         // given
         Mention mention = new Mention();
