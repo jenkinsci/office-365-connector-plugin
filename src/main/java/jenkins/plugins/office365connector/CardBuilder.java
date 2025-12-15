@@ -35,10 +35,19 @@ public class CardBuilder {
     private final FactsBuilder factsBuilder;
     private final ActionableBuilder potentialActionBuilder;
     private final boolean isAdaptiveCards;
+    private final boolean mentionCommitters;
+    private final boolean mentionDevelopers;
+
 
     public CardBuilder(Run run, TaskListener taskListener, boolean isAdaptiveCards) {
+    this(run, taskListener, isAdaptiveCards, false, false);
+    }
+
+    public CardBuilder(Run run, TaskListener taskListener, boolean isAdaptiveCards, boolean mentionCommitters, boolean mentionDevelopers) {
         this.run = run;
         this.isAdaptiveCards = isAdaptiveCards;
+        this.mentionCommitters = mentionCommitters;
+        this.mentionDevelopers = mentionDevelopers;
 
         factsBuilder = new FactsBuilder(run, taskListener);
         potentialActionBuilder = new ActionableBuilder(run, factsBuilder, isAdaptiveCards);
@@ -48,8 +57,8 @@ public class CardBuilder {
         final String statusName = "Started";
         factsBuilder.addStatus(statusName);
         factsBuilder.addRemarks();
-        factsBuilder.addCommitters();
-        factsBuilder.addDevelopers();
+        factsBuilder.addCommitters(mentionCommitters);
+        factsBuilder.addDevelopers(mentionDevelopers);
         factsBuilder.addUserFacts(factDefinitions);
 
         Section section = buildSection(statusName);
@@ -84,8 +93,8 @@ public class CardBuilder {
         }
         factsBuilder.addStatus(status);
         factsBuilder.addRemarks();
-        factsBuilder.addCommitters();
-        factsBuilder.addDevelopers();
+        factsBuilder.addCommitters(mentionCommitters);
+        factsBuilder.addDevelopers(mentionDevelopers);
         factsBuilder.addUserFacts(factDefinitions);
 
         Section section = buildSection(status);
