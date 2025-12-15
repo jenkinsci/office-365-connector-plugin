@@ -48,6 +48,14 @@
             <f:entry title="Notify Repeated Failure" field="notifyRepeatedFailure">
                 <f:checkbox/>
             </f:entry>
+
+            <f:entry title="Mention Committers" field="mentionCommitters">
+                <f:checkbox default="false"/>
+            </f:entry>
+
+            <f:entry title="Mention Developers" field="mentionDevelopers">
+                <f:checkbox default="false"/>
+            </f:entry>
         </f:section>
 
         <f:section title="Advanced configuration">
