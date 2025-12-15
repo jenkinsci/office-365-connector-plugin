@@ -38,7 +38,6 @@ import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
 import jenkins.plugins.office365connector.utils.TeamsMentionUtils;
 
-
 /**
  * Collects helper methods that create instance of {@link jenkins.plugins.office365connector.model.Fact Fact} class.
  *
