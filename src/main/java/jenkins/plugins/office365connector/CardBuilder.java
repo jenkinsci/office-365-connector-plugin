@@ -58,21 +58,12 @@ public CardBuilder(Run run, TaskListener taskListener, boolean isAdaptiveCards,
     potentialActionBuilder = new ActionableBuilder(run, factsBuilder, isAdaptiveCards);
 }
 
-
-    public CardBuilder(Run run, TaskListener taskListener, boolean isAdaptiveCards, boolean mentionCommitters, boolean mentionDevelopers) {
-        this.run = run;
-        this.isAdaptiveCards = isAdaptiveCards;
-        this.mentionCommitters = mentionCommitters;
-        this.mentionDevelopers = mentionDevelopers;
-
-        factsBuilder = new FactsBuilder(run, taskListener);
-        potentialActionBuilder = new ActionableBuilder(run, factsBuilder, isAdaptiveCards);
-    }
-
     public Card createStartedCard(List<FactDefinition> factDefinitions) {
         final String statusName = "Started";
         factsBuilder.addStatus(statusName);
         factsBuilder.addRemarks();
+        factsBuilder.addCommitters();
+        factsBuilder.addDevelopers();
         factsBuilder.addUserFacts(factDefinitions);
 
         Section section = buildSection(statusName);
