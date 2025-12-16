@@ -49,7 +49,7 @@
                 <f:checkbox/>
             </f:entry>
 
-            <f:entry title="Only Mention On Failure" field="mentionOnlyOnFailure">
+            <f:entry title="Only Mention On Failure" field="mentionOnFailure">
                 <f:checkbox default="true"/>
             </f:entry>
         </f:section>
