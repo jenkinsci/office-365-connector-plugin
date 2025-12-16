@@ -86,7 +86,7 @@ public CardBuilder(Run run, TaskListener taskListener, boolean isAdaptiveCards,
 
         boolean isRepeatedFailure = isRepeatedFailure(previousResult, lastNotFailedBuild);
 
-        boolean shouldMention = lastResult == Result.FAILURE && mentionOnFailure;
+        boolean shouldMention = (lastResult == Result.FAILURE || lastResult == Result.UNSTABLE || isRepeatedFailure) && mentionOnFailure;
 
         String summary = String.format("%s: Build %s %s", getDisplayName(), getRunName(),
                 calculateSummary(lastResult, previousResult, isRepeatedFailure));
