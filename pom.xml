@@ -112,10 +112,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>io.jenkins.plugins</groupId>
-            <artifactId>commons-collections4-api</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
