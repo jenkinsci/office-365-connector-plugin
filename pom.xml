@@ -97,10 +97,6 @@
             <artifactId>commons-validator</artifactId>
             <version>1.9.0</version>
         </dependency>
-        <dependency>
-            <groupId>io.jenkins.plugins</groupId>
-            <artifactId>commons-collections4-api</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
