@@ -49,12 +49,8 @@
                 <f:checkbox/>
             </f:entry>
 
-            <f:entry title="Mention Committers" field="mentionCommitters">
-                <f:checkbox default="false"/>
-            </f:entry>
-
-            <f:entry title="Mention Developers" field="mentionDevelopers">
-                <f:checkbox default="false"/>
+            <f:entry title="Only mention on failure" field="mentionOnlyOnFailure">
+                <f:checkbox default="true"/>
             </f:entry>
         </f:section>
 

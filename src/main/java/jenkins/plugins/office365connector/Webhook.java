@@ -50,6 +50,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     private boolean notifyRepeatedFailure;
     private boolean mentionCommitters;
     private boolean mentionDevelopers;
+    private boolean mentionOnFailure = true;
 
     private int timeout;
 
@@ -208,6 +209,14 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
         this.mentionDevelopers = mentionDevelopers;
     }
 
+    public boolean isMentionOnFailure() {
+        return mentionOnFailure;
+    }
+
+    @DataBoundSetter
+    public void setMentionOnFailure(boolean mentionOnFailure) {
+        this.mentionOnFailure = mentionOnFailure;
+    }
 
     @Extension
     public static class DescriptorImpl extends Descriptor<Webhook> {

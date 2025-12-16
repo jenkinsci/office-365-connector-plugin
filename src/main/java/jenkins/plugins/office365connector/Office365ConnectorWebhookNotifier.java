@@ -61,7 +61,14 @@ public class Office365ConnectorWebhookNotifier {
             for (Webhook webhook : webhooks) {
                 if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                     if (webhook.isStartNotification()) {
-                        CardBuilder cardBuilder = new CardBuilder(run, taskListener, webhook.isAdaptiveCards(), webhook.isMentionCommitters(), webhook.isMentionDevelopers());
+                        CardBuilder cardBuilder = new CardBuilder(
+                            run,
+                            taskListener,
+                            webhook.isAdaptiveCards(),
+                            webhook.isMentionCommitters(),
+                            webhook.isMentionDevelopers(),
+                            webhook.isMentionOnFailure()
+                        );
                         Card card = cardBuilder.createStartedCard(webhook.getFactDefinitions());
                         executeWorker(webhook, card);
                     }
@@ -76,7 +83,14 @@ public class Office365ConnectorWebhookNotifier {
         for (Webhook webhook : webhooks) {
             if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                 if (decisionMaker.isStatusMatched(webhook)) {
-                    CardBuilder cardBuilder = new CardBuilder(run, taskListener, webhook.isAdaptiveCards(), webhook.isMentionCommitters(), webhook.isMentionDevelopers());
+                        CardBuilder cardBuilder = new CardBuilder(
+                            run,
+                            taskListener,
+                            webhook.isAdaptiveCards(),
+                            webhook.isMentionCommitters(),
+                            webhook.isMentionDevelopers(),
+                            webhook.isMentionOnFailure()
+                        );
                     Card card = cardBuilder.createCompletedCard(webhook.getFactDefinitions());
                     executeWorker(webhook, card);
                 }
