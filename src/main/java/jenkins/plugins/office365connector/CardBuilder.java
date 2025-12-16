@@ -37,11 +37,27 @@ public class CardBuilder {
     private final boolean isAdaptiveCards;
     private final boolean mentionCommitters;
     private final boolean mentionDevelopers;
+    private final boolean mentionOnFailure;
 
+// Old constructor kept for backward compatibility
+public CardBuilder(Run run, TaskListener taskListener, boolean isAdaptiveCards) {
+    this(run, taskListener, isAdaptiveCards, false, false, true); // sensible defaults
+}
 
-    public CardBuilder(Run run, TaskListener taskListener, boolean isAdaptiveCards) {
-    this(run, taskListener, isAdaptiveCards, false, false);
-    }
+// Main constructor with all options
+public CardBuilder(Run run, TaskListener taskListener, boolean isAdaptiveCards,
+                   boolean mentionCommitters, boolean mentionDevelopers,
+                   boolean mentionOnFailure) {
+    this.run = run;
+    this.isAdaptiveCards = isAdaptiveCards;
+    this.mentionCommitters = mentionCommitters;
+    this.mentionDevelopers = mentionDevelopers;
+    this.mentionOnFailure = mentionOnFailure;
+
+    factsBuilder = new FactsBuilder(run, taskListener);
+    potentialActionBuilder = new ActionableBuilder(run, factsBuilder, isAdaptiveCards);
+}
+
 
     public CardBuilder(Run run, TaskListener taskListener, boolean isAdaptiveCards, boolean mentionCommitters, boolean mentionDevelopers) {
         this.run = run;
@@ -57,8 +73,6 @@ public class CardBuilder {
         final String statusName = "Started";
         factsBuilder.addStatus(statusName);
         factsBuilder.addRemarks();
-        factsBuilder.addCommitters(mentionCommitters);
-        factsBuilder.addDevelopers(mentionDevelopers);
         factsBuilder.addUserFacts(factDefinitions);
 
         Section section = buildSection(statusName);
@@ -80,6 +94,9 @@ public class CardBuilder {
         Run lastNotFailedBuild = run.getPreviousNotFailedBuild();
 
         boolean isRepeatedFailure = isRepeatedFailure(previousResult, lastNotFailedBuild);
+
+        boolean shouldMention = lastResult == Result.FAILURE && mentionOnFailure;
+
         String summary = String.format("%s: Build %s %s", getDisplayName(), getRunName(),
                 calculateSummary(lastResult, previousResult, isRepeatedFailure));
         String status = calculateStatus(lastResult, previousResult, isRepeatedFailure);
@@ -93,8 +110,8 @@ public class CardBuilder {
         }
         factsBuilder.addStatus(status);
         factsBuilder.addRemarks();
-        factsBuilder.addCommitters(mentionCommitters);
-        factsBuilder.addDevelopers(mentionDevelopers);
+        factsBuilder.addCommitters(mentionCommitters && shouldMention);
+        factsBuilder.addDevelopers(mentionDevelopers && shouldMention);
         factsBuilder.addUserFacts(factDefinitions);
 
         Section section = buildSection(status);
