@@ -65,7 +65,6 @@ public class WebhookBuilder {
         return List.of(webhook);
     }
 
-
     private static void enableAllStatuses(Webhook webhook) {
         webhook.setNotifyAborted(true);
         webhook.setNotifyBackToNormal(true);
