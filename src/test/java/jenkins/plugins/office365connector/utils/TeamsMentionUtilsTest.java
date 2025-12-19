@@ -19,7 +19,7 @@ class TeamsMentionUtilsTest {
         User user = Mockito.mock(User.class);
         Mailer.UserProperty userProperty = Mockito.mock(Mailer.UserProperty.class);
         Mockito.when(user.getProperty(Mailer.UserProperty.class)).thenReturn(userProperty);
-        Mockito.when(prop.getAddress()).thenReturn("user@example.com");
+        Mockito.when(userProperty.getAddress()).thenReturn("user@example.com");
 
         String actual = TeamsMentionUtils.mentionUserOrEmail(user);
         String expected = "<at>user@example.com</at>";
