@@ -81,12 +81,12 @@ public CardBuilder(Run run, TaskListener taskListener, boolean isAdaptiveCards,
         Result lastResult = getCompletedResult(run);
 
         Run previousBuild = run.getPreviousBuild();
-        Result previousResult = previousBuild != null ? previousBuild.getResult() : Result.SUCCESS;
+        Result previousResult = previousBuild != null ? previousBuild.getResult() : Result.SUCCESS; 
         Run lastNotFailedBuild = run.getPreviousNotFailedBuild();
 
         boolean isRepeatedFailure = isRepeatedFailure(previousResult, lastNotFailedBuild);
 
-        boolean shouldMention = (lastResult == Result.FAILURE || lastResult == Result.UNSTABLE || isRepeatedFailure) && mentionOnFailure;
+        boolean shouldMention = (lastResult == Result.FAILURE || lastResult == Result.UNSTABLE) && mentionOnFailure;
 
         String summary = String.format("%s: Build %s %s", getDisplayName(), getRunName(),
                 calculateSummary(lastResult, previousResult, isRepeatedFailure));
