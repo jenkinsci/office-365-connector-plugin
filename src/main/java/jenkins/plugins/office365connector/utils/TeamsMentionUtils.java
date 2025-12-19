@@ -17,17 +17,16 @@ public final class TeamsMentionUtils {
         return "<at>" + email + "</at>";
     }
 
-    public static String mentionUser(User user) {
-    if (user == null) {
-        return "Unknown User";
+    public static String mentionUserOrEmail(User user) {
+        if (user == null) {
+            return "Unknown user";
+        }
+        Mailer.UserProperty userProperty = user.getProperty(Mailer.UserProperty.class);
+        if (prop != null && StringUtils.isNotBlank(prop.getAddress())) {
+            return mentionEmail(prop.getAddress());
+        }
+        // fallback: just return username
+        return user.getFullName();
     }
-    Mailer.UserProperty prop = user.getProperty(Mailer.UserProperty.class);
-    if (prop != null && StringUtils.isNotBlank(prop.getAddress())) {
-        return mentionEmail(prop.getAddress());
-    }
-    // fallback: just return username
-    return user.getFullName();
-}
-
 
 }
