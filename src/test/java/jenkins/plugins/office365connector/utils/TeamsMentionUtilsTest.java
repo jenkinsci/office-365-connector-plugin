@@ -11,17 +11,17 @@ class TeamsMentionUtilsTest {
 
     @Test
     void mentionUser_nullUser_returnsUnknown() {
-        assertEquals("Unknown User", TeamsMentionUtils.mentionUser(null), "Expected 'Unknown User' when user is null");
+        assertEquals("Unknown User", TeamsMentionUtils.mentionUserOrEmail(null), "Expected 'Unknown User' when user is null");
     }
 
     @Test
     void mentionUser_userWithEmail_returnsMentionTag() throws Exception {
         User user = Mockito.mock(User.class);
-        Mailer.UserProperty prop = Mockito.mock(Mailer.UserProperty.class);
-        Mockito.when(user.getProperty(Mailer.UserProperty.class)).thenReturn(prop);
+        Mailer.UserProperty userProperty = Mockito.mock(Mailer.UserProperty.class);
+        Mockito.when(user.getProperty(Mailer.UserProperty.class)).thenReturn(userProperty);
         Mockito.when(prop.getAddress()).thenReturn("user@example.com");
 
-        String actual = TeamsMentionUtils.mentionUser(user);
+        String actual = TeamsMentionUtils.mentionUserOrEmail(user);
         String expected = "<at>user@example.com</at>";
         assertEquals(expected, actual, "User email should be wrapped in <at> tag exactly");
     }
@@ -32,7 +32,7 @@ class TeamsMentionUtilsTest {
         Mockito.when(user.getProperty(Mailer.UserProperty.class)).thenReturn(null);
         Mockito.when(user.getFullName()).thenReturn("John Doe");
 
-        String actual = TeamsMentionUtils.mentionUser(user);
+        String actual = TeamsMentionUtils.mentionUserOrEmail(user);
         String expected = "John Doe";
         assertEquals(expected, actual, "Fallback to full name when email is missing");
     }
