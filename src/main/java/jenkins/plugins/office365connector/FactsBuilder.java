@@ -99,34 +99,21 @@ public class FactsBuilder {
         addCommitters(false);
     }
 
-    public void addDevelopers(boolean mentionDevelopers) {
+    public void addDevelopers() {
         if (!(run instanceof RunWithSCM)) {
             return;
         }
         RunWithSCM runWithSCM = (RunWithSCM) run;
 
-        List<ChangeLogSet<ChangeLogSet.Entry>> changeSets = runWithSCM.getChangeSets();
+        List<ChangeLogSet<ChangeLogSet.Entry>> sets = runWithSCM.getChangeSets();
+
         Set<User> authors = new HashSet<>();
+        sets.stream()
+                .filter(set -> set instanceof ChangeLogSet)
+                .forEach(set -> set
+                        .forEach(entry -> authors.add(entry.getAuthor())));
 
-        // Collect authors safely
-        for (ChangeLogSet<ChangeLogSet.Entry> set : changeSets) {
-            for (ChangeLogSet.Entry entry : set) {
-                authors.add(entry.getAuthor());
-            }
-        }
-
-        // Sort users and mention if needed
-        String joinedDevelopers = sortUsers(authors).stream()
-            .map(user -> mentionDevelopers ? TeamsMentionUtils.mentionUserOrEmail(user) : user.getFullName())
-            .filter(StringUtils::isNotBlank)
-            .collect(Collectors.joining(", "));
-
-        addFact(NAME_DEVELOPERS, joinedDevelopers);
-    }
-
-    // Overload to preserve old behavior
-    public void addDevelopers() {
-        addDevelopers(false);
+        addFact(NAME_DEVELOPERS, StringUtils.join(sortUsers(authors), ", "));
     }
     
     /**
