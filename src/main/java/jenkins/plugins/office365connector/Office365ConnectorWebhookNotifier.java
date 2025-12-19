@@ -65,8 +65,6 @@ public class Office365ConnectorWebhookNotifier {
                             run,
                             taskListener,
                             webhook.isAdaptiveCards(),
-                            webhook.isMentionCommitters(),
-                            webhook.isMentionDevelopers(),
                             webhook.isMentionOnFailure()
                         );
                         Card card = cardBuilder.createStartedCard(webhook.getFactDefinitions());
@@ -87,8 +85,6 @@ public class Office365ConnectorWebhookNotifier {
                             run,
                             taskListener,
                             webhook.isAdaptiveCards(),
-                            webhook.isMentionCommitters(),
-                            webhook.isMentionDevelopers(),
                             webhook.isMentionOnFailure()
                         );
                     Card card = cardBuilder.createCompletedCard(webhook.getFactDefinitions());
