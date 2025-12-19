@@ -202,7 +202,17 @@ class SampleIT extends AbstractTest {
         // given
         when(run.getResult()).thenReturn(Result.FAILURE);
 
-        // mock the parent job to have our webhook
+        //override changelog ONLY for this test
+        List<ChangeLogSet> changeLogs = new AffectedFileBuilder()
+                .changeLogWithCommitters(
+                        run,
+                        List.of(
+                                new AffectedFileBuilder.Committer("Mike", "mike@example.com"),
+                                new AffectedFileBuilder.Committer("Alice", "alice@example.com")));
+
+        when(run.getChangeSets()).thenReturn(changeLogs);
+
+        // enable adaptive cards + mentions
         mockProperty(run.getParent(), WebhookBuilder.sampleFailedWebhookWithMentions());
 
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
@@ -211,8 +221,10 @@ class SampleIT extends AbstractTest {
         notifier.sendBuildCompletedNotification();
 
         // then
-        assertHasSameContent(workerData.get(0),
+        assertHasSameContent(
+                workerData.get(0),
                 FileUtils.getContentFile("completed-failed-with-mentions.json"));
+
         assertEquals(1, workerConstruction.constructed().size());
     }
 
