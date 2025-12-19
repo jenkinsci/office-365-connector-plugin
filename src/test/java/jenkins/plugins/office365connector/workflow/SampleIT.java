@@ -195,4 +195,25 @@ class SampleIT extends AbstractTest {
         assertThat(workerData.get(0), equalTo(workerData.get(1)));
         assertEquals(2, workerConstruction.constructed().size());
     }
+
+    @Test
+    void sendBuildCompletedNotification_FailedBuildWithMentions_SendsProperData() {
+
+        // given
+        when(run.getResult()).thenReturn(Result.FAILURE);
+
+        // mock the parent job to have our webhook
+        mockProperty(run.getParent(), WebhookBuilder.sampleFailedWebhookWithMentions());
+
+        Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
+
+        // when
+        notifier.sendBuildCompletedNotification();
+
+        // then
+        assertHasSameContent(workerData.get(0),
+                FileUtils.getContentFile("completed-failed-with-mentions.json"));
+        assertEquals(1, workerConstruction.constructed().size());
+    }
+
 }

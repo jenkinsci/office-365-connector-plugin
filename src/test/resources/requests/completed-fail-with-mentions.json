@@ -1,0 +1,35 @@
+{
+    "summary": "myFirst_Job_: Build #167 Failed",
+    "themeColor": "#CC0003",
+    "sections": [
+        {
+            "markdown": true,
+            "facts": [
+                {
+                    "name": "Status",
+                    "value": "Build Failed"
+                },
+                {
+                    "name": "Remarks",
+                    "value": "Started by John."
+                },
+                {
+                    "name": "Committers",
+                    "value": "<at>mike@example.com</at>, <at>alice@example.com</at>"
+                }
+            ],
+            "activityTitle": "Notification from myFirst_Job_: Build Failed",
+            "activitySubtitle": "Latest status of build #167"
+        }
+    ],
+    "potentialAction": [
+        {
+            "@context": "http://schema.org",
+            "@type": "ViewAction",
+            "name": "View Build",
+            "target": [
+                "http://localhost/job/myFirst_Job_/167/display/redirect"
+            ]
+        }
+    ]
+}
