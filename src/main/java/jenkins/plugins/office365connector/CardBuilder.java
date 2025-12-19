@@ -35,23 +35,18 @@ public class CardBuilder {
     private final FactsBuilder factsBuilder;
     private final ActionableBuilder potentialActionBuilder;
     private final boolean isAdaptiveCards;
-    private final boolean mentionCommitters;
-    private final boolean mentionDevelopers;
     private final boolean mentionOnFailure;
 
 // Old constructor kept for backward compatibility
 public CardBuilder(Run run, TaskListener taskListener, boolean isAdaptiveCards) {
-    this(run, taskListener, isAdaptiveCards, false, false, true); // sensible defaults
+    this(run, taskListener, isAdaptiveCards, true); // sensible defaults
 }
 
 // Main constructor with all options
 public CardBuilder(Run run, TaskListener taskListener, boolean isAdaptiveCards,
-                   boolean mentionCommitters, boolean mentionDevelopers,
                    boolean mentionOnFailure) {
     this.run = run;
     this.isAdaptiveCards = isAdaptiveCards;
-    this.mentionCommitters = mentionCommitters;
-    this.mentionDevelopers = mentionDevelopers;
     this.mentionOnFailure = mentionOnFailure;
 
     factsBuilder = new FactsBuilder(run, taskListener);
@@ -101,8 +96,8 @@ public CardBuilder(Run run, TaskListener taskListener, boolean isAdaptiveCards,
         }
         factsBuilder.addStatus(status);
         factsBuilder.addRemarks();
-        factsBuilder.addCommitters(mentionCommitters && shouldMention);
-        factsBuilder.addDevelopers(mentionDevelopers && shouldMention);
+        factsBuilder.addCommitters(shouldMention);
+        factsBuilder.addDevelopers();
         factsBuilder.addUserFacts(factDefinitions);
 
         Section section = buildSection(status);

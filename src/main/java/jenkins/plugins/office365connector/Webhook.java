@@ -48,8 +48,6 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     private boolean notifyFailure;
     private boolean notifyBackToNormal;
     private boolean notifyRepeatedFailure;
-    private boolean mentionCommitters;
-    private boolean mentionDevelopers;
     private boolean mentionOnFailure = true;
 
     private int timeout;
@@ -189,24 +187,6 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     @DataBoundSetter
     public void setFactDefinitions(List<FactDefinition> factDefinitions) {
         this.factDefinitions = Util.fixNull(factDefinitions);
-    }
-
-    public boolean isMentionCommitters() {
-    return mentionCommitters;
-    }
-
-    @DataBoundSetter
-    public void setMentionCommitters(boolean mentionCommitters) {
-        this.mentionCommitters = mentionCommitters;
-    }
-
-    public boolean isMentionDevelopers() {
-        return mentionDevelopers;
-    }
-
-    @DataBoundSetter
-    public void setMentionDevelopers(boolean mentionDevelopers) {
-        this.mentionDevelopers = mentionDevelopers;
     }
 
     public boolean isMentionOnFailure() {
