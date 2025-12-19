@@ -111,10 +111,8 @@ public class FactsBuilder {
         // Collect authors safely
         for (ChangeLogSet<ChangeLogSet.Entry> set : changeSets) {
             for (ChangeLogSet.Entry entry : set) {
-                User author = entry.getAuthor();
-                if (author != null) {
-                    authors.add(author);
-                }
+                authors.add(entry.getAuthor());
+
             }
         }
 
