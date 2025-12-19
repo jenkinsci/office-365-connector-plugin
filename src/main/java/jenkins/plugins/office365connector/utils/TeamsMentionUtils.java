@@ -22,8 +22,8 @@ public final class TeamsMentionUtils {
             return "Unknown user";
         }
         Mailer.UserProperty userProperty = user.getProperty(Mailer.UserProperty.class);
-        if (prop != null && StringUtils.isNotBlank(prop.getAddress())) {
-            return mentionEmail(prop.getAddress());
+        if (prop != null && StringUtils.isNotBlank(userProperty.getAddress())) {
+            return mentionEmail(userProperty.getAddress());
         }
         // fallback: just return username
         return user.getFullName();
