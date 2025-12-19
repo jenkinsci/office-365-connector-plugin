@@ -112,7 +112,6 @@ public class FactsBuilder {
         for (ChangeLogSet<ChangeLogSet.Entry> set : changeSets) {
             for (ChangeLogSet.Entry entry : set) {
                 authors.add(entry.getAuthor());
-
             }
         }
 
