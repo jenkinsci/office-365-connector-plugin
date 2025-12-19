@@ -11,7 +11,7 @@ class TeamsMentionUtilsTest {
 
     @Test
     void mentionUser_nullUser_returnsUnknown() {
-        assertEquals("Unknown User", TeamsMentionUtils.mentionUserOrEmail(null), "Expected 'Unknown User' when user is null");
+        assertEquals("Unknown user", TeamsMentionUtils.mentionUserOrEmail(null), "Expected 'Unknown user' when user is null");
     }
 
     @Test
