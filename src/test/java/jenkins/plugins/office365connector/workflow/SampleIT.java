@@ -195,4 +195,50 @@ class SampleIT extends AbstractTest {
         assertThat(workerData.get(0), equalTo(workerData.get(1)));
         assertEquals(2, workerConstruction.constructed().size());
     }
+
+@Test
+void sendBuildCompletedNotification_FailedBuildWithMentions_SendsProperData() {
+    // given
+    when(run.getResult()).thenReturn(Result.FAILURE);
+
+    // mock the parent job to have our webhook
+    mockProperty(run.getParent(), WebhookBuilder.sampleFailedWebhookWithMentions());
+
+    // mock change sets for committers Mike and Alice
+    ChangeLogSet.Entry mikeEntry = mock(ChangeLogSet.Entry.class);
+    ChangeLogSet.Entry aliceEntry = mock(ChangeLogSet.Entry.class);
+
+    // Mock users and their email properties
+    User mikeUser = AffectedFileBuilder.mockUser("Mike");
+    User aliceUser = AffectedFileBuilder.mockUser("Alice");
+
+    // Mock Mailer.UserProperty for proper email resolution
+    Mailer.UserProperty mikeMailer = mock(Mailer.UserProperty.class);
+    when(mikeMailer.getAddress()).thenReturn("mike@example.com");
+    when(mikeUser.getProperty(Mailer.UserProperty.class)).thenReturn(mikeMailer);
+
+    Mailer.UserProperty aliceMailer = mock(Mailer.UserProperty.class);
+    when(aliceMailer.getAddress()).thenReturn("alice@example.com");
+    when(aliceUser.getProperty(Mailer.UserProperty.class)).thenReturn(aliceMailer);
+
+    when(mikeEntry.getAuthor()).thenReturn(mikeUser);
+    when(aliceEntry.getAuthor()).thenReturn(aliceUser);
+
+    // wrap entries in a ChangeLogSet and mock run.getChangeSets()
+    ChangeLogSet<Entry> changeSet = new ChangeLogSetBuilder(run, mikeEntry, aliceEntry);
+    when(run.getChangeSets()).thenReturn(List.of(changeSet));
+
+    Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
+
+    // when
+    notifier.sendBuildCompletedNotification();
+
+    // then
+    assertHasSameContent(workerData.get(0),
+            FileUtils.getContentFile("completed-failed-with-mentions.json"));
+    assertEquals(1, workerConstruction.constructed().size());
+}
+
+
+
 }
