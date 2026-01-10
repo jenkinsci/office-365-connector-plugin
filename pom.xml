@@ -31,7 +31,9 @@
         <jenkins.version>${jenkins.baseline}.3</jenkins.version>
 
         <gitHubRepo>jenkinsci/office-365-connector-plugin</gitHubRepo>
-		<ban-junit4-imports.skip>false</ban-junit4-imports.skip>
+        <hpi.bundledArtifacts>commons-digester,commons-validator</hpi.bundledArtifacts>
+        <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
+        <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
     </properties>
 
     <dependencyManagement>
@@ -57,6 +59,11 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>apache-httpcomponents-client-5-api</artifactId>
