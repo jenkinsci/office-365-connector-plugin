@@ -32,7 +32,6 @@ import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.model.FactDefinition;
 import jenkins.scm.RunWithSCM;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
@@ -120,7 +119,7 @@ public class FactsBuilder {
     }
 
     public void addUserFacts(List<FactDefinition> factDefinitions) {
-        if (CollectionUtils.isNotEmpty(factDefinitions)) {
+        if (factDefinitions != null && !factDefinitions.isEmpty()) {
             for (FactDefinition factDefinition : factDefinitions) {
                 addFact(factDefinition.getName(), evaluateMacro(factDefinition.getTemplate()));
             }
