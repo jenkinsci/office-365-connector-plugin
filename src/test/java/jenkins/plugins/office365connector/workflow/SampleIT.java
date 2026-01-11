@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
@@ -216,7 +217,15 @@ class SampleIT extends AbstractTest {
         ChangeLogSet.Entry mikeEntry = mock(ChangeLogSet.Entry.class);
         when(mikeEntry.getAuthor()).thenReturn(mikeUser);
 
-        ChangeLogSet<ChangeLogSet.Entry> changeSet = new ChangeLogSetBuilder(run, aliceEntry, mikeEntry);
+        List<ChangeLogSet.Entry> entries = List.of(aliceEntry, mikeEntry)
+        .stream()
+        .sorted(Comparator.comparing(
+                e -> e.getAuthor().getFullName(),
+                String.CASE_INSENSITIVE_ORDER
+        ))
+        .toList();
+
+        ChangeLogSet<ChangeLogSet.Entry> changeSet = new ChangeLogSetBuilder(run, entries).build();
         when(run.getChangeSets()).thenReturn(List.of(changeSet));
         
         Set<User> culprits = new HashSet<>();
@@ -243,6 +252,7 @@ class SampleIT extends AbstractTest {
         User user = mock(User.class);
         when(user.getFullName()).thenReturn(name);
         when(user.getId()).thenReturn(name.toLowerCase());
+        when(user.toString()).thenReturn(name);
         
         Mailer.UserProperty mailProperty = mock(Mailer.UserProperty.class);
         when(mailProperty.getAddress()).thenReturn(email);
