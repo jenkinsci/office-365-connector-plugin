@@ -233,10 +233,12 @@ class SampleIT extends AbstractTest {
 
     /**
      * Helper method to create a mock User with email configured.
-     * Uses AffectedFileBuilder.mockUser() as the base and adds email property.
+     * Ensures fullName is set to avoid NullPointerException during sorting in FactsBuilder.
      */
     private User createUserWithEmail(String name, String email) {
-        User user = AffectedFileBuilder.mockUser(name);
+        User user = mock(User.class);
+        when(user.getFullName()).thenReturn(name);
+        when(user.getId()).thenReturn(name.toLowerCase());
         
         Mailer.UserProperty mailProperty = mock(Mailer.UserProperty.class);
         when(mailProperty.getAddress()).thenReturn(email);
@@ -244,5 +246,4 @@ class SampleIT extends AbstractTest {
         
         return user;
     }
-
 }
