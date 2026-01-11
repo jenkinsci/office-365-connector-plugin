@@ -12,10 +12,10 @@
         },
         "body": [
           {
-            "text": "...",
+            "text": "myFirst_Job_: Build #167 Failed",
             "weight": "bolder",
-            "size": "default",
-            "color": "default",
+            "size": "large",
+            "color": "attention",
             "type": "TextBlock",
             "wrap": true
           },
@@ -26,23 +26,27 @@
                 "type": "Column",
                 "items": [
                   {
-                    "type": "TextBlock",
                     "text": "Notification from myFirst\\_Job\\_: Build Failed",
                     "weight": "bolder",
+                    "size": "default",
+                    "color": "default",
+                    "type": "TextBlock",
                     "wrap": true
                   },
                   {
-                    "type": "TextBlock",
                     "text": "Latest status of build #167",
+                    "weight": "default",
+                    "size": "default",
+                    "color": "default",
+                    "type": "TextBlock",
                     "wrap": true
                   }
-                ],
-                "width": "stretch"
+                ]
               }
-            ]
+            ],
+            "width": "stretch"
           },
           {
-            "type": "FactSet",
             "facts": [
               {
                 "title": "Status",
@@ -60,7 +64,8 @@
                 "title": "Developers",
                 "value": "Alice, Mike"
               }
-            ]
+            ],
+            "type": "FactSet"
           }
         ],
         "actions": [
