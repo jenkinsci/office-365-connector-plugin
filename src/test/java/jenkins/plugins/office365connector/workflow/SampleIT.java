@@ -3,6 +3,8 @@ package jenkins.plugins.office365connector.workflow;
 import hudson.model.AbstractBuild;
 import hudson.model.Job;
 import hudson.model.Result;
+import hudson.model.User;
+import hudson.tasks.Mailer;
 import hudson.scm.ChangeLogSet;
 import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.FileUtils;
@@ -196,49 +198,50 @@ class SampleIT extends AbstractTest {
         assertEquals(2, workerConstruction.constructed().size());
     }
 
-@Test
-void sendBuildCompletedNotification_FailedBuildWithMentions_SendsProperData() {
-    // given
-    when(run.getResult()).thenReturn(Result.FAILURE);
+    @Test
+    void sendBuildCompletedNotification_FailedBuildWithMentions_SendsProperData() {
+        // given
+        when(run.getResult()).thenReturn(Result.FAILURE);
+        mockProperty(run.getParent(), WebhookBuilder.sampleFailedWebhookWithMentions());
 
-    // mock the parent job to have our webhook
-    mockProperty(run.getParent(), WebhookBuilder.sampleFailedWebhookWithMentions());
+        // Create users with email properties
+        User mikeUser = createUserWithEmail("Mike", "mike@example.com");
+        User aliceUser = createUserWithEmail("Alice", "alice@example.com");
 
-    // mock change sets for committers Mike and Alice
-    ChangeLogSet.Entry mikeEntry = mock(ChangeLogSet.Entry.class);
-    ChangeLogSet.Entry aliceEntry = mock(ChangeLogSet.Entry.class);
+        // Create changelog entries
+        ChangeLogSet.Entry mikeEntry = mock(ChangeLogSet.Entry.class);
+        when(mikeEntry.getAuthor()).thenReturn(mikeUser);
+        
+        ChangeLogSet.Entry aliceEntry = mock(ChangeLogSet.Entry.class);
+        when(aliceEntry.getAuthor()).thenReturn(aliceUser);
 
-    // Mock users and their email properties
-    User mikeUser = AffectedFileBuilder.mockUser("Mike");
-    User aliceUser = AffectedFileBuilder.mockUser("Alice");
+        // Setup changeset using existing helper
+        ChangeLogSet<ChangeLogSet.Entry> changeSet = new ChangeLogSetBuilder(run, mikeEntry, aliceEntry);
+        when(run.getChangeSets()).thenReturn(List.of(changeSet));
 
-    // Mock Mailer.UserProperty for proper email resolution
-    Mailer.UserProperty mikeMailer = mock(Mailer.UserProperty.class);
-    when(mikeMailer.getAddress()).thenReturn("mike@example.com");
-    when(mikeUser.getProperty(Mailer.UserProperty.class)).thenReturn(mikeMailer);
+        Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
 
-    Mailer.UserProperty aliceMailer = mock(Mailer.UserProperty.class);
-    when(aliceMailer.getAddress()).thenReturn("alice@example.com");
-    when(aliceUser.getProperty(Mailer.UserProperty.class)).thenReturn(aliceMailer);
+        // when
+        notifier.sendBuildCompletedNotification();
 
-    when(mikeEntry.getAuthor()).thenReturn(mikeUser);
-    when(aliceEntry.getAuthor()).thenReturn(aliceUser);
+        // then
+        assertHasSameContent(workerData.get(0),
+                FileUtils.getContentFile("completed-failed-with-mentions.json"));
+        assertEquals(1, workerConstruction.constructed().size());
+    }
 
-    // wrap entries in a ChangeLogSet and mock run.getChangeSets()
-    ChangeLogSet<Entry> changeSet = new ChangeLogSetBuilder(run, mikeEntry, aliceEntry);
-    when(run.getChangeSets()).thenReturn(List.of(changeSet));
-
-    Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
-
-    // when
-    notifier.sendBuildCompletedNotification();
-
-    // then
-    assertHasSameContent(workerData.get(0),
-            FileUtils.getContentFile("completed-failed-with-mentions.json"));
-    assertEquals(1, workerConstruction.constructed().size());
-}
-
-
+    /**
+     * Helper method to create a mock User with email configured.
+     * Uses AffectedFileBuilder.mockUser() as the base and adds email property.
+     */
+    private User createUserWithEmail(String name, String email) {
+        User user = AffectedFileBuilder.mockUser(name);
+        
+        Mailer.UserProperty mailProperty = mock(Mailer.UserProperty.class);
+        when(mailProperty.getAddress()).thenReturn(email);
+        when(user.getProperty(Mailer.UserProperty.class)).thenReturn(mailProperty);
+        
+        return user;
+    }
 
 }
