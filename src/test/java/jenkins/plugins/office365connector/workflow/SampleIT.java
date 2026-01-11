@@ -205,20 +205,22 @@ class SampleIT extends AbstractTest {
         when(run.getResult()).thenReturn(Result.FAILURE);
         mockProperty(run.getParent(), WebhookBuilder.sampleFailedWebhookWithMentions());
 
-        // Create users with email properties
-        User mikeUser = createUserWithEmail("Mike", "mike@example.com");
         User aliceUser = createUserWithEmail("Alice", "alice@example.com");
+        User mikeUser = createUserWithEmail("Mike", "mike@example.com");
 
-        // Create changelog entries
-        ChangeLogSet.Entry mikeEntry = mock(ChangeLogSet.Entry.class);
-        when(mikeEntry.getAuthor()).thenReturn(mikeUser);
-        
         ChangeLogSet.Entry aliceEntry = mock(ChangeLogSet.Entry.class);
         when(aliceEntry.getAuthor()).thenReturn(aliceUser);
+        
+        ChangeLogSet.Entry mikeEntry = mock(ChangeLogSet.Entry.class);
+        when(mikeEntry.getAuthor()).thenReturn(mikeUser);
 
-        // Setup changeset using existing helper
-        ChangeLogSet<ChangeLogSet.Entry> changeSet = new ChangeLogSetBuilder(run, mikeEntry, aliceEntry);
+        ChangeLogSet<ChangeLogSet.Entry> changeSet = new ChangeLogSetBuilder(run, aliceEntry, mikeEntry);
         when(run.getChangeSets()).thenReturn(List.of(changeSet));
+        
+        Set<User> culprits = new HashSet<>();
+        culprits.add(aliceUser);
+        culprits.add(mikeUser);
+        when(run.getCulprits()).thenReturn(culprits);
 
         Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
 
