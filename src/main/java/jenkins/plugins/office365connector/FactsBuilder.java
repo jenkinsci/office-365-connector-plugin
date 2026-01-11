@@ -88,6 +88,7 @@ public class FactsBuilder {
         Set<User> authors = runWithSCM.getCulprits();
 
         String joinedCommitters = authors.stream()
+            .sorted(Comparator.comparing(User::getFullName))
             .map(user -> mentionCommitters ? TeamsMentionUtils.mentionUserOrEmail(user) : user.getFullName())
             .filter(StringUtils::isNotBlank) // remove nulls or empty strings
             .collect(Collectors.joining(", "));
