@@ -55,6 +55,10 @@
               {
                 "title": "Committers",
                 "value": "<at>alice@example.com</at>, <at>mike@example.com</at>"
+              },
+              {
+                "title": "Developers",
+                "value": "Alice, Mike"
               }
             ]
           }
