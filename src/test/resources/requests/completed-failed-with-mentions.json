@@ -12,11 +12,11 @@
         },
         "body": [
           {
-            "type": "TextBlock",
-            "text": "myFirst_Job_: Build #167 Failed",
+            "text": "...",
             "weight": "bolder",
-            "size": "large",
-            "color": "attention",
+            "size": "default",
+            "color": "default",
+            "type": "TextBlock",
             "wrap": true
           },
           {
@@ -24,7 +24,6 @@
             "columns": [
               {
                 "type": "Column",
-                "width": "stretch",
                 "items": [
                   {
                     "type": "TextBlock",
@@ -37,7 +36,8 @@
                     "text": "Latest status of build #167",
                     "wrap": true
                   }
-                ]
+                ],
+                "width": "stretch"
               }
             ]
           },
@@ -54,7 +54,7 @@
               },
               {
                 "title": "Committers",
-                "value": "<at>alice@example.com</at>, <at>mike@example.com</at>"
+                "value": "\u003cat\u003ealice@example.com\u003c/at\u003e, \u003cat\u003emike@example.com\u003c/at\u003e"
               },
               {
                 "title": "Developers",
