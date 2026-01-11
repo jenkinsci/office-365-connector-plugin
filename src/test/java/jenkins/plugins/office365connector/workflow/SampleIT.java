@@ -11,6 +11,7 @@ import jenkins.plugins.office365connector.FileUtils;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
+import jenkins.plugins.office365connector.helpers.ChangeLogSetBuilder;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
 import org.junit.jupiter.api.AfterEach;
