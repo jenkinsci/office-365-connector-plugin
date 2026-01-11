@@ -217,15 +217,19 @@ class SampleIT extends AbstractTest {
         ChangeLogSet.Entry mikeEntry = mock(ChangeLogSet.Entry.class);
         when(mikeEntry.getAuthor()).thenReturn(mikeUser);
 
-        List<ChangeLogSet.Entry> entries = List.of(aliceEntry, mikeEntry)
-        .stream()
-        .sorted(Comparator.comparing(
-                e -> e.getAuthor().getFullName(),
-                String.CASE_INSENSITIVE_ORDER
-        ))
-        .toList();
+        List<ChangeLogSet.Entry> sortedEntries = List.of(aliceEntry, mikeEntry)
+                .stream()
+                .sorted(Comparator.comparing(
+                        e -> e.getAuthor().getFullName(),
+                        String.CASE_INSENSITIVE_ORDER
+                ))
+                .toList();
 
-        ChangeLogSet<ChangeLogSet.Entry> changeSet = new ChangeLogSetBuilder(run, entries).build();
+        ChangeLogSet<ChangeLogSet.Entry> changeSet =
+                new ChangeLogSetBuilder(
+                        run,
+                        sortedEntries.toArray(new ChangeLogSet.Entry[0])
+                );
         when(run.getChangeSets()).thenReturn(List.of(changeSet));
         
         Set<User> culprits = new HashSet<>();
