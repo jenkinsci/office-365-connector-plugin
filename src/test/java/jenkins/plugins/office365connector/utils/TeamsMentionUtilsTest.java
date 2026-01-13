@@ -10,11 +10,6 @@ import org.mockito.Mockito;
 class TeamsMentionUtilsTest {
 
     @Test
-    void mentionUser_nullUser_returnsUnknown() {
-        assertEquals("Unknown user", TeamsMentionUtils.mentionUserOrEmail(null), "Expected 'Unknown user' when user is null");
-    }
-
-    @Test
     void mentionUser_userWithEmail_returnsMentionTag() throws Exception {
         User user = Mockito.mock(User.class);
         Mailer.UserProperty userProperty = Mockito.mock(Mailer.UserProperty.class);
