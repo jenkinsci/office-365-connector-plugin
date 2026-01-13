@@ -90,7 +90,7 @@ public class FactsBuilder {
         String joinedCommitters = authors.stream()
             .sorted(Comparator.comparing(User::getFullName))
             .map(user -> mentionCommitters ? TeamsMentionUtils.mentionUserOrEmail(user) : user.getFullName())
-            .filter(StringUtils::isNotBlank) // remove nulls or empty strings
+            .filter(StringUtils::isNotBlank) // remove empty strings
             .collect(Collectors.joining(", "));
         addFact(COMMITTERS, joinedCommitters);
     }
