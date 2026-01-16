@@ -1,7 +1,7 @@
 package jenkins.plugins.office365connector.helpers;
 
 import hudson.util.ReflectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
