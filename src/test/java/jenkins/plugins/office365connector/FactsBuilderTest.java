@@ -10,7 +10,7 @@ import jenkins.plugins.office365connector.helpers.CauseBuilder;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.model.FactDefinition;
 import jenkins.plugins.office365connector.workflow.AbstractTest;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

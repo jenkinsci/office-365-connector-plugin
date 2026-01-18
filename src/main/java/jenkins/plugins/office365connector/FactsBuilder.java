@@ -32,7 +32,7 @@ import hudson.scm.ChangeLogSet;
 import jenkins.plugins.office365connector.model.Fact;
 import jenkins.plugins.office365connector.model.FactDefinition;
 import jenkins.scm.RunWithSCM;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
