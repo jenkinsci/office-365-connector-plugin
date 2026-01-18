@@ -3,12 +3,15 @@ package jenkins.plugins.office365connector.workflow;
 import hudson.model.AbstractBuild;
 import hudson.model.Job;
 import hudson.model.Result;
+import hudson.model.User;
+import hudson.tasks.Mailer;
 import hudson.scm.ChangeLogSet;
 import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.FileUtils;
 import jenkins.plugins.office365connector.Office365ConnectorWebhookNotifier;
 import jenkins.plugins.office365connector.Webhook;
 import jenkins.plugins.office365connector.helpers.AffectedFileBuilder;
+import jenkins.plugins.office365connector.helpers.ChangeLogSetBuilder;
 import jenkins.plugins.office365connector.helpers.ClassicDisplayURLProviderBuilder;
 import jenkins.plugins.office365connector.helpers.WebhookBuilder;
 import org.junit.jupiter.api.AfterEach;
@@ -18,6 +21,8 @@ import org.mockito.MockedStatic;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -194,5 +199,56 @@ class SampleIT extends AbstractTest {
         assertThat(workerData, hasSize(2));
         assertThat(workerData.get(0), equalTo(workerData.get(1)));
         assertEquals(2, workerConstruction.constructed().size());
+    }
+
+    @Test
+    void sendBuildCompletedNotification_FailedBuildWithMentions_SendsProperData() {
+        // given
+        when(run.getResult()).thenReturn(Result.FAILURE);
+        mockProperty(run.getParent(), WebhookBuilder.sampleFailedWebhookWithMentions());
+
+        User aliceUser = createUserWithEmail("Alice", "alice@example.com");
+        User mikeUser = createUserWithEmail("Mike", "mike@example.com");
+
+        ChangeLogSet.Entry aliceEntry = mock(ChangeLogSet.Entry.class);
+        when(aliceEntry.getAuthor()).thenReturn(aliceUser);
+        
+        ChangeLogSet.Entry mikeEntry = mock(ChangeLogSet.Entry.class);
+        when(mikeEntry.getAuthor()).thenReturn(mikeUser);
+
+        ChangeLogSet<ChangeLogSet.Entry> changeSet = new ChangeLogSetBuilder(run, aliceEntry, mikeEntry);
+        when(run.getChangeSets()).thenReturn(List.of(changeSet));
+        
+        Set<User> culprits = new HashSet<>();
+        culprits.add(aliceUser);
+        culprits.add(mikeUser);
+        when(run.getCulprits()).thenReturn(culprits);
+
+        Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, mockListener());
+
+        // when
+        notifier.sendBuildCompletedNotification();
+
+        // then
+        assertHasSameContent(workerData.get(0),
+                FileUtils.getContentFile("completed-failed-with-mentions.json"));
+        assertEquals(1, workerConstruction.constructed().size());
+    }
+
+    /**
+     * Helper method to create a mock User with email configured.
+     * Ensures fullName is set to avoid NullPointerException during sorting in FactsBuilder.
+     */
+    private User createUserWithEmail(String name, String email) {
+        User user = mock(User.class);
+        when(user.getFullName()).thenReturn(name);
+        when(user.getId()).thenReturn(name.toLowerCase());
+        when(user.toString()).thenReturn(name);
+        
+        Mailer.UserProperty mailProperty = mock(Mailer.UserProperty.class);
+        when(mailProperty.getAddress()).thenReturn(email);
+        when(user.getProperty(Mailer.UserProperty.class)).thenReturn(mailProperty);
+        
+        return user;
     }
 }
