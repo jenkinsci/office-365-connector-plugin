@@ -2,7 +2,9 @@ package jenkins.plugins.office365connector.utils;
 
 import org.apache.commons.lang.StringUtils;
 import hudson.model.User;
-import hudson.tasks.Mailer;
+import hudson.model.UserProperty;
+
+import java.lang.reflect.Method;
 
 public final class TeamsMentionUtils {
 
@@ -18,12 +20,27 @@ public final class TeamsMentionUtils {
     }
 
     public static String mentionUserOrEmail(User user) {
-        Mailer.UserProperty userProperty = user.getProperty(Mailer.UserProperty.class);
-        if (userProperty != null && StringUtils.isNotBlank(userProperty.getAddress())) {
-            return mentionEmail(userProperty.getAddress());
+        try {
+            @SuppressWarnings("unchecked")
+            Class<? extends UserProperty> mailerPropClass =
+                (Class<? extends UserProperty>)
+                    Class.forName("hudson.tasks.Mailer$UserProperty");
+
+            UserProperty prop = user.getProperty(mailerPropClass);
+            if (prop != null) {
+                Method getAddress = mailerPropClass.getMethod("getAddress");
+                Object email = getAddress.invoke(prop);
+
+                if (email instanceof String && StringUtils.isNotBlank((String) email)) {
+                    return mentionEmail((String) email);
+                }
+            }
+        } catch (ClassNotFoundException e) {
+            // Mailer not installed — ignore
+        } catch (Exception e) {
+            // Defensive: ignore and fall back
         }
-        // fallback: just return username
+
         return user.getFullName();
     }
-
 }
