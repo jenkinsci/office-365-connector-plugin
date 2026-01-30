@@ -244,10 +244,9 @@ class SampleIT extends AbstractTest {
         when(user.getFullName()).thenReturn(name);
         when(user.getId()).thenReturn(name.toLowerCase());
         when(user.toString()).thenReturn(name);
-        
-        Mailer.UserProperty mailProperty = mock(Mailer.UserProperty.class);
-        when(mailProperty.getAddress()).thenReturn(email);
-        when(user.getProperty(Mailer.UserProperty.class)).thenReturn(mailProperty);
+
+        Mailer.UserProperty mailerProp = new Mailer.UserProperty(email);
+        when(user.getProperty(Mailer.UserProperty.class)).thenReturn(mailerProp);
         
         return user;
     }
