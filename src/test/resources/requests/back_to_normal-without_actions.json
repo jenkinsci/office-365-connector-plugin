@@ -1,4 +1,6 @@
 {
+    "@context": "https://schema.org/extensions",
+    "@type": "MessageCard",
     "summary": "hook » PR-1: Build #3 Back to Normal",
     "themeColor": "#00FF00",
     "sections": [

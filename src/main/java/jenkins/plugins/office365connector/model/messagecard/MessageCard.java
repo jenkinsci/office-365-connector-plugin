@@ -17,6 +17,8 @@ package jenkins.plugins.office365connector.model.messagecard;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.gson.annotations.SerializedName;
+
 import jenkins.plugins.office365connector.model.CardAction;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.Section;
@@ -25,6 +27,12 @@ import jenkins.plugins.office365connector.model.Section;
  * @author srhebbar
  */
 public class MessageCard implements Card {
+
+    @SerializedName("@context")
+    private String context = "https://schema.org/extensions";
+
+    @SerializedName("@type")
+    private String type = "MessageCard";
 
     private String summary;
     private String themeColor = "3479BF";
@@ -37,6 +45,14 @@ public class MessageCard implements Card {
     public MessageCard(String summary, Section section) {
         this.summary = summary;
         this.sections = Arrays.asList(section);
+    }
+
+    public String getContext() {
+        return context;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public String getSummary() {

@@ -1,4 +1,6 @@
 {
+    "@context": "https://schema.org/extensions",
+    "@type": "MessageCard",
     "summary": "myFirst_Job_: Build #167 Failed",
     "themeColor": "#CC0003",
     "sections": [

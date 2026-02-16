@@ -70,4 +70,30 @@ class MessageCardTest {
         assertThat(messageCard.getAction(), hasSize(1));
         assertThat(messageCard.getAction(), contains(action));
     }
+
+    @Test
+    void getContext_ReturnsContext() {
+
+        // given
+        MessageCard messageCard = new MessageCard("mySummary", null);
+
+        // when
+        String context = messageCard.getContext();
+
+        // then
+        assertThat(context, equalTo("https://schema.org/extensions"));
+    }
+
+    @Test
+    void getType_ReturnsType() {
+
+        // given
+        MessageCard messageCard = new MessageCard("mySummary", null);
+
+        // when
+        String type = messageCard.getType();
+
+        // then
+        assertThat(type, equalTo("MessageCard"));
+    }
 }
