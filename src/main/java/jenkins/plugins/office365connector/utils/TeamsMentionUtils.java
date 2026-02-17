@@ -1,6 +1,6 @@
 package jenkins.plugins.office365connector.utils;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import hudson.model.User;
 import hudson.model.UserProperty;
 
