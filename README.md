@@ -1,5 +1,5 @@
 [![Github build](https://github.com/jenkinsci/office-365-connector-plugin/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/jenkinsci/office-365-connector-plugin/actions/workflows/build.yml)
-[![Build Status](https://ci.jenkins.io/job/Plugins/job/office-365-connector-plugin/job/master/badge/icon)](https://ci.jenkins.io/job/Plugins/job/office-365-connector-plugin/job/master/)
+[![Build Status](https://ci.jenkins.io/buildStatus/icon?job=Plugins%2Foffice-365-connector-plugin%2Fmaster)](https://ci.jenkins.io/job/Plugins/job/office-365-connector-plugin/job/master/)
 
 [![Coverage Status](https://codecov.io/gh/jenkinsci/office-365-connector-plugin/branch/master/graph/badge.svg)](https://codecov.io/github/jenkinsci/office-365-connector-plugin)
 [![Popularity](https://img.shields.io/jenkins/plugin/i/Office-365-Connector.svg)](https://plugins.jenkins.io/Office-365-Connector)
