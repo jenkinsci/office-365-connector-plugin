@@ -54,6 +54,17 @@ public class WebhookBuilder {
         return webhook;
     }
 
+    public static List<Webhook> sampleFailedWebhookWithMentions() {
+        Webhook webhook = new Webhook(ClassicDisplayURLProviderBuilder.LOCALHOST_URL_TEMPLATE);
+
+        enableAllStatuses(webhook);
+
+        webhook.setAdaptiveCards(true);
+        webhook.setMentionOnFailure(true);
+        
+        return List.of(webhook);
+    }
+
     private static void enableAllStatuses(Webhook webhook) {
         webhook.setNotifyAborted(true);
         webhook.setNotifyBackToNormal(true);

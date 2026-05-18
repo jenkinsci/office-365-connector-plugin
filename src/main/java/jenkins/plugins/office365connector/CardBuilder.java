@@ -35,14 +35,23 @@ public class CardBuilder {
     private final FactsBuilder factsBuilder;
     private final ActionableBuilder potentialActionBuilder;
     private final boolean isAdaptiveCards;
+    private final boolean mentionOnFailure;
 
-    public CardBuilder(Run run, TaskListener taskListener, boolean isAdaptiveCards) {
-        this.run = run;
-        this.isAdaptiveCards = isAdaptiveCards;
+// Old constructor kept for backward compatibility
+public CardBuilder(Run run, TaskListener taskListener, boolean isAdaptiveCards) {
+    this(run, taskListener, isAdaptiveCards, true); // sensible defaults
+}
 
-        factsBuilder = new FactsBuilder(run, taskListener);
-        potentialActionBuilder = new ActionableBuilder(run, factsBuilder, isAdaptiveCards);
-    }
+// Main constructor with all options
+public CardBuilder(Run run, TaskListener taskListener, boolean isAdaptiveCards,
+                   boolean mentionOnFailure) {
+    this.run = run;
+    this.isAdaptiveCards = isAdaptiveCards;
+    this.mentionOnFailure = mentionOnFailure;
+
+    factsBuilder = new FactsBuilder(run, taskListener);
+    potentialActionBuilder = new ActionableBuilder(run, factsBuilder, isAdaptiveCards);
+}
 
     public Card createStartedCard(List<FactDefinition> factDefinitions) {
         final String statusName = "Started";
@@ -71,6 +80,9 @@ public class CardBuilder {
         Run lastNotFailedBuild = run.getPreviousNotFailedBuild();
 
         boolean isRepeatedFailure = isRepeatedFailure(previousResult, lastNotFailedBuild);
+
+        boolean shouldMention = (lastResult == Result.FAILURE || lastResult == Result.UNSTABLE) && mentionOnFailure;
+
         String summary = String.format("%s: Build %s %s", getDisplayName(), getRunName(),
                 calculateSummary(lastResult, previousResult, isRepeatedFailure));
         String status = calculateStatus(lastResult, previousResult, isRepeatedFailure);
@@ -84,7 +96,7 @@ public class CardBuilder {
         }
         factsBuilder.addStatus(status);
         factsBuilder.addRemarks();
-        factsBuilder.addCommitters();
+        factsBuilder.addCommitters(shouldMention);
         factsBuilder.addDevelopers();
         factsBuilder.addUserFacts(factDefinitions);
 
