@@ -11,6 +11,7 @@ import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.plugins.office365connector.model.FactDefinition;
+import jenkins.plugins.office365connector.model.Mention;
 import jenkins.plugins.office365connector.utils.FormUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.workflow.steps.Step;
@@ -32,6 +33,7 @@ public class Office365ConnectorSendStep extends Step {
     private List<FactDefinition> factDefinitions;
     private String color;
     private boolean adaptiveCards;
+    private List<Mention> mentions;
 
     @DataBoundConstructor
     public Office365ConnectorSendStep(String webhookUrl) {
@@ -91,6 +93,15 @@ public class Office365ConnectorSendStep extends Step {
     @DataBoundSetter
     public void setAdaptiveCards(boolean adaptiveCards) {
         this.adaptiveCards = adaptiveCards;
+    }
+
+    public List<Mention> getMentions() {
+        return mentions;
+    }
+
+    @DataBoundSetter
+    public void setMentions(List<Mention> mentions) {
+        this.mentions = mentions;
     }
 
     @Extension

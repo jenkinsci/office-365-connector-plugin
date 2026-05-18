@@ -20,6 +20,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.FactDefinition;
+import jenkins.plugins.office365connector.model.Mention;
 import jenkins.plugins.office365connector.model.Section;
 import jenkins.plugins.office365connector.model.adaptivecard.AdaptiveCard;
 import jenkins.plugins.office365connector.model.messagecard.MessageCard;
@@ -45,6 +46,10 @@ public class CardBuilder {
     }
 
     public Card createStartedCard(List<FactDefinition> factDefinitions) {
+        return createStartedCard(factDefinitions, List.of());
+    }
+
+    public Card createStartedCard(List<FactDefinition> factDefinitions, List<Mention> mentions) {
         final String statusName = "Started";
         factsBuilder.addStatus(statusName);
         factsBuilder.addRemarks();
@@ -55,13 +60,17 @@ public class CardBuilder {
         Section section = buildSection(statusName);
 
         String summary = getDisplayName() + ": Build " + getRunName();
-        Card card = isAdaptiveCards ? new AdaptiveCard(summary, section, getCompletedResult(run)) : new MessageCard(summary, section);
+        Card card = isAdaptiveCards ? new AdaptiveCard(summary, section, getCompletedResult(run), mentions) : new MessageCard(summary, section);
         card.setAction(potentialActionBuilder.buildActionable());
 
         return card;
     }
 
     public Card createCompletedCard(List<FactDefinition> factDefinitions) {
+        return createCompletedCard(factDefinitions, List.of());
+    }
+
+    public Card createCompletedCard(List<FactDefinition> factDefinitions, List<Mention> mentions) {
         // result might be null only for ongoing job - check documentation of Run.getCompletedResult()
         // but based on issue #133 it may happen that result for completed job is null
         Result lastResult = getCompletedResult(run);
@@ -90,7 +99,7 @@ public class CardBuilder {
 
         Section section = buildSection(status);
 
-        Card card = isAdaptiveCards ? new AdaptiveCard(summary, section, getCompletedResult(run)) : new MessageCard(summary, section);
+        Card card = isAdaptiveCards ? new AdaptiveCard(summary, section, getCompletedResult(run), mentions) : new MessageCard(summary, section);
         card.setThemeColor(getCardThemeColor(lastResult));
         if (run.getResult() != Result.SUCCESS) {
             card.setAction(potentialActionBuilder.buildActionable());
@@ -192,7 +201,8 @@ public class CardBuilder {
         Section section = new Section(activityTitle, stepParameters.getMessage(), factsBuilder.collect());
 
         String summary = getDisplayName() + ": Build " + getRunName();
-        Card card = isAdaptiveCards ? new AdaptiveCard(summary, section, getCompletedResult(run)) : new MessageCard(summary, section);
+        List<Mention> mentions = stepParameters.getMentions() != null ? stepParameters.getMentions() : List.of();
+        Card card = isAdaptiveCards ? new AdaptiveCard(summary, section, getCompletedResult(run), mentions) : new MessageCard(summary, section);
 
         if (stepParameters.getColor() != null) {
             card.setThemeColor(stepParameters.getColor());
