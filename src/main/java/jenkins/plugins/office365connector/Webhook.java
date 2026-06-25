@@ -43,6 +43,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.verb.POST;
 
 public class Webhook extends AbstractDescribableImpl<Webhook> {
 
@@ -258,12 +259,14 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
         }
 
         public FormValidation doCheckUrl(@QueryParameter String value, @QueryParameter String credentialsId) {
+        @POST
             if (StringUtils.isNotBlank(credentialsId)) {
                 return FormValidation.ok();
             }
             return FormUtils.formValidateUrl(value);
         }
 
+        @POST
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String credentialsId) {
             StandardListBoxModel result = new StandardListBoxModel();
             if (item == null) {
@@ -287,6 +290,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
                     .includeCurrentValue(credentialsId);
         }
 
+        @POST
         public FormValidation doCheckCredentialsId(@AncestorInPath Item item, @QueryParameter String value) {
             if (item == null) {
                 if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {

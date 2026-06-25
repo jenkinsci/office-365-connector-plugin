@@ -31,6 +31,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.verb.POST;
 
 /**
  * Workflow step to send a notification to Jenkins office 365 connector.
@@ -135,12 +136,14 @@ public class Office365ConnectorSendStep extends Step {
         }
 
         public FormValidation doCheckWebhookUrl(@QueryParameter String value, @QueryParameter String credentialsId) {
+        @POST
             if (StringUtils.isNotBlank(credentialsId)) {
                 return FormValidation.ok();
             }
             return FormUtils.formValidateUrl(value);
         }
 
+        @POST
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String credentialsId) {
             StandardListBoxModel result = new StandardListBoxModel();
             if (item == null) {
