@@ -33,6 +33,7 @@ class WebhookDescriptorImplTest {
         Jenkins jenkins = mock(Jenkins.class);
         File rootDir = new File(".");
         when(jenkins.getRootDir()).thenReturn(rootDir);
+        when(jenkins.hasPermission(Jenkins.ADMINISTER)).thenReturn(true);
         staticJenkins.when(Jenkins::get).thenReturn(jenkins);
     }
 
