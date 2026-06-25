@@ -68,7 +68,7 @@ class WebhookDescriptorImplTest {
         String validUrl = "http://myJenkins.abc";
 
         // when
-        FormValidation result = descriptor.doCheckUrl(validUrl);
+        FormValidation result = descriptor.doCheckUrl(validUrl, "");
 
         // then
         assertThat(result, equalTo(FormValidation.ok()));

@@ -17,17 +17,28 @@ package jenkins.plugins.office365connector;
 import java.util.Collections;
 import java.util.List;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
+import hudson.model.Item;
+import hudson.model.Run;
+import hudson.security.ACL;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
+import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.model.FactDefinition;
 import jenkins.plugins.office365connector.model.Macro;
 import jenkins.plugins.office365connector.utils.FormUtils;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -39,6 +50,7 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     private String name;
     private String url;
+    private String credentialsId;
 
     private boolean startNotification;
     private boolean notifySuccess;
@@ -69,6 +81,42 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
 
     public String getUrl() {
         return url;
+    }
+
+    public String getCredentialsId() {
+        return credentialsId;
+    }
+
+    @DataBoundSetter
+    public void setCredentialsId(String credentialsId) {
+        this.credentialsId = Util.fixEmptyAndTrim(credentialsId);
+    }
+
+    /**
+     * Resolves the webhook URL. If {@code credentialsId} is set, the URL is retrieved
+     * from the Jenkins credentials store (Secret Text). Otherwise the plain {@code url} field is used.
+     *
+     * @param run the current build run, used for credential lookup scope
+     * @return the resolved webhook URL
+     * @throws IllegalStateException if neither credentialsId nor url is configured
+     */
+    public String resolveUrl(Run<?, ?> run) {
+        if (StringUtils.isNotBlank(credentialsId)) {
+            StringCredentials credentials = CredentialsProvider.findCredentialById(
+                    credentialsId,
+                    StringCredentials.class,
+                    run);
+            if (credentials != null) {
+                return credentials.getSecret().getPlainText();
+            }
+            throw new IllegalStateException(
+                    String.format("Could not find credentials with id '%s' for webhook '%s'", credentialsId, getName()));
+        }
+        if (StringUtils.isNotBlank(url)) {
+            return url;
+        }
+        throw new IllegalStateException(
+                String.format("No URL or credentialsId configured for webhook '%s'", getName()));
     }
 
     public String getName() {
@@ -209,8 +257,51 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
             return Webhook.DEFAULT_TIMEOUT;
         }
 
-        public FormValidation doCheckUrl(@QueryParameter String value) {
+        public FormValidation doCheckUrl(@QueryParameter String value, @QueryParameter String credentialsId) {
+            if (StringUtils.isNotBlank(credentialsId)) {
+                return FormValidation.ok();
+            }
             return FormUtils.formValidateUrl(value);
+        }
+
+        public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String credentialsId) {
+            StandardListBoxModel result = new StandardListBoxModel();
+            if (item == null) {
+                if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+                    return result.includeCurrentValue(credentialsId);
+                }
+            } else {
+                if (!item.hasPermission(Item.EXTENDED_READ)
+                        && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                    return result.includeCurrentValue(credentialsId);
+                }
+            }
+            return result
+                    .includeEmptyValue()
+                    .includeMatchingAs(
+                            ACL.SYSTEM2,
+                            item,
+                            StringCredentials.class,
+                            URIRequirementBuilder.fromUri("").build(),
+                            CredentialsMatchers.always())
+                    .includeCurrentValue(credentialsId);
+        }
+
+        public FormValidation doCheckCredentialsId(@AncestorInPath Item item, @QueryParameter String value) {
+            if (item == null) {
+                if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+                    return FormValidation.ok();
+                }
+            } else {
+                if (!item.hasPermission(Item.EXTENDED_READ)
+                        && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                    return FormValidation.ok();
+                }
+            }
+            if (StringUtils.isBlank(value)) {
+                return FormValidation.ok();
+            }
+            return FormValidation.ok();
         }
 
         public FormValidation doCheckGlobalUrl(@QueryParameter String value) {

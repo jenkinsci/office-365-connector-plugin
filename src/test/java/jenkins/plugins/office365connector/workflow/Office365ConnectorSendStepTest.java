@@ -220,7 +220,7 @@ class Office365ConnectorSendStepTest {
         Office365ConnectorSendStep.DescriptorImpl descriptor = new Office365ConnectorSendStep.DescriptorImpl();
 
         // when
-        FormValidation result = descriptor.doCheckWebhookUrl(validUrl);
+        FormValidation result = descriptor.doCheckWebhookUrl(validUrl, "");
 
         // then
         assertThat(result, equalTo(FormValidation.ok()));
@@ -234,7 +234,7 @@ class Office365ConnectorSendStepTest {
         Office365ConnectorSendStep.DescriptorImpl descriptor = new Office365ConnectorSendStep.DescriptorImpl();
 
         // when
-        FormValidation result = descriptor.doCheckWebhookUrl(validUrl);
+        FormValidation result = descriptor.doCheckWebhookUrl(validUrl, "");
 
         // then
         assertThat(result.kind, equalTo(FormValidation.Kind.ERROR));

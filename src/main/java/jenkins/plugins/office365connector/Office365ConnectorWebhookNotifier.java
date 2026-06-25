@@ -94,6 +94,7 @@ public class Office365ConnectorWebhookNotifier {
 
     public void sendBuildStepNotification(StepParameters stepParameters) {
         Webhook webhook = new Webhook(stepParameters.getWebhookUrl());
+        webhook.setCredentialsId(stepParameters.getCredentialsId());
 
         CardBuilder cardBuilder = new CardBuilder(run, taskListener, stepParameters.isAdaptiveCards());
         Card card;
@@ -111,13 +112,15 @@ public class Office365ConnectorWebhookNotifier {
 
     private void executeWorker(Webhook webhook, Card card) {
         try {
-            String url = run.getEnvironment(taskListener).expand(webhook.getUrl());
+            String url = run.getEnvironment(taskListener).expand(webhook.resolveUrl(run));
             String data = gson.toJson(card == null ? null : card.toPaylod());
             HttpWorker worker = new HttpWorker(url, data, webhook.getTimeout(), taskListener.getLogger());
             worker.submit();
         } catch (IOException | InterruptedException | RejectedExecutionException e) {
             log(String.format("Failed to notify webhook: %s", webhook.getName()));
             e.printStackTrace(taskListener.getLogger());
+        } catch (IllegalStateException e) {
+            log(String.format("Failed to resolve webhook URL: %s - %s", webhook.getName(), e.getMessage()));
         }
     }
 
