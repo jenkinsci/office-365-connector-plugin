@@ -258,8 +258,17 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
             return Webhook.DEFAULT_TIMEOUT;
         }
 
-        public FormValidation doCheckUrl(@QueryParameter String value, @QueryParameter String credentialsId) {
         @POST
+        public FormValidation doCheckUrl(@AncestorInPath Item item, @QueryParameter String value, @QueryParameter String credentialsId) {
+            if (item == null) {
+                if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+                    return FormValidation.ok();
+                }
+            } else {
+                if (!item.hasPermission(Item.CONFIGURE)) {
+                    return FormValidation.ok();
+                }
+            }
             if (StringUtils.isNotBlank(credentialsId)) {
                 return FormValidation.ok();
             }

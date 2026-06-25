@@ -135,8 +135,17 @@ public class Office365ConnectorSendStep extends Step {
             return "Send job status notifications to Office 365 (e.g. Microsoft Teams or Outlook)";
         }
 
-        public FormValidation doCheckWebhookUrl(@QueryParameter String value, @QueryParameter String credentialsId) {
         @POST
+        public FormValidation doCheckWebhookUrl(@AncestorInPath Item item, @QueryParameter String value, @QueryParameter String credentialsId) {
+            if (item == null) {
+                if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+                    return FormValidation.ok();
+                }
+            } else {
+                if (!item.hasPermission(Item.CONFIGURE)) {
+                    return FormValidation.ok();
+                }
+            }
             if (StringUtils.isNotBlank(credentialsId)) {
                 return FormValidation.ok();
             }
