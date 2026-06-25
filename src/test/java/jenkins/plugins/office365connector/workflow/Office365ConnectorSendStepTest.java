@@ -1,5 +1,6 @@
 package jenkins.plugins.office365connector.workflow;
 
+import hudson.model.Item;
 import hudson.util.FormValidation;
 import jenkins.plugins.office365connector.helpers.ReflectionHelper;
 import jenkins.plugins.office365connector.model.FactDefinition;
@@ -18,6 +19,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
@@ -218,9 +220,11 @@ class Office365ConnectorSendStepTest {
         // given
         String validUrl = "http://myJenkins.abc";
         Office365ConnectorSendStep.DescriptorImpl descriptor = new Office365ConnectorSendStep.DescriptorImpl();
+        Item item = mock(Item.class);
+        when(item.hasPermission(Item.CONFIGURE)).thenReturn(true);
 
         // when
-        FormValidation result = descriptor.doCheckWebhookUrl(validUrl, "");
+        FormValidation result = descriptor.doCheckWebhookUrl(item, validUrl, "");
 
         // then
         assertThat(result, equalTo(FormValidation.ok()));
@@ -232,9 +236,11 @@ class Office365ConnectorSendStepTest {
         // given
         String validUrl = "-myJenkins.abc";
         Office365ConnectorSendStep.DescriptorImpl descriptor = new Office365ConnectorSendStep.DescriptorImpl();
+        Item item = mock(Item.class);
+        when(item.hasPermission(Item.CONFIGURE)).thenReturn(true);
 
         // when
-        FormValidation result = descriptor.doCheckWebhookUrl(validUrl, "");
+        FormValidation result = descriptor.doCheckWebhookUrl(item, validUrl, "");
 
         // then
         assertThat(result.kind, equalTo(FormValidation.Kind.ERROR));
