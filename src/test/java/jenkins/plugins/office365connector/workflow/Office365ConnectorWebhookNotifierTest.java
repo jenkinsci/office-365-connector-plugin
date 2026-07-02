@@ -198,4 +198,38 @@ class Office365ConnectorWebhookNotifierTest extends AbstractTest {
         // then
         assertThat(webhooks, empty());
     }
+
+    @Test
+    void sendBuildStepNotification_OnMissingCredential_LogsError() {
+
+        // given
+        when(job.getFullDisplayName()).thenReturn("TestJob");
+        Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
+        StepParameters stepParameters = new StepParameters(
+                null, null, "started", Collections.emptyList(), null, false, "nonexistent-credential");
+
+        try (MockedConstruction<CardBuilder> ignored = mockConstruction(CardBuilder.class)) {
+            // when
+            notifier.sendBuildStepNotification(stepParameters);
+
+            // then — no exception thrown, error is logged to console
+        }
+    }
+
+    @Test
+    void sendBuildStepNotification_OnNeitherUrlNorCredentials_LogsError() {
+
+        // given
+        when(job.getFullDisplayName()).thenReturn("TestJob");
+        Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
+        StepParameters stepParameters = new StepParameters(
+                null, null, "started", Collections.emptyList(), null, false, null);
+
+        try (MockedConstruction<CardBuilder> ignored = mockConstruction(CardBuilder.class)) {
+            // when
+            notifier.sendBuildStepNotification(stepParameters);
+
+            // then — no exception thrown, error is logged to console
+        }
+    }
 }

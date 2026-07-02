@@ -1,13 +1,18 @@
 package jenkins.plugins.office365connector.workflow;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
 import hudson.model.Item;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
+import jenkins.model.Jenkins;
 import jenkins.plugins.office365connector.helpers.ReflectionHelper;
 import jenkins.plugins.office365connector.model.FactDefinition;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import java.util.List;
 import java.util.Set;
@@ -18,13 +23,24 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Damian Szczepanik (damianszczepanik@github)
  */
 class Office365ConnectorSendStepTest {
+
+    private MockedStatic<Jenkins> staticJenkins;
+
+    @AfterEach
+    void tearDown() {
+        if (staticJenkins != null) {
+            staticJenkins.close();
+        }
+    }
 
     @Test
     void Office365ConnectorSendStep_SavesWebhook() {
@@ -244,5 +260,114 @@ class Office365ConnectorSendStepTest {
 
         // then
         assertThat(result.kind, equalTo(FormValidation.Kind.ERROR));
+    }
+
+    @Test
+    void getCredentialsId_ReturnsCredentialsId() {
+
+        // given
+        String credId = "my-secret-id";
+        Office365ConnectorSendStep step = new Office365ConnectorSendStep(null);
+        step.setCredentialsId(credId);
+
+        // when
+        String returnedCredentialsId = step.getCredentialsId();
+
+        // then
+        assertThat(returnedCredentialsId, equalTo(credId));
+    }
+
+    @Test
+    void getCredentialsId_OnBlankCredentialsId_ReturnsNull() {
+
+        // given
+        Office365ConnectorSendStep step = new Office365ConnectorSendStep(null);
+        step.setCredentialsId("  ");
+
+        // when
+        String returnedCredentialsId = step.getCredentialsId();
+
+        // then
+        assertThat(returnedCredentialsId, nullValue());
+    }
+
+    @Test
+    void doCheckWebhookUrl_WithCredentialsId_ReturnsOk() {
+
+        // given
+        Office365ConnectorSendStep.DescriptorImpl descriptor = new Office365ConnectorSendStep.DescriptorImpl();
+        Item item = mock(Item.class);
+        when(item.hasPermission(Item.CONFIGURE)).thenReturn(true);
+
+        // when
+        FormValidation result = descriptor.doCheckWebhookUrl(item, "", "my-credential");
+
+        // then
+        assertThat(result, equalTo(FormValidation.ok()));
+    }
+
+    @Test
+    void doCheckWebhookUrl_WithNoPermission_ReturnsOk() {
+
+        // given
+        Office365ConnectorSendStep.DescriptorImpl descriptor = new Office365ConnectorSendStep.DescriptorImpl();
+        Item item = mock(Item.class);
+        when(item.hasPermission(Item.CONFIGURE)).thenReturn(false);
+
+        // when
+        FormValidation result = descriptor.doCheckWebhookUrl(item, "invalid", "");
+
+        // then
+        assertThat(result, equalTo(FormValidation.ok()));
+    }
+
+    @Test
+    void doCheckWebhookUrl_WithNullItem_AndNoPermission_ReturnsOk() {
+
+        // given
+        Office365ConnectorSendStep.DescriptorImpl descriptor = new Office365ConnectorSendStep.DescriptorImpl();
+        staticJenkins = mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
+        when(jenkins.hasPermission(Jenkins.ADMINISTER)).thenReturn(false);
+
+        // when
+        FormValidation result = descriptor.doCheckWebhookUrl(null, "invalid", "");
+
+        // then
+        assertThat(result, equalTo(FormValidation.ok()));
+    }
+
+    @Test
+    void doFillCredentialsIdItems_WithNoPermission_ReturnsCurrentValue() {
+
+        // given
+        Office365ConnectorSendStep.DescriptorImpl descriptor = new Office365ConnectorSendStep.DescriptorImpl();
+        Item item = mock(Item.class);
+        when(item.hasPermission(Item.EXTENDED_READ)).thenReturn(false);
+        when(item.hasPermission(CredentialsProvider.USE_ITEM)).thenReturn(false);
+
+        // when
+        ListBoxModel result = descriptor.doFillCredentialsIdItems(item, "existing-id");
+
+        // then
+        assertThat(result.stream().anyMatch(o -> "existing-id".equals(o.value)), equalTo(true));
+    }
+
+    @Test
+    void doFillCredentialsIdItems_WithNullItem_AndNoPermission_ReturnsCurrentValue() {
+
+        // given
+        Office365ConnectorSendStep.DescriptorImpl descriptor = new Office365ConnectorSendStep.DescriptorImpl();
+        staticJenkins = mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
+        when(jenkins.hasPermission(Jenkins.ADMINISTER)).thenReturn(false);
+
+        // when
+        ListBoxModel result = descriptor.doFillCredentialsIdItems(null, "existing-id");
+
+        // then
+        assertThat(result.stream().anyMatch(o -> "existing-id".equals(o.value)), equalTo(true));
     }
 }
