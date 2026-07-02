@@ -111,13 +111,13 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
                 return secretUrl.getSecret().getPlainText();
             }
             throw new IllegalStateException(
-                    String.format("Could not find credentials with id '%s' for webhook '%s'", credentialsId, getName()));
+                    String.format("Credentials with id '%s' not found. Verify the credential exists and is accessible by this job.", credentialsId));
         }
         if (StringUtils.isNotBlank(url)) {
             return url;
         }
         throw new IllegalStateException(
-                String.format("No URL or credentialsId configured for webhook '%s'", getName()));
+                "Webhook URL is not configured. Set either the URL field or select a credential that stores the webhook URL.");
     }
 
     public String getName() {
