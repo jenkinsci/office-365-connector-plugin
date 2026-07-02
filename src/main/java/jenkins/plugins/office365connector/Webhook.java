@@ -270,6 +270,9 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
                 }
             }
             if (StringUtils.isNotBlank(credentialsId)) {
+                if (StringUtils.isNotBlank(value)) {
+                    return FormValidation.warning("Both URL and credential are configured. The credential will be used and the URL will be ignored.");
+                }
                 return FormValidation.ok();
             }
             return FormUtils.formValidateUrl(value);

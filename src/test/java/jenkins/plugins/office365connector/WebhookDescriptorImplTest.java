@@ -76,6 +76,44 @@ class WebhookDescriptorImplTest {
     }
 
     @Test
+    void doCheckUrl_WithCredentialsId_ReturnsOk() {
+
+        // given & when
+        FormValidation result = descriptor.doCheckUrl(null, "", "my-credential-id");
+
+        // then
+        assertThat(result, equalTo(FormValidation.ok()));
+    }
+
+    @Test
+    void doCheckUrl_WithBothUrlAndCredentialsId_ReturnsWarning() {
+
+        // given & when
+        FormValidation result = descriptor.doCheckUrl(null, "http://myJenkins.abc", "my-credential-id");
+
+        // then
+        assertThat(result.kind, equalTo(FormValidation.Kind.WARNING));
+    }
+
+    @Test
+    void doCheckUrl_WithNoPermission_ReturnsOk() {
+
+        // given
+        staticJenkins.close();
+        staticJenkins = mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
+        when(jenkins.getRootDir()).thenReturn(new File("."));
+        when(jenkins.hasPermission(Jenkins.ADMINISTER)).thenReturn(false);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
+
+        // when
+        FormValidation result = descriptor.doCheckUrl(null, "invalid-url", "");
+
+        // then
+        assertThat(result, equalTo(FormValidation.ok()));
+    }
+
+    @Test
     void getName_ReturnsName() {
 
         // given

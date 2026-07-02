@@ -130,7 +130,7 @@ class WebhookResolveUrlTest {
 
         // when/then
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> webhook.resolveUrl(run));
-        assertThat(exception.getMessage(), equalTo("Could not find credentials with id 'nonexistent-id' for webhook 'Test Webhook'"));
+        assertThat(exception.getMessage(), equalTo("Credentials with id 'nonexistent-id' not found. Verify the credential exists and is accessible by this job."));
     }
 
     @Test
@@ -143,6 +143,6 @@ class WebhookResolveUrlTest {
 
         // when/then
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> webhook.resolveUrl(run));
-        assertThat(exception.getMessage(), equalTo("No URL or credentialsId configured for webhook 'Test Webhook'"));
+        assertThat(exception.getMessage(), equalTo("Webhook URL is not configured. Set either the URL field or select a credential that stores the webhook URL."));
     }
 }
