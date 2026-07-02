@@ -103,12 +103,12 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
      */
     public String resolveUrl(Run<?, ?> run) {
         if (StringUtils.isNotBlank(credentialsId)) {
-            StringCredentials credentials = CredentialsProvider.findCredentialById(
+            StringCredentials secretUrl = CredentialsProvider.findCredentialById(
                     credentialsId,
                     StringCredentials.class,
                     run);
-            if (credentials != null) {
-                return credentials.getSecret().getPlainText();
+            if (secretUrl != null) {
+                return secretUrl.getSecret().getPlainText();
             }
             throw new IllegalStateException(
                     String.format("Could not find credentials with id '%s' for webhook '%s'", credentialsId, getName()));
