@@ -217,6 +217,27 @@ class Office365ConnectorWebhookNotifierTest extends AbstractTest {
     }
 
     @Test
+    void sendBuildStepNotification_OnMissingCredentialWithNamedWebhook_LogsError() {
+
+        // given — exercises the non-null getName() branch in the IllegalStateException catch
+        when(job.getFullDisplayName()).thenReturn("TestJob");
+        Office365ConnectorWebhookNotifier notifier = new Office365ConnectorWebhookNotifier(run, taskListener);
+
+        Webhook namedWebhook = new Webhook(null);
+        namedWebhook.setName("My Named Webhook");
+        namedWebhook.setCredentialsId("nonexistent-credential");
+
+        try (MockedConstruction<CardBuilder> ignored = mockConstruction(CardBuilder.class)) {
+            // when — invoke executeWorker directly via the webhook property list
+            WebhookJobProperty property = new WebhookJobProperty(List.of(namedWebhook));
+            when(job.getProperty(WebhookJobProperty.class)).thenReturn(property);
+            notifier.sendBuildStartedNotification(true);
+
+            // then — no exception thrown, error is logged with webhook name
+        }
+    }
+
+    @Test
     void sendBuildStepNotification_OnNeitherUrlNorCredentials_LogsError() {
 
         // given

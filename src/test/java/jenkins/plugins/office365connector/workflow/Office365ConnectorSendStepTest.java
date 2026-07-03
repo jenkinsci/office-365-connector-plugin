@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -369,5 +370,71 @@ class Office365ConnectorSendStepTest {
 
         // then
         assertThat(result.stream().anyMatch(o -> "existing-id".equals(o.value)), equalTo(true));
+    }
+
+    @Test
+    void doCheckWebhookUrl_WithNullItem_AndAdminPermission_ValidatesUrl() {
+
+        // given
+        Office365ConnectorSendStep.DescriptorImpl descriptor = new Office365ConnectorSendStep.DescriptorImpl();
+        staticJenkins = mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
+        when(jenkins.hasPermission(Jenkins.ADMINISTER)).thenReturn(true);
+
+        // when
+        FormValidation result = descriptor.doCheckWebhookUrl(null, "invalid-url", "");
+
+        // then — validation actually runs (returns error for invalid URL)
+        assertThat(result.kind, equalTo(FormValidation.Kind.ERROR));
+    }
+
+    @Test
+    void doFillCredentialsIdItems_WithNullItem_AndAdminPermission_ReturnsEntries() {
+
+        // given
+        Office365ConnectorSendStep.DescriptorImpl descriptor = new Office365ConnectorSendStep.DescriptorImpl();
+        staticJenkins = mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
+        when(jenkins.hasPermission(Jenkins.ADMINISTER)).thenReturn(true);
+
+        // when
+        ListBoxModel result = descriptor.doFillCredentialsIdItems(null, "");
+
+        // then — should at least have the empty value
+        assertThat(result.size(), greaterThan(0));
+    }
+
+    @Test
+    void doFillCredentialsIdItems_WithItem_AndExtendedReadPermission_ReturnsEntries() {
+
+        // given
+        Office365ConnectorSendStep.DescriptorImpl descriptor = new Office365ConnectorSendStep.DescriptorImpl();
+        Item item = mock(Item.class);
+        when(item.hasPermission(Item.EXTENDED_READ)).thenReturn(true);
+        when(item.hasPermission(CredentialsProvider.USE_ITEM)).thenReturn(false);
+
+        // when
+        ListBoxModel result = descriptor.doFillCredentialsIdItems(item, "");
+
+        // then — should at least have the empty value
+        assertThat(result.size(), greaterThan(0));
+    }
+
+    @Test
+    void doFillCredentialsIdItems_WithItem_AndUseItemPermission_ReturnsEntries() {
+
+        // given
+        Office365ConnectorSendStep.DescriptorImpl descriptor = new Office365ConnectorSendStep.DescriptorImpl();
+        Item item = mock(Item.class);
+        when(item.hasPermission(Item.EXTENDED_READ)).thenReturn(false);
+        when(item.hasPermission(CredentialsProvider.USE_ITEM)).thenReturn(true);
+
+        // when
+        ListBoxModel result = descriptor.doFillCredentialsIdItems(item, "");
+
+        // then — should at least have the empty value
+        assertThat(result.size(), greaterThan(0));
     }
 }

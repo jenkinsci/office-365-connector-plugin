@@ -1,6 +1,9 @@
 package jenkins.plugins.office365connector;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import hudson.model.Item;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +15,7 @@ import java.io.File;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -174,6 +178,172 @@ class WebhookDescriptorImplTest {
 
         // when
         FormValidation result = descriptor.doCheckGlobalUrl(validUrl);
+
+        // then
+        assertThat(result, equalTo(FormValidation.ok()));
+    }
+
+    @Test
+    void doCheckUrl_WithItem_ValidatesUrl() {
+
+        // given
+        Item item = mock(Item.class);
+        when(item.hasPermission(Item.CONFIGURE)).thenReturn(true);
+
+        // when
+        FormValidation result = descriptor.doCheckUrl(item, "http://myJenkins.abc", "");
+
+        // then
+        assertThat(result, equalTo(FormValidation.ok()));
+    }
+
+    @Test
+    void doCheckUrl_WithItem_AndBothUrlAndCredentialsId_ReturnsWarning() {
+
+        // given
+        Item item = mock(Item.class);
+        when(item.hasPermission(Item.CONFIGURE)).thenReturn(true);
+
+        // when
+        FormValidation result = descriptor.doCheckUrl(item, "http://myJenkins.abc", "my-cred");
+
+        // then
+        assertThat(result.kind, equalTo(FormValidation.Kind.WARNING));
+    }
+
+    @Test
+    void doCheckUrl_WithItem_AndNoPermission_ReturnsOk() {
+
+        // given
+        Item item = mock(Item.class);
+        when(item.hasPermission(Item.CONFIGURE)).thenReturn(false);
+
+        // when
+        FormValidation result = descriptor.doCheckUrl(item, "invalid-url", "");
+
+        // then
+        assertThat(result, equalTo(FormValidation.ok()));
+    }
+
+    @Test
+    void doFillCredentialsIdItems_WithNullItem_AndAdminPermission_ReturnsEntries() {
+
+        // when
+        ListBoxModel result = descriptor.doFillCredentialsIdItems(null, "");
+
+        // then — should at least have the empty value
+        assertThat(result.size(), greaterThan(0));
+    }
+
+    @Test
+    void doFillCredentialsIdItems_WithNullItem_AndNoPermission_ReturnsCurrentValue() {
+
+        // given
+        staticJenkins.close();
+        staticJenkins = mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
+        when(jenkins.getRootDir()).thenReturn(new File("."));
+        when(jenkins.hasPermission(Jenkins.ADMINISTER)).thenReturn(false);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
+
+        // when
+        ListBoxModel result = descriptor.doFillCredentialsIdItems(null, "existing-id");
+
+        // then
+        assertThat(result.stream().anyMatch(o -> "existing-id".equals(o.value)), equalTo(true));
+    }
+
+    @Test
+    void doFillCredentialsIdItems_WithItem_AndPermission_ReturnsEntries() {
+
+        // given
+        Item item = mock(Item.class);
+        when(item.hasPermission(Item.EXTENDED_READ)).thenReturn(true);
+
+        // when
+        ListBoxModel result = descriptor.doFillCredentialsIdItems(item, "");
+
+        // then — should at least have the empty value
+        assertThat(result.size(), greaterThan(0));
+    }
+
+    @Test
+    void doFillCredentialsIdItems_WithItem_AndNoPermission_ReturnsCurrentValue() {
+
+        // given
+        Item item = mock(Item.class);
+        when(item.hasPermission(Item.EXTENDED_READ)).thenReturn(false);
+        when(item.hasPermission(CredentialsProvider.USE_ITEM)).thenReturn(false);
+
+        // when
+        ListBoxModel result = descriptor.doFillCredentialsIdItems(item, "existing-id");
+
+        // then
+        assertThat(result.stream().anyMatch(o -> "existing-id".equals(o.value)), equalTo(true));
+    }
+
+    @Test
+    void doCheckCredentialsId_WithNullItem_AndAdminPermission_ReturnsOk() {
+
+        // when
+        FormValidation result = descriptor.doCheckCredentialsId(null, "some-id");
+
+        // then
+        assertThat(result, equalTo(FormValidation.ok()));
+    }
+
+    @Test
+    void doCheckCredentialsId_WithNullItem_AndNoPermission_ReturnsOk() {
+
+        // given
+        staticJenkins.close();
+        staticJenkins = mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
+        when(jenkins.getRootDir()).thenReturn(new File("."));
+        when(jenkins.hasPermission(Jenkins.ADMINISTER)).thenReturn(false);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
+
+        // when
+        FormValidation result = descriptor.doCheckCredentialsId(null, "some-id");
+
+        // then
+        assertThat(result, equalTo(FormValidation.ok()));
+    }
+
+    @Test
+    void doCheckCredentialsId_WithItem_AndPermission_ReturnsOk() {
+
+        // given
+        Item item = mock(Item.class);
+        when(item.hasPermission(Item.EXTENDED_READ)).thenReturn(true);
+
+        // when
+        FormValidation result = descriptor.doCheckCredentialsId(item, "some-id");
+
+        // then
+        assertThat(result, equalTo(FormValidation.ok()));
+    }
+
+    @Test
+    void doCheckCredentialsId_WithItem_AndNoPermission_ReturnsOk() {
+
+        // given
+        Item item = mock(Item.class);
+        when(item.hasPermission(Item.EXTENDED_READ)).thenReturn(false);
+        when(item.hasPermission(CredentialsProvider.USE_ITEM)).thenReturn(false);
+
+        // when
+        FormValidation result = descriptor.doCheckCredentialsId(item, "some-id");
+
+        // then
+        assertThat(result, equalTo(FormValidation.ok()));
+    }
+
+    @Test
+    void doCheckCredentialsId_WithBlankValue_ReturnsOk() {
+
+        // when
+        FormValidation result = descriptor.doCheckCredentialsId(null, "");
 
         // then
         assertThat(result, equalTo(FormValidation.ok()));
