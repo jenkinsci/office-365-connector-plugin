@@ -38,7 +38,7 @@ import org.kohsuke.stapler.verb.POST;
  */
 public class Office365ConnectorSendStep extends Step {
 
-    private final String webhookUrl;
+    private String webhookUrl;
     private String message;
     private String status;
     private List<FactDefinition> factDefinitions;
@@ -47,12 +47,16 @@ public class Office365ConnectorSendStep extends Step {
     private String credentialsId;
 
     @DataBoundConstructor
-    public Office365ConnectorSendStep(String webhookUrl) {
-        this.webhookUrl = Util.fixEmptyAndTrim(webhookUrl);
+    public Office365ConnectorSendStep() {
     }
 
     public String getWebhookUrl() {
         return webhookUrl;
+    }
+
+    @DataBoundSetter
+    public void setWebhookUrl(String webhookUrl) {
+        this.webhookUrl = Util.fixEmptyAndTrim(webhookUrl);
     }
 
     public String getCredentialsId() {

@@ -50,7 +50,8 @@ class Office365ConnectorSendStepTest {
         String webhook = "someString";
 
         // when
-        Office365ConnectorSendStep step = new Office365ConnectorSendStep(webhook);
+        Office365ConnectorSendStep step = new Office365ConnectorSendStep();
+        step.setWebhookUrl(webhook);
 
         assertThat(step.getWebhookUrl(), equalTo(webhook));
     }
@@ -62,7 +63,8 @@ class Office365ConnectorSendStepTest {
         String webhook = " some string ";
 
         // when
-        Office365ConnectorSendStep step = new Office365ConnectorSendStep(webhook);
+        Office365ConnectorSendStep step = new Office365ConnectorSendStep();
+        step.setWebhookUrl(webhook);
 
         assertThat(step.getWebhookUrl(), equalTo(webhook.trim()));
     }
@@ -72,7 +74,7 @@ class Office365ConnectorSendStepTest {
 
         // given
         String message = "Hello!";
-        Office365ConnectorSendStep step = new Office365ConnectorSendStep(null);
+        Office365ConnectorSendStep step = new Office365ConnectorSendStep();
         step.setMessage(message);
 
         // when
@@ -87,7 +89,7 @@ class Office365ConnectorSendStepTest {
 
         // given
         String message = " Hello!  ";
-        Office365ConnectorSendStep step = new Office365ConnectorSendStep(null);
+        Office365ConnectorSendStep step = new Office365ConnectorSendStep();
         step.setMessage(message);
 
         // when
@@ -102,7 +104,7 @@ class Office365ConnectorSendStepTest {
 
         // given
         String status = "FAILED";
-        Office365ConnectorSendStep step = new Office365ConnectorSendStep(null);
+        Office365ConnectorSendStep step = new Office365ConnectorSendStep();
         step.setStatus(status);
 
         // when
@@ -117,7 +119,7 @@ class Office365ConnectorSendStepTest {
 
         // given
         String status = "FAILED ";
-        Office365ConnectorSendStep step = new Office365ConnectorSendStep(null);
+        Office365ConnectorSendStep step = new Office365ConnectorSendStep();
         step.setStatus(status);
 
         // when
@@ -132,7 +134,7 @@ class Office365ConnectorSendStepTest {
 
         // given
         String color = "#FF00BB";
-        Office365ConnectorSendStep step = new Office365ConnectorSendStep(null);
+        Office365ConnectorSendStep step = new Office365ConnectorSendStep();
         step.setColor(color);
 
         // when
@@ -146,7 +148,7 @@ class Office365ConnectorSendStepTest {
     void getFactDefinitions_ReturnsFactDefinitions() {
 
         // given
-        Office365ConnectorSendStep step = new Office365ConnectorSendStep(null);
+        Office365ConnectorSendStep step = new Office365ConnectorSendStep();
         FactDefinition factDefinition = new FactDefinition("name", "theTemplate");
         step.setFactDefinitions(List.of(factDefinition));
 
@@ -162,7 +164,7 @@ class Office365ConnectorSendStepTest {
 
         // given
         String color = "black ";
-        Office365ConnectorSendStep step = new Office365ConnectorSendStep(null);
+        Office365ConnectorSendStep step = new Office365ConnectorSendStep();
         step.setColor(color);
 
         // when
@@ -177,7 +179,7 @@ class Office365ConnectorSendStepTest {
 
         // given
         String message = "Hi there.";
-        Office365ConnectorSendStep step = new Office365ConnectorSendStep(null);
+        Office365ConnectorSendStep step = new Office365ConnectorSendStep();
         step.setMessage(message);
         StepContext stepContext = mock(StepContext.class);
 
@@ -268,7 +270,7 @@ class Office365ConnectorSendStepTest {
 
         // given
         String credId = "my-secret-id";
-        Office365ConnectorSendStep step = new Office365ConnectorSendStep(null);
+        Office365ConnectorSendStep step = new Office365ConnectorSendStep();
         step.setCredentialsId(credId);
 
         // when
@@ -282,7 +284,7 @@ class Office365ConnectorSendStepTest {
     void getCredentialsId_OnBlankCredentialsId_ReturnsNull() {
 
         // given
-        Office365ConnectorSendStep step = new Office365ConnectorSendStep(null);
+        Office365ConnectorSendStep step = new Office365ConnectorSendStep();
         step.setCredentialsId("  ");
 
         // when
