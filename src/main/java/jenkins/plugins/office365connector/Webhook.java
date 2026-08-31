@@ -19,6 +19,7 @@ import java.util.List;
 
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -110,6 +111,16 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
                     run);
             if (secretUrl != null) {
                 return secretUrl.getSecret().getPlainText();
+            }
+            // The id may exist but reference an unsupported type (e.g. username/password)
+            StandardCredentials wrongType = CredentialsProvider.findCredentialById(
+                    urlCredentialId,
+                    StandardCredentials.class,
+                    run);
+            if (wrongType != null) {
+                throw new IllegalStateException(String.format(
+                        "Credential with id '%s' is of type '%s' but a 'Secret text' credential is required.",
+                        urlCredentialId, wrongType.getClass().getSimpleName()));
             }
             throw new IllegalStateException(
                     String.format("Credentials with id '%s' not found. Verify the credential exists and is accessible by this job.", urlCredentialId));

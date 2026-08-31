@@ -8,6 +8,8 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardCredentials;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import hudson.model.Run;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
@@ -144,5 +146,32 @@ class WebhookResolveUrlTest {
         // when/then
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> webhook.resolveUrl(run));
         assertThat(exception.getMessage(), equalTo("Webhook URL is not configured. Set either the URL field or select a credential that stores the webhook URL."));
+    }
+
+    @Test
+    void resolveUrl_WithWrongCredentialType_ThrowsException() {
+        // given
+        Webhook webhook = createWebhook("");
+        webhook.setUrlCredentialId("wrong-type-id");
+        webhook.setName("Test Webhook");
+
+        Run<?, ?> run = mock(Run.class);
+        StandardCredentials wrongType = mock(StandardUsernamePasswordCredentials.class);
+
+        staticCredentials = mockStatic(CredentialsProvider.class);
+        staticCredentials.when(() -> CredentialsProvider.findCredentialById(
+                "wrong-type-id",
+                StringCredentials.class,
+                run
+        )).thenReturn(null);
+        staticCredentials.when(() -> CredentialsProvider.findCredentialById(
+                "wrong-type-id",
+                StandardCredentials.class,
+                run
+        )).thenReturn(wrongType);
+
+        // when/then
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> webhook.resolveUrl(run));
+        assertThat(exception.getMessage(), org.hamcrest.Matchers.containsString("is required"));
     }
 }
