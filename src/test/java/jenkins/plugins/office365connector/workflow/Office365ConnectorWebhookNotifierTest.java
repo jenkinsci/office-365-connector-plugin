@@ -225,7 +225,7 @@ class Office365ConnectorWebhookNotifierTest extends AbstractTest {
 
         Webhook namedWebhook = new Webhook(null);
         namedWebhook.setName("My Named Webhook");
-        namedWebhook.setCredentialsId("nonexistent-credential");
+        namedWebhook.setUrlCredentialId("nonexistent-credential");
 
         try (MockedConstruction<CardBuilder> ignored = mockConstruction(CardBuilder.class)) {
             // when — invoke executeWorker directly via the webhook property list

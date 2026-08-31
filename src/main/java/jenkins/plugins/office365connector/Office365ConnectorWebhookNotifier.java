@@ -94,7 +94,7 @@ public class Office365ConnectorWebhookNotifier {
 
     public void sendBuildStepNotification(StepParameters stepParameters) {
         Webhook webhook = new Webhook(stepParameters.getWebhookUrl());
-        webhook.setCredentialsId(stepParameters.getCredentialsId());
+        webhook.setUrlCredentialId(stepParameters.getCredentialsId());
 
         CardBuilder cardBuilder = new CardBuilder(run, taskListener, stepParameters.isAdaptiveCards());
         Card card;

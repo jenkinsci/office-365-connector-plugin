@@ -49,7 +49,7 @@ class WebhookResolveUrlTest {
     void resolveUrl_WithCredentialsId_ReturnsSecretValue() {
         // given
         Webhook webhook = createWebhook("");
-        webhook.setCredentialsId("my-credentials-id");
+        webhook.setUrlCredentialId("my-credentials-id");
         webhook.setName("Test Webhook");
 
         Run<?, ?> run = mock(Run.class);
@@ -90,7 +90,7 @@ class WebhookResolveUrlTest {
     void resolveUrl_WithBothCredentialsAndUrl_CredentialsTakePrecedence() {
         // given
         Webhook webhook = createWebhook("https://outlook.office.com/webhook/plain-url");
-        webhook.setCredentialsId("my-credentials-id");
+        webhook.setUrlCredentialId("my-credentials-id");
         webhook.setName("Test Webhook");
 
         Run<?, ?> run = mock(Run.class);
@@ -116,7 +116,7 @@ class WebhookResolveUrlTest {
     void resolveUrl_WithCredentialsIdNotFound_ThrowsException() {
         // given
         Webhook webhook = createWebhook("");
-        webhook.setCredentialsId("nonexistent-id");
+        webhook.setUrlCredentialId("nonexistent-id");
         webhook.setName("Test Webhook");
 
         Run<?, ?> run = mock(Run.class);

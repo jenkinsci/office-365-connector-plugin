@@ -226,17 +226,17 @@ class WebhookDescriptorImplTest {
     }
 
     @Test
-    void doFillCredentialsIdItems_WithNullItem_AndAdminPermission_ReturnsEntries() {
+    void doFillUrlCredentialIdItems_WithNullItem_AndAdminPermission_ReturnsEntries() {
 
         // when
-        ListBoxModel result = descriptor.doFillCredentialsIdItems(null, "");
+        ListBoxModel result = descriptor.doFillUrlCredentialIdItems(null, "");
 
         // then — should at least have the empty value
         assertThat(result.size(), greaterThan(0));
     }
 
     @Test
-    void doFillCredentialsIdItems_WithNullItem_AndNoPermission_ReturnsCurrentValue() {
+    void doFillUrlCredentialIdItems_WithNullItem_AndNoPermission_ReturnsCurrentValue() {
 
         // given
         staticJenkins.close();
@@ -247,28 +247,28 @@ class WebhookDescriptorImplTest {
         staticJenkins.when(Jenkins::get).thenReturn(jenkins);
 
         // when
-        ListBoxModel result = descriptor.doFillCredentialsIdItems(null, "existing-id");
+        ListBoxModel result = descriptor.doFillUrlCredentialIdItems(null, "existing-id");
 
         // then
         assertThat(result.stream().anyMatch(o -> "existing-id".equals(o.value)), equalTo(true));
     }
 
     @Test
-    void doFillCredentialsIdItems_WithItem_AndPermission_ReturnsEntries() {
+    void doFillUrlCredentialIdItems_WithItem_AndPermission_ReturnsEntries() {
 
         // given
         Item item = mock(Item.class);
         when(item.hasPermission(Item.EXTENDED_READ)).thenReturn(true);
 
         // when
-        ListBoxModel result = descriptor.doFillCredentialsIdItems(item, "");
+        ListBoxModel result = descriptor.doFillUrlCredentialIdItems(item, "");
 
         // then — should at least have the empty value
         assertThat(result.size(), greaterThan(0));
     }
 
     @Test
-    void doFillCredentialsIdItems_WithItem_AndNoPermission_ReturnsCurrentValue() {
+    void doFillUrlCredentialIdItems_WithItem_AndNoPermission_ReturnsCurrentValue() {
 
         // given
         Item item = mock(Item.class);
@@ -276,24 +276,24 @@ class WebhookDescriptorImplTest {
         when(item.hasPermission(CredentialsProvider.USE_ITEM)).thenReturn(false);
 
         // when
-        ListBoxModel result = descriptor.doFillCredentialsIdItems(item, "existing-id");
+        ListBoxModel result = descriptor.doFillUrlCredentialIdItems(item, "existing-id");
 
         // then
         assertThat(result.stream().anyMatch(o -> "existing-id".equals(o.value)), equalTo(true));
     }
 
     @Test
-    void doCheckCredentialsId_WithNullItem_AndAdminPermission_ReturnsOk() {
+    void doCheckUrlCredentialId_WithNullItem_AndAdminPermission_ReturnsOk() {
 
         // when
-        FormValidation result = descriptor.doCheckCredentialsId(null, "some-id");
+        FormValidation result = descriptor.doCheckUrlCredentialId(null, "some-id");
 
         // then
         assertThat(result, equalTo(FormValidation.ok()));
     }
 
     @Test
-    void doCheckCredentialsId_WithNullItem_AndNoPermission_ReturnsOk() {
+    void doCheckUrlCredentialId_WithNullItem_AndNoPermission_ReturnsOk() {
 
         // given
         staticJenkins.close();
@@ -304,28 +304,28 @@ class WebhookDescriptorImplTest {
         staticJenkins.when(Jenkins::get).thenReturn(jenkins);
 
         // when
-        FormValidation result = descriptor.doCheckCredentialsId(null, "some-id");
+        FormValidation result = descriptor.doCheckUrlCredentialId(null, "some-id");
 
         // then
         assertThat(result, equalTo(FormValidation.ok()));
     }
 
     @Test
-    void doCheckCredentialsId_WithItem_AndPermission_ReturnsOk() {
+    void doCheckUrlCredentialId_WithItem_AndPermission_ReturnsOk() {
 
         // given
         Item item = mock(Item.class);
         when(item.hasPermission(Item.EXTENDED_READ)).thenReturn(true);
 
         // when
-        FormValidation result = descriptor.doCheckCredentialsId(item, "some-id");
+        FormValidation result = descriptor.doCheckUrlCredentialId(item, "some-id");
 
         // then
         assertThat(result, equalTo(FormValidation.ok()));
     }
 
     @Test
-    void doCheckCredentialsId_WithItem_AndNoPermission_ReturnsOk() {
+    void doCheckUrlCredentialId_WithItem_AndNoPermission_ReturnsOk() {
 
         // given
         Item item = mock(Item.class);
@@ -333,17 +333,17 @@ class WebhookDescriptorImplTest {
         when(item.hasPermission(CredentialsProvider.USE_ITEM)).thenReturn(false);
 
         // when
-        FormValidation result = descriptor.doCheckCredentialsId(item, "some-id");
+        FormValidation result = descriptor.doCheckUrlCredentialId(item, "some-id");
 
         // then
         assertThat(result, equalTo(FormValidation.ok()));
     }
 
     @Test
-    void doCheckCredentialsId_WithBlankValue_ReturnsOk() {
+    void doCheckUrlCredentialId_WithBlankValue_ReturnsOk() {
 
         // when
-        FormValidation result = descriptor.doCheckCredentialsId(null, "");
+        FormValidation result = descriptor.doCheckUrlCredentialId(null, "");
 
         // then
         assertThat(result, equalTo(FormValidation.ok()));
