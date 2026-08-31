@@ -150,6 +150,7 @@ public class Office365ConnectorSendStep extends Step {
                     return FormValidation.ok();
                 }
             }
+            // When a credential supplies the webhook URL, the URL field is optional and needs no validation.
             if (StringUtils.isNotBlank(credentialsId)) {
                 return FormValidation.ok();
             }
