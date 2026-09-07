@@ -120,8 +120,14 @@ public class Office365ConnectorWebhookNotifier {
             log(String.format("Failed to notify webhook: %s", webhook.getName()));
             e.printStackTrace(taskListener.getLogger());
         } catch (IllegalStateException e) {
-            log(String.format("Webhook '%s' cannot send notification: %s",
-                    webhook.getName() != null ? webhook.getName() : "(unnamed)", e.getMessage()));
+            // resolveUrl messages identify the misconfiguration by id and never contain the secret URL
+            String credentialHint = webhook.getUrlCredentialId() != null
+                    ? String.format(" (credential id '%s')", webhook.getUrlCredentialId())
+                    : "";
+            log(String.format("Webhook '%s'%s cannot send notification: %s",
+                    webhook.getName() != null ? webhook.getName() : "(unnamed)",
+                    credentialHint,
+                    e.getMessage()));
         }
     }
 
