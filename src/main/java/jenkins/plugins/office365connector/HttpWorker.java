@@ -16,11 +16,15 @@ package jenkins.plugins.office365connector;
 import hudson.ProxyConfiguration;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import jenkins.model.Jenkins;
@@ -48,6 +52,8 @@ import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
  * curl -X POST -H "Content-Type: application/json" -d "@completed-success.json" "https://webhook.office.com/webhookb2..." -vs
  */
 public class HttpWorker implements Runnable {
+
+    private static final Logger LOGGER = Logger.getLogger(HttpWorker.class.getName());
 
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 

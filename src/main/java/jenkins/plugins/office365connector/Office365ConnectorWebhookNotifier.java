@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -35,6 +37,8 @@ import org.apache.commons.lang3.StringUtils;
  * @author srhebbar
  */
 public class Office365ConnectorWebhookNotifier {
+
+    private static final Logger LOGGER = Logger.getLogger(Office365ConnectorWebhookNotifier.class.getName());
 
     private static final Gson gson = new GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
@@ -128,6 +132,7 @@ public class Office365ConnectorWebhookNotifier {
         } catch (IOException | InterruptedException e) {
             // The failure may reference the resolved URL, so keep the detail out of the job console
             log(String.format("Failed to notify webhook '%s'. See the Jenkins system log for details.", webhook.getName()));
+            LOGGER.log(Level.WARNING, "Failed to resolve the webhook URL", e);
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }
@@ -141,6 +146,7 @@ public class Office365ConnectorWebhookNotifier {
         } catch (RejectedExecutionException e) {
             // The failure may reference the resolved URL, so keep the detail out of the job console
             log(String.format("Failed to notify webhook '%s'. See the Jenkins system log for details.", webhook.getName()));
+            LOGGER.log(Level.WARNING, "Failed to submit the webhook notification", e);
         }
     }
 
