@@ -111,16 +111,12 @@ public class Office365ConnectorWebhookNotifier {
     }
 
     private void executeWorker(Webhook webhook, Card card) {
+        String url;
         try {
-            String url = run.getEnvironment(taskListener).expand(webhook.resolveUrl(run));
-            String data = gson.toJson(card == null ? null : card.toPaylod());
-            HttpWorker worker = new HttpWorker(url, data, webhook.getTimeout(), taskListener.getLogger());
-            worker.submit();
-        } catch (IOException | InterruptedException | RejectedExecutionException e) {
-            log(String.format("Failed to notify webhook: %s", webhook.getName()));
-            e.printStackTrace(taskListener.getLogger());
+            // resolveUrl only throws controlled messages that reference the credential id/type, never
+            // the URL value, so scoping the call here keeps the secret URL out of the failure paths below
+            url = run.getEnvironment(taskListener).expand(webhook.resolveUrl(run));
         } catch (IllegalStateException e) {
-            // resolveUrl messages identify the misconfiguration by id and never contain the secret URL
             String credentialHint = webhook.getUrlCredentialId() != null
                     ? String.format(" (credential id '%s')", webhook.getUrlCredentialId())
                     : "";
@@ -128,6 +124,23 @@ public class Office365ConnectorWebhookNotifier {
                     webhook.getName() != null ? webhook.getName() : "(unnamed)",
                     credentialHint,
                     e.getMessage()));
+            return;
+        } catch (IOException | InterruptedException e) {
+            // The failure may reference the resolved URL, so keep the detail out of the job console
+            log(String.format("Failed to notify webhook '%s'. See the Jenkins system log for details.", webhook.getName()));
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            return;
+        }
+
+        try {
+            String data = gson.toJson(card == null ? null : card.toPaylod());
+            HttpWorker worker = new HttpWorker(url, data, webhook.getTimeout(), taskListener.getLogger());
+            worker.submit();
+        } catch (RejectedExecutionException e) {
+            // The failure may reference the resolved URL, so keep the detail out of the job console
+            log(String.format("Failed to notify webhook '%s'. See the Jenkins system log for details.", webhook.getName()));
         }
     }
 
