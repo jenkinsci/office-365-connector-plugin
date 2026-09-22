@@ -61,6 +61,11 @@
                 </f:repeatableProperty>
             </f:entry>
 
+            <f:entry title="Mentions" field="mentions">
+                <f:repeatableProperty minimum="0" field="mentions" add="Add Mention">
+                </f:repeatableProperty>
+            </f:entry>
+
             <f:entry title="Timeout" description="Timeout (in ms)" field="timeout">
                 <f:number default="${descriptor.defaultTimeout}"/>
             </f:entry>

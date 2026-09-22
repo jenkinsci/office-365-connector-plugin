@@ -25,6 +25,7 @@ import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import jenkins.plugins.office365connector.model.FactDefinition;
 import jenkins.plugins.office365connector.model.Macro;
+import jenkins.plugins.office365connector.model.Mention;
 import jenkins.plugins.office365connector.utils.FormUtils;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -56,6 +57,8 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     private List<Macro> macros = Collections.emptyList();
 
     private List<FactDefinition> factDefinitions = Collections.emptyList();
+
+    private List<Mention> mentions = Collections.emptyList();
 
     @Override
     public DescriptorImpl getDescriptor() {
@@ -186,6 +189,15 @@ public class Webhook extends AbstractDescribableImpl<Webhook> {
     @DataBoundSetter
     public void setFactDefinitions(List<FactDefinition> factDefinitions) {
         this.factDefinitions = Util.fixNull(factDefinitions);
+    }
+
+    public List<Mention> getMentions() {
+        return Util.fixNull(mentions);
+    }
+
+    @DataBoundSetter
+    public void setMentions(List<Mention> mentions) {
+        this.mentions = Util.fixNull(mentions);
     }
 
     @Extension

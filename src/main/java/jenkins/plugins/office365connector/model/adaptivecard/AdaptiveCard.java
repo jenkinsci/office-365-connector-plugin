@@ -2,12 +2,14 @@ package jenkins.plugins.office365connector.model.adaptivecard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.gson.annotations.SerializedName;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.Result;
 import jenkins.plugins.office365connector.model.Card;
 import jenkins.plugins.office365connector.model.CardAction;
+import jenkins.plugins.office365connector.model.Mention;
 import jenkins.plugins.office365connector.model.Section;
 
 public class AdaptiveCard implements Card {
@@ -23,6 +25,10 @@ public class AdaptiveCard implements Card {
     private List<CardAction> actions;
 
     public AdaptiveCard(final String summary, final Section section, Result result) {
+        this(summary, section, result, List.of());
+    }
+
+    public AdaptiveCard(final String summary, final Section section, Result result, List<Mention> mentions) {
         this.body = new ArrayList<>();
         this.body.add(new TextBlock(summary, "large", "bolder", color(result)));
         if (section != null) {
@@ -33,6 +39,16 @@ public class AdaptiveCard implements Card {
             if (!section.getFacts().isEmpty()) {
                 this.body.add(new FactSet(section.getFacts()));
             }
+        }
+        if (mentions != null && !mentions.isEmpty()) {
+            List<MentionEntity> entities = mentions.stream()
+                    .map(MentionEntity::new)
+                    .collect(Collectors.toList());
+            msTeams.setEntities(entities);
+            String mentionText = entities.stream()
+                    .map(MentionEntity::getText)
+                    .collect(Collectors.joining(" "));
+            this.body.add(new TextBlock(mentionText));
         }
     }
 
