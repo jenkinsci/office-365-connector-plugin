@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -35,6 +37,8 @@ import org.apache.commons.lang3.StringUtils;
  * @author srhebbar
  */
 public class Office365ConnectorWebhookNotifier {
+
+    private static final Logger LOGGER = Logger.getLogger(Office365ConnectorWebhookNotifier.class.getName());
 
     private static final Gson gson = new GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
@@ -94,6 +98,7 @@ public class Office365ConnectorWebhookNotifier {
 
     public void sendBuildStepNotification(StepParameters stepParameters) {
         Webhook webhook = new Webhook(stepParameters.getWebhookUrl());
+        webhook.setUrlCredentialId(stepParameters.getCredentialsId());
 
         CardBuilder cardBuilder = new CardBuilder(run, taskListener, stepParameters.isAdaptiveCards());
         Card card;
@@ -110,14 +115,38 @@ public class Office365ConnectorWebhookNotifier {
     }
 
     private void executeWorker(Webhook webhook, Card card) {
+        String url;
         try {
-            String url = run.getEnvironment(taskListener).expand(webhook.getUrl());
+            // resolveUrl only throws controlled messages that reference the credential id/type, never
+            // the URL value, so scoping the call here keeps the secret URL out of the failure paths below
+            url = run.getEnvironment(taskListener).expand(webhook.resolveUrl(run));
+        } catch (IllegalStateException e) {
+            String credentialHint = webhook.getUrlCredentialId() != null
+                    ? String.format(" (credential id '%s')", webhook.getUrlCredentialId())
+                    : "";
+            log(String.format("Webhook '%s'%s cannot send notification: %s",
+                    webhook.getName() != null ? webhook.getName() : "(unnamed)",
+                    credentialHint,
+                    e.getMessage()));
+            return;
+        } catch (IOException | InterruptedException e) {
+            // The failure may reference the resolved URL, so keep the detail out of the job console
+            log(String.format("Failed to notify webhook '%s'. See the Jenkins system log for details.", webhook.getName()));
+            LOGGER.log(Level.WARNING, "Failed to resolve the webhook URL", e);
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            return;
+        }
+
+        try {
             String data = gson.toJson(card == null ? null : card.toPaylod());
             HttpWorker worker = new HttpWorker(url, data, webhook.getTimeout(), taskListener.getLogger());
             worker.submit();
-        } catch (IOException | InterruptedException | RejectedExecutionException e) {
-            log(String.format("Failed to notify webhook: %s", webhook.getName()));
-            e.printStackTrace(taskListener.getLogger());
+        } catch (RejectedExecutionException e) {
+            // The failure may reference the resolved URL, so keep the detail out of the job console
+            log(String.format("Failed to notify webhook '%s'. See the Jenkins system log for details.", webhook.getName()));
+            LOGGER.log(Level.WARNING, "Failed to submit the webhook notification", e);
         }
     }
 

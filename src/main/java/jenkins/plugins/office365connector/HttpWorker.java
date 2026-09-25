@@ -16,11 +16,15 @@ package jenkins.plugins.office365connector;
 import hudson.ProxyConfiguration;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import jenkins.model.Jenkins;
@@ -48,6 +52,8 @@ import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
  * curl -X POST -H "Content-Type: application/json" -d "@completed-success.json" "https://webhook.office.com/webhookb2..." -vs
  */
 public class HttpWorker implements Runnable {
+
+    private static final Logger LOGGER = Logger.getLogger(HttpWorker.class.getName());
 
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
@@ -89,7 +95,7 @@ public class HttpWorker implements Runnable {
             try (ClassicHttpResponse httpResponse = client.execute(post, classicHttpResponse -> classicHttpResponse)) {
                 int responseCode = httpResponse.getCode();
                 if (responseCode >= HttpStatus.SC_BAD_REQUEST) {
-                    log("Posting data to %s may have failed. Webhook responded with status code - %s", url, responseCode);
+                    log("Posting data to %s may have failed. Webhook responded with status code - %s", redactUrl(url), responseCode);
                     String response =
                             EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
                     log("Message from webhook - %s", response);
@@ -98,8 +104,9 @@ public class HttpWorker implements Runnable {
                     success = true;
                 }
             } catch (IOException | ParseException e) {
-                log("Failed to post data to webhook - %s", url);
-                e.printStackTrace(logger);
+                // The exception may reference the full URL, so keep the detail out of the job console
+                log("Failed to post data to %s.", redactUrl(url));
+                LOGGER.log(Level.WARNING, "Failed to post data to " + redactUrl(url), e);
             }
         } while (tried < RETRIES && !success);
 
@@ -160,5 +167,21 @@ public class HttpWorker implements Runnable {
      */
     private void log(String format, Object... args) {
         this.logger.println("[Office365connector] " + String.format(format, args));
+    }
+
+    /**
+     * Returns the scheme and host of the URL only, so the secret path/query (e.g. the token or
+     * signature of the webhook URL) is never written to the job console.
+     */
+    private static String redactUrl(String url) {
+        try {
+            URI uri = new URI(url);
+            if (uri.getScheme() != null && uri.getHost() != null) {
+                return uri.getScheme() + "://" + uri.getHost();
+            }
+        } catch (URISyntaxException e) {
+            // fall through to the generic label
+        }
+        return "the webhook";
     }
 }
