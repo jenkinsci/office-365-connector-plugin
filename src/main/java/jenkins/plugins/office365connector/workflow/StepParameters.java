@@ -18,6 +18,7 @@ package jenkins.plugins.office365connector.workflow;
 import java.util.List;
 
 import jenkins.plugins.office365connector.model.FactDefinition;
+import jenkins.plugins.office365connector.model.Mention;
 
 /**
  * @author srhebbar
@@ -30,14 +31,16 @@ public class StepParameters {
     private final String color;
     private final boolean adaptiveCards;
     private final List<FactDefinition> factDefinitions;
+    private final List<Mention> mentions;
 
-    public StepParameters(String message, String webhookUrl, String status, List<FactDefinition> factDefinitions, String color, boolean adaptiveCards) {
+    public StepParameters(String message, String webhookUrl, String status, List<FactDefinition> factDefinitions, String color, boolean adaptiveCards, List<Mention> mentions) {
         this.message = message;
         this.webhookUrl = webhookUrl;
         this.status = status;
         this.factDefinitions = factDefinitions;
         this.color = color;
         this.adaptiveCards = adaptiveCards;
+        this.mentions = mentions;
     }
 
     public String getMessage() {
@@ -62,5 +65,9 @@ public class StepParameters {
 
     public boolean isAdaptiveCards() {
         return adaptiveCards;
+    }
+
+    public List<Mention> getMentions() {
+        return mentions;
     }
 }

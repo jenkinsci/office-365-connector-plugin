@@ -62,7 +62,7 @@ public class Office365ConnectorWebhookNotifier {
                 if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                     if (webhook.isStartNotification()) {
                         CardBuilder cardBuilder = new CardBuilder(run, taskListener, webhook.isAdaptiveCards());
-                        Card card = cardBuilder.createStartedCard(webhook.getFactDefinitions());
+                        Card card = cardBuilder.createStartedCard(webhook.getFactDefinitions(), webhook.getMentions());
                         executeWorker(webhook, card);
                     }
                 }
@@ -77,7 +77,7 @@ public class Office365ConnectorWebhookNotifier {
             if (decisionMaker.isAtLeastOneRuleMatched(webhook)) {
                 if (decisionMaker.isStatusMatched(webhook)) {
                     CardBuilder cardBuilder = new CardBuilder(run, taskListener, webhook.isAdaptiveCards());
-                    Card card = cardBuilder.createCompletedCard(webhook.getFactDefinitions());
+                    Card card = cardBuilder.createCompletedCard(webhook.getFactDefinitions(), webhook.getMentions());
                     executeWorker(webhook, card);
                 }
             }
@@ -113,6 +113,7 @@ public class Office365ConnectorWebhookNotifier {
         try {
             String url = run.getEnvironment(taskListener).expand(webhook.getUrl());
             String data = gson.toJson(card == null ? null : card.toPaylod());
+            log("Sending payload to " + url + ":\n" + data);
             HttpWorker worker = new HttpWorker(url, data, webhook.getTimeout(), taskListener.getLogger());
             worker.submit();
         } catch (IOException | InterruptedException | RejectedExecutionException e) {
