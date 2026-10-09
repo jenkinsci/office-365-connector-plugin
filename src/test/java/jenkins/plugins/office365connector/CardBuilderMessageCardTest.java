@@ -425,7 +425,7 @@ class CardBuilderMessageCardTest extends AbstractTest {
         String status = Result.SUCCESS.toString();
         String color = "blue";
 
-        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, Collections.emptyList(), color, false);
+        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, Collections.emptyList(), color, false, null);
 
         // then
         Card card = cardBuilder.createBuildMessageCard(stepParameters);
@@ -447,7 +447,7 @@ class CardBuilderMessageCardTest extends AbstractTest {
         String status = null;
         String color = "blue";
 
-        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, Collections.emptyList(), color, false);
+        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, Collections.emptyList(), color, false, null);
 
         // then
         Card card = cardBuilder.createBuildMessageCard(stepParameters);
@@ -468,7 +468,7 @@ class CardBuilderMessageCardTest extends AbstractTest {
         String status = Result.ABORTED.toString();
         String color = null;
 
-        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, Collections.emptyList(), color, false);
+        StepParameters stepParameters = new StepParameters(message, webhookUrl, status, Collections.emptyList(), color, false, null);
 
         // then
         Card card = cardBuilder.createBuildMessageCard(stepParameters);

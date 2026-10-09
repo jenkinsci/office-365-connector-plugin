@@ -35,7 +35,8 @@ class ExecutionTest extends AbstractTest {
         when(stepContext.get(Run.class)).thenReturn(run);
         TaskListener taskListener = mockListener();
         when(stepContext.get(TaskListener.class)).thenReturn(taskListener);
-        Office365ConnectorSendStep step = new Office365ConnectorSendStep("myUrl");
+        Office365ConnectorSendStep step = new Office365ConnectorSendStep();
+        step.setWebhookUrl("myUrl");
 
         Execution execution = new Execution(step, stepContext);
 
