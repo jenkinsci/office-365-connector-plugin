@@ -154,6 +154,18 @@ stage('Upload') {
 }
 ```
 
+The `webhookUrl` parameter is optional when a `credentialsId` referring to a *Secret Text* credential that holds the webhook URL is provided instead:
+
+```groovy
+stage('Upload') {
+    steps {
+        office365ConnectorSend credentialsId: 'my-webhook-credential',
+            message: 'Application has been [deployed](https://uat.green.biz)',
+            status: 'Success'
+    }
+}
+```
+
 ### Pipeline post section
 
 ```groovy
