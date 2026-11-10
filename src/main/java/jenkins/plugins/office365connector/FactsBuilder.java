@@ -36,6 +36,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
+import jenkins.plugins.office365connector.utils.TeamsMentionUtils;
+
 /**
  * Collects helper methods that create instance of {@link jenkins.plugins.office365connector.model.Fact Fact} class.
  *
@@ -78,7 +80,7 @@ public class FactsBuilder {
         addFact(NAME_REMARKS, joinedCauses);
     }
 
-    public void addCommitters() {
+    public void addCommitters(boolean mentionCommitters) {
         if (!(run instanceof RunWithSCM)) {
             return;
         }
@@ -86,9 +88,16 @@ public class FactsBuilder {
         Set<User> authors = runWithSCM.getCulprits();
 
         String joinedCommitters = authors.stream()
-                .map(User::getFullName)
-                .collect(Collectors.joining(", "));
+            .sorted(Comparator.comparing(User::getFullName))
+            .map(user -> mentionCommitters ? TeamsMentionUtils.mentionUserOrEmail(user) : user.getFullName())
+            .filter(StringUtils::isNotBlank) // remove empty strings
+            .collect(Collectors.joining(", "));
         addFact(COMMITTERS, joinedCommitters);
+    }
+
+    // Overload to preserve old behavior
+    public void addCommitters() {
+        addCommitters(false);
     }
 
     public void addDevelopers() {
@@ -107,16 +116,17 @@ public class FactsBuilder {
 
         addFact(NAME_DEVELOPERS, StringUtils.join(sortUsers(authors), ", "));
     }
-
+    
     /**
      * Users should be stored in set to eliminate duplicates and sorted so the results
      * are presented same and deterministic way.
      */
-    private Collection sortUsers(Set<User> authors) {
+    private List<User> sortUsers(Set<User> authors) {
         return authors.stream()
-                .sorted(Comparator.comparing(User::getFullName))
-                .collect(Collectors.toList());
+            .sorted(Comparator.comparing(User::getFullName))
+            .collect(Collectors.toList());
     }
+
 
     public void addUserFacts(List<FactDefinition> factDefinitions) {
         if (factDefinitions != null && !factDefinitions.isEmpty()) {
